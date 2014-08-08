@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.signalfuse.public</groupId>
+    <artifactId>clients-parent</artifactId>
+    <version>1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>signalfuse-protoc</artifactId>
+  <name>SignalFuse Protocol Buffer definitions</name>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>
+    Protocol buffer definitions for sending datapoints to SignalFuse
+  </description>
+
+  <url>http://www.signalfuse.com</url>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:signalfx/signalfuse-clients.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfuse-clients.git</developerConnection>
+    <url>git@github.com:signalfx/signalfuse-clients.git</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>jack</id>
+      <name>Jack Lindamood</name>
+      <email>jack@signalfuse.com</email>
+      <organization>SignalFuse</organization>
+      <organizationUrl>http://www.signalfuse.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>2.5.0</version>
+    </dependency>
+  </dependencies>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>protoc-plugin</id>
+      <url>http://sergei-ivanov.github.com/maven-protoc-plugin/repo/releases/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.google.protobuf.tools</groupId>
+        <artifactId>maven-protoc-plugin</artifactId>
+        <version>0.3.2</version>
+        <configuration>
+          <protocExecutable>${protoc.executable.path}</protocExecutable>
+          <protoSourceRoot>${project.basedir}/src/main/protoc/</protoSourceRoot>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

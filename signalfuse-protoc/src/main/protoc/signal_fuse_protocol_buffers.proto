@@ -1,0 +1,40 @@
+package com.signalfuse.metrics.protobuf;
+
+enum MetricType {
+    /**
+     * Numerical: Periodic, instantaneous measurement of some state.
+     */
+    GAUGE = 0;
+    /**
+     * Numerical: Count of occurrences. Generally non-negative integers.
+     */
+    COUNTER = 1;
+    /**
+     * String: Used for non-continuous quantities (that is, measurements where there is a fixed
+     * set of meaningful values). This is essentially a special case of gauge.
+     */
+    ENUM = 2;
+    /**
+     * Tracks a value that increases over time, where only the difference is important.
+     */
+    CUMULATIVE_COUNTER =3;
+}
+
+
+message Datum {
+    optional string strValue = 1;
+    optional double doubleValue = 2;
+    optional int64 intValue = 3;
+}
+
+message DataPoint {
+    optional string source = 1;
+    optional string metric = 2;
+    optional int64 timestamp = 3;
+    optional Datum value = 4;
+}
+
+message PointValue {
+    optional int64 timestamp = 3;
+    optional Datum value = 4;
+}

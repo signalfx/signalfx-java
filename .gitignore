@@ -1,0 +1,33 @@
+*.class
+
+# phabricator
+.arcconfig
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Python compiled files
+*.pyc
+
+# Maven build directory/artifacts
+target
+dependency-reduced-pom.xml
+
+# Eclipse project files
+.classpath
+.project
+.settings
+.pydevproject
+.metadata
+.cache
+
+# cleansvn files
+.cleanmvn.pickle
+cleanmvn.dot
+
+# IntelliJ
+*.iml
+.idea
+/analytics/server/log/

@@ -1,0 +1,11 @@
+language: java
+
+install:
+  - sudo apt-get install protobuf-compiler
+  - mvn clean install -DskipTests=true
+
+script: mvn verify
+
+jdk:
+  - oraclejdk7
+  - oraclejdk8
