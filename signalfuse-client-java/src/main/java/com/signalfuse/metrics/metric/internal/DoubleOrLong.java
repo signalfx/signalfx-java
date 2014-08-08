@@ -1,10 +1,11 @@
 package com.signalfuse.metrics.metric.internal;
 
 /**
- * Stores either a double or long and smartly switched between them. <br />
+ * <p>Stores either a double or long and smartly switched between them.</p>
+ * <p>
  * Tries to keep them as a long, but once you do a double operation on the value, it is converted to
  * a double until cleared.
- * 
+ * </p>
  * @author jack
  */
 public class DoubleOrLong {

@@ -82,7 +82,7 @@ public class BasicJvmMetrics {
     /**
      * Construct the basic JVM metrics using a supplied SignalFuse MetricFactory.
      * 
-     * @param metricFactory
+     * @param metricFactory    Factory to encapsulate
      */
     public BasicJvmMetrics(MetricFactory metricFactory) {
 

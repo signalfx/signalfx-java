@@ -24,7 +24,7 @@ public interface Metric {
     /**
      * Get the current value of this metric.
      * 
-     * @return
+     * @return Current metric value
      */
     Number getValue();
 }

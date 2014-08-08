@@ -59,8 +59,8 @@ public class MetricFactoryBuilder {
     /**
      * Use the given auth token during requests
      * 
-     * @param token
-     * @return
+     * @param token    Auth token to use
+     * @return this
      */
     public MetricFactoryBuilder usingToken(String token) {
         this.authToken = new StaticAuthToken(token);
@@ -70,7 +70,7 @@ public class MetricFactoryBuilder {
     /**
      * Use the default algorithm for auth tokens. See ConfigAuthToken
      * 
-     * @return
+     * @return this
      */
     public MetricFactoryBuilder usingDefaultToken() {
         this.authToken = new ConfigAuthToken();
@@ -116,8 +116,8 @@ public class MetricFactoryBuilder {
     /**
      * Specify a different way to create DataPointReceiver interfaces
      * 
-     * @param dataPointReceiverFactory
-     * @return
+     * @param dataPointReceiverFactory    Factory to create receives
+     * @return this
      */
     public MetricFactoryBuilder usingDataPointReceiverFactory(DataPointReceiverFactory
                                                               dataPointReceiverFactory) {
@@ -138,8 +138,8 @@ public class MetricFactoryBuilder {
     /**
      * Add a failure handler that does System.exit() on any connection failure
      * 
-     * @param shouldFail
-     * @return
+     * @param shouldFail    True if connection errors cause system exit
+     * @return this
      */
     public MetricFactoryBuilder shouldFailOnConnectError(boolean shouldFail) {
         this.onSendErrorHandler.clear();
@@ -154,17 +154,17 @@ public class MetricFactoryBuilder {
      * this method, the default source name is obtained using the following logic:
      * 
      * <ol>
-     * <li>If the system property <code>com.signalfuse.signalfuse.sourceName</code> is specified, it is used as the
+     * <li>If the system property {@code com.signalfuse.signalfuse.sourceName} is specified, it is used as the
      * source name</li>
-     * <li>Otherwise, if the environment variable <code>SIGNALFUSE_SOURCE_NAME</code> is specified,
+     * <li>Otherwise, if the environment variable {@code SIGNALFUSE_SOURCE_NAME} is specified,
      * it is used</li>
-     * <li>Otherwise, the output of <code>InetAddress.getLocalHost().getHostName()</code> is used</li>
+     * <li>Otherwise, the output of {@code InetAddress.getLocalHost().getHostName()} is used</li>
      * </ol>
      * 
      * @param sourceName
      *            The default source name
      * 
-     * @return
+     * @return this
      */
     public MetricFactoryBuilder usingDefaultSource(String sourceName) {
         this.sourceName = sourceName;
@@ -177,7 +177,7 @@ public class MetricFactoryBuilder {
      * 
      * @param wrapper
      *            The wrapper
-     * @return
+     * @return this
      */
     public MetricFactoryBuilder wrappedWith(MetricFactoryWrapper wrapper) {
         this.wrappers.add(wrapper);
@@ -187,7 +187,7 @@ public class MetricFactoryBuilder {
     /**
      * Make metrics available via JMX
      * 
-     * @return
+     * @return this
      */
     public MetricFactoryBuilder registerJmx() {
         return this.wrappedWith(JmxAwareMetricFactory.wrapper());
@@ -221,7 +221,7 @@ public class MetricFactoryBuilder {
     /**
      * Create your factory.
      * 
-     * @return
+     * @return this
      */
     public MetricFactory build() {
         MetricFactory mf = new MetricFactoryImpl(getUsableDefaultSourceName(),

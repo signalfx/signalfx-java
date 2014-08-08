@@ -3,7 +3,7 @@ package com.signalfuse.metrics.metric;
 /**
  * A sample is a metric that represents a duration of time for some distinct value.
  * 
- * Use a latency gauge and Java's autoclosable to time a method. <code>
+ * Use a latency gauge and Java's autoclosable to time a method. {@code
  * try (Sample.Timer G =  metricFactory.createSample("latency").time()) {
  * try {
  * Thread.sleep(1000);
@@ -11,7 +11,7 @@ package com.signalfuse.metrics.metric;
  * e.printStackTrace();
  * }
  * }
- * </code>
+ * }
  * 
  * @author jack
  */
