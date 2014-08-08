@@ -11,3 +11,8 @@ Supported languages
 -------------------
 
  * Java 6+ with `signalfuse-metrics`.
+
+Build Status
+------------
+
+[![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
