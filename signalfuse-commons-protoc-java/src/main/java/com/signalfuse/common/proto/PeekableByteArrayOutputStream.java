@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
  * A stream that users can output bytes to as well as peek at and read bytes from.  It's trying to
  * be both an {@link java.io.InputStream} and {@link java.io.OutputStream}, but can't actually be
  * both because of multiple inheritance.
- * <p/>
+ * <br />
  * If you call {@link #reset()} frequently when the stream is empty, you can stream a large amount
  * of data without using much memory at all.
  */
@@ -30,6 +30,7 @@ public final class PeekableByteArrayOutputStream extends ByteArrayOutputStream {
 
     /**
      * Similar to {@link java.io.InputStream#read()}
+     * @return Next byte, or -1
      */
     public int read() {
         if (available() == 0) {
@@ -44,6 +45,10 @@ public final class PeekableByteArrayOutputStream extends ByteArrayOutputStream {
 
     /**
      * Similar to {@link java.io.InputStream#read(byte[], int, int)}
+     * @param readInput    Array to read into
+     * @param off          Offset to read into
+     * @param len          Number of bytes to attempt to read
+     * @return Number of bytes read
      */
     public int read(byte[] readInput, int off, int len) {
         if (count == position) {
