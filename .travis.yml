@@ -1,15 +1,6 @@
 language: java
 
 install:
-  - #### Does not work (version??)) sudo apt-get install protobuf-compiler
-  - wget https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.gz
-  - tar -xzvf protobuf-2.5.0.tar.gz
-  - cd protobuf-2.5.0
-  - ./configure --prefix=/usr
-  - make
-  - make check
-  - sudo make install
-  - cd -
   - mvn clean install -DskipTests=true
 
 script: mvn verify

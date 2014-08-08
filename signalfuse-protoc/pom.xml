@@ -30,7 +30,8 @@
 
   <scm>
     <connection>scm:git:git@github.com:signalfx/signalfuse-clients.git</connection>
-    <developerConnection>scm:git:git@github.com:signalfx/signalfuse-clients.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfuse-clients.git
+    </developerConnection>
     <url>git@github.com:signalfx/signalfuse-clients.git</url>
   </scm>
 
@@ -52,27 +53,16 @@
     </dependency>
   </dependencies>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>protoc-plugin</id>
-      <url>http://sergei-ivanov.github.com/maven-protoc-plugin/repo/releases/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
     <plugins>
       <plugin>
-        <groupId>com.google.protobuf.tools</groupId>
-        <artifactId>maven-protoc-plugin</artifactId>
-        <version>0.3.2</version>
-        <configuration>
-          <protocExecutable>${protoc.executable.path}</protocExecutable>
-          <protoSourceRoot>${project.basedir}/src/main/protoc/</protoSourceRoot>
-        </configuration>
+        <groupId>com.comoyo.maven.plugins</groupId>
+        <artifactId>protoc-bundled-plugin</artifactId>
+        <version>1.4.46</version>
         <executions>
           <execution>
             <goals>
-              <goal>compile</goal>
+              <goal>run</goal>
             </goals>
           </execution>
         </executions>
