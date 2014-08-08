@@ -4,12 +4,12 @@ import java.io.ByteArrayOutputStream;
 import com.google.common.base.Preconditions;
 
 /**
- * A stream that users can output bytes to as well as peek at and read bytes from.  It's trying to
+ * <p>A stream that users can output bytes to as well as peek at and read bytes from.  It's trying to
  * be both an {@link java.io.InputStream} and {@link java.io.OutputStream}, but can't actually be
- * both because of multiple inheritance.
- * <br />
- * If you call {@link #reset()} frequently when the stream is empty, you can stream a large amount
- * of data without using much memory at all.
+ * both because of multiple inheritance.</p>
+ *
+ * <p>If you call {@link #reset()} frequently when the stream is empty, you can stream a large amount
+ * of data without using much memory at all.</p>
  */
 public final class PeekableByteArrayOutputStream extends ByteArrayOutputStream {
     private int position;
