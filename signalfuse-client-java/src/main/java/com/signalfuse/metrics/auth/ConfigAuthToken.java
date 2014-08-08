@@ -8,6 +8,7 @@ import java.util.Scanner;
  * <p>
  * Use the default metric upload token discovered from one of the following locations (in order of
  * decreasing precedence):
+ * </p>
  * <ol>
  * <li>The system property <tt>com.signalfuse.signalfuse.metricToken</tt></li>
  * <li>The environment variable <tt>SIGNALFUSE_METRIC_TOKEN</tt></li>
@@ -15,10 +16,10 @@ import java.util.Scanner;
  * <li>The <tt>com.signalfuse.signalfuse.metricToken</tt> from the file <tt>~/.sfsession</tt></li>
  * <li>The <tt>com.signalfuse.signalfuse.metricToken</tt> from the file <tt>/etc/com.signalfuse.signalfuse/com.signalfuse.signalfuse.conf</tt></li>
  * </ol>
- * </p>
+ * <p>
  * This behavior is the default; this method is provided for people who like to be explicit in their
  * code.
- * 
+ * </p>
  * @author jack
  */
 public class ConfigAuthToken implements AuthToken {

@@ -80,6 +80,9 @@ public class MetricFactoryBuilder {
     /**
      * Connect this source to a specific SignalFuse host. Useful if you connect to SignalFuse using
      * a tunnel (or if you're a SignalFuse employee testing the product)
+     *
+     * @param host Host to connect to (without port)
+     * @return this
      */
     public MetricFactoryBuilder connectedTo(String host) {
         this.dataPointEndpoint = new DataPointEndpoint(host, this.dataPointEndpoint.getPort());
@@ -89,6 +92,10 @@ public class MetricFactoryBuilder {
     /**
      * Connect this source to a specific SignalFuse host and port. Useful if you connect to
      * SignalFuse using a tunnel (or if you're a SignalFuse employee testing the product)
+     *
+     * @param host    Host to connect to
+     * @param port    Port on the host
+     * @return this
      */
     public MetricFactoryBuilder connectedTo(String host, int port) {
         this.dataPointEndpoint = new DataPointEndpoint(host, port);
@@ -98,15 +105,22 @@ public class MetricFactoryBuilder {
     /**
      * Connect this source to a specific SignalFuse host and port. Useful if you connect to
      * SignalFuse using a tunnel (or if you're a SignalFuse employee testing the product)
+     * @param scheme    http/https/etc
+     * @param host      Host to connect to
+     * @param port      Port on the host
+     * @return this
      */
     public MetricFactoryBuilder connectedTo(String scheme, String host, int port) {
         this.dataPointEndpoint = new DataPointEndpoint(scheme, host, port);
         return this;
     }
 
+
     /**
      * Connect this source to a specific SignalFuse host and port. Useful if you connect to
      * SignalFuse using a tunnel (or if you're a SignalFuse employee testing the product)
+     * @param dataPointEndpoint     Endpoint to connect to
+     * @return this
      */
     public MetricFactoryBuilder connectedTo(DataPointEndpoint dataPointEndpoint) {
         this.dataPointEndpoint = dataPointEndpoint;
