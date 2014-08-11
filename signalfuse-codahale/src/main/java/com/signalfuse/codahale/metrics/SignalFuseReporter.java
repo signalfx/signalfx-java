@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
-import com.signalfuse.metrics.metricbuilder.MetricFactory;
+import com.signalfuse.metrics.flush.AggregateMetricSender;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Counting;
@@ -25,7 +25,7 @@ import com.codahale.metrics.Timer;
  * Reporter object for codahale metrics that reports values to com.signalfuse.signalfuse at some interval.
  */
 public class SignalFuseReporter extends ScheduledReporter {
-    private final MetricFactory metricFactory;
+    private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
 
     /**
@@ -41,9 +41,9 @@ public class SignalFuseReporter extends ScheduledReporter {
      */
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
-                                 MetricFactory metricFactory, Set<MetricDetails> detailsToAdd) {
+                                 AggregateMetricSender aggregateMetricSender, Set<MetricDetails> detailsToAdd) {
         super(registry, name, filter, rateUnit, durationUnit);
-        this.metricFactory = metricFactory;
+        this.aggregateMetricSender = aggregateMetricSender;
         this.detailsToAdd = detailsToAdd;
     }
 
@@ -51,99 +51,121 @@ public class SignalFuseReporter extends ScheduledReporter {
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
                        SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
-        for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
-            Object gaugeValue = entry.getValue().getValue();
-            if (gaugeValue instanceof Number) {
-                reportGauge(entry.getKey(), (Number)gaugeValue);
+        AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(aggregateMetricSender.createSession());
+        try {
+            for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
+                Object gaugeValue = entry.getValue().getValue();
+                if (gaugeValue instanceof Number) {
+                    session.reportGauge(entry.getKey(), (Number) gaugeValue);
+                }
+            }
+            for (Map.Entry<String, Counter> entry : counters.entrySet()) {
+                session.metricSenderSession.setCumulativeCounter(entry.getKey(), entry.getValue().getCount());
+            }
+            for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
+                session.addHistogram(entry.getKey(), entry.getValue());
+            }
+            for (Map.Entry<String, Meter> entry : meters.entrySet()) {
+                session.addMetered(entry.getKey(), entry.getValue());
+            }
+            for (Map.Entry<String, Timer> entry : timers.entrySet()) {
+                session.addTimer(entry.getKey(), entry.getValue());
+            }
+        } finally {
+            try {
+                session.close();
+            } catch (Exception e) {
+                // Unable to register... these exceptions handled by AggregateMetricSender
             }
         }
-        for (Map.Entry<String, Counter> entry : counters.entrySet()) {
-            metricFactory.createCumulativeCounter(entry.getKey()).value(entry.getValue().getCount());
-        }
-        for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
-            addHistogram(entry.getKey(), entry.getValue());
-        }
-        for (Map.Entry<String, Meter> entry : meters.entrySet()) {
-            addMetered(entry.getKey(), entry.getValue());
-        }
-        for (Map.Entry<String, Timer> entry : timers.entrySet()) {
-            addTimer(entry.getKey(), entry.getValue());
-        }
     }
+    
+    private final class AggregateMetricSenderSessionWrapper implements AutoCloseable {
+        private final AggregateMetricSender.Session metricSenderSession;
 
-    // These three called from report
-    private void addTimer(String key, Timer value) {
-        addMetered(key, value);
-        addSampling(key, value);
-    }
-
-    private void addHistogram(String baseName, Histogram histogram) {
-        addCounting(baseName, histogram);
-        addSampling(baseName, histogram);
-    }
-
-    private void addMetered(String baseName, Metered metered) {
-        addCounting(baseName, metered);
-        checkedAdd(MetricDetails.RATE_15_MIN, baseName, metered.getFifteenMinuteRate());
-        checkedAdd(MetricDetails.RATE_5_MIN, baseName, metered.getFiveMinuteRate());
-        checkedAdd(MetricDetails.RATE_1_MIN, baseName, metered.getOneMinuteRate());
-        if (detailsToAdd.contains(MetricDetails.RATE_MEAN)) {
-            checkedAdd(MetricDetails.RATE_MEAN, baseName, metered.getMeanRate());
+        private AggregateMetricSenderSessionWrapper(AggregateMetricSender.Session metricSenderSession) {
+            this.metricSenderSession = metricSenderSession;
         }
-    }
 
-    // Shared
-    private void addCounting(String baseName, Counting counting) {
-        checkedAddCumulativeCounter(MetricDetails.COUNT, baseName, counting.getCount());
-    }
-
-    private void addSampling(String baseName, Sampling sampling) {
-        final Snapshot snapshot = sampling.getSnapshot();
-        checkedAdd(MetricDetails.MEDIAN, baseName, snapshot.getMedian());
-        checkedAdd(MetricDetails.PERCENT_75, baseName, snapshot.get75thPercentile());
-        checkedAdd(MetricDetails.PERCENT_95, baseName, snapshot.get95thPercentile());
-        checkedAdd(MetricDetails.PERCENT_98, baseName, snapshot.get98thPercentile());
-        checkedAdd(MetricDetails.PERCENT_99, baseName, snapshot.get99thPercentile());
-        checkedAdd(MetricDetails.PERCENT_999, baseName, snapshot.get999thPercentile());
-        checkedAdd(MetricDetails.MAX, baseName, snapshot.getMax());
-        checkedAdd(MetricDetails.MIN, baseName, snapshot.getMin());
-
-        // These are slower to calculate.  Only calculate if we need.
-        if (detailsToAdd.contains(MetricDetails.STD_DEV)) {
-            checkedAdd(MetricDetails.STD_DEV, baseName, snapshot.getStdDev());
+        public void close() throws Exception {
+            metricSenderSession.close();
         }
-        if (detailsToAdd.contains(MetricDetails.MEAN)) {
-            checkedAdd(MetricDetails.MEAN, baseName, snapshot.getMean());
-        }
-    }
 
-    private void reportGauge(String baseName, Number value) {
-        if (Double.isInfinite(value.doubleValue()) || Double.isNaN(value.doubleValue())) {
-            return;
+        // These three called from report
+        private void addTimer(String key, Timer value) {
+            addMetered(key, value);
+            addSampling(key, value);
         }
-        if (value instanceof Long || value instanceof Integer) {
-            metricFactory.createGauge(baseName).value(value.longValue());
-        } else {
-            metricFactory.createGauge(baseName).value(value.doubleValue());
-        }
-    }
 
-    // helpers
-    private void checkedAddCumulativeCounter(MetricDetails type, String baseName, long value) {
-        if (detailsToAdd.contains(type)) {
-            metricFactory.createCumulativeCounter(baseName + '.' + type.getDescription()).value(value);
+        private void addHistogram(String baseName,
+                                  Histogram histogram) {
+            addCounting(baseName, histogram);
+            addSampling(baseName, histogram);
         }
-    }
 
-    private void checkedAdd(MetricDetails type, String baseName, double value) {
-        if (detailsToAdd.contains(type)) {
-            metricFactory.createGauge(baseName + '.' + type.getDescription()).value(value);
+        private void addMetered(String baseName, Metered metered) {
+            addCounting(baseName, metered);
+            checkedAdd(MetricDetails.RATE_15_MIN, baseName, metered.getFifteenMinuteRate());
+            checkedAdd(MetricDetails.RATE_5_MIN, baseName, metered.getFiveMinuteRate());
+            checkedAdd(MetricDetails.RATE_1_MIN, baseName, metered.getOneMinuteRate());
+            if (detailsToAdd.contains(MetricDetails.RATE_MEAN)) {
+                checkedAdd(MetricDetails.RATE_MEAN, baseName, metered.getMeanRate());
+            }
         }
-    }
 
-    private void checkedAdd(MetricDetails type, String baseName, long value) {
-        if (detailsToAdd.contains(type)) {
-            metricFactory.createGauge(baseName + '.' + type.getDescription()).value(value);
+        // Shared
+        private void addCounting(String baseName, Counting counting) {
+            checkedAddCumulativeCounter(MetricDetails.COUNT, baseName, counting.getCount());
+        }
+
+        private void addSampling(String baseName, Sampling sampling) {
+            final Snapshot snapshot = sampling.getSnapshot();
+            checkedAdd(MetricDetails.MEDIAN, baseName, snapshot.getMedian());
+            checkedAdd(MetricDetails.PERCENT_75, baseName, snapshot.get75thPercentile());
+            checkedAdd(MetricDetails.PERCENT_95, baseName, snapshot.get95thPercentile());
+            checkedAdd(MetricDetails.PERCENT_98, baseName, snapshot.get98thPercentile());
+            checkedAdd(MetricDetails.PERCENT_99, baseName, snapshot.get99thPercentile());
+            checkedAdd(MetricDetails.PERCENT_999, baseName, snapshot.get999thPercentile());
+            checkedAdd(MetricDetails.MAX, baseName, snapshot.getMax());
+            checkedAdd(MetricDetails.MIN, baseName, snapshot.getMin());
+
+            // These are slower to calculate.  Only calculate if we need.
+            if (detailsToAdd.contains(MetricDetails.STD_DEV)) {
+                checkedAdd(MetricDetails.STD_DEV, baseName, snapshot.getStdDev());
+            }
+            if (detailsToAdd.contains(MetricDetails.MEAN)) {
+                checkedAdd(MetricDetails.MEAN, baseName, snapshot.getMean());
+            }
+        }
+
+        private void reportGauge(String baseName, Number value) {
+            if (Double.isInfinite(value.doubleValue()) || Double.isNaN(value.doubleValue())) {
+                return;
+            }
+            if (value instanceof Long || value instanceof Integer) {
+                metricSenderSession.setGauge(baseName, value.longValue());
+            } else {
+                metricSenderSession.setGauge(baseName, value.doubleValue());
+            }
+        }
+
+        // helpers
+        private void checkedAddCumulativeCounter(MetricDetails type, String baseName, long value) {
+            if (detailsToAdd.contains(type)) {
+                metricSenderSession.setCumulativeCounter(baseName + '.' + type.getDescription(), value);
+            }
+        }
+
+        private void checkedAdd(MetricDetails type, String baseName, double value) {
+            if (detailsToAdd.contains(type)) {
+                metricSenderSession.setGauge(baseName + '.' + type.getDescription(), value);
+            }
+        }
+
+        private void checkedAdd(MetricDetails type, String baseName, long value) {
+            if (detailsToAdd.contains(type)) {
+                metricSenderSession.setGauge(baseName + '.' + type.getDescription(), value);
+            }
         }
     }
 

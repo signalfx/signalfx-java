@@ -192,9 +192,8 @@
 
   <modules>
     <module>signalfuse-protoc</module>
-    <module>signalfuse-core-java</module>
+    <module>signalfuse-java</module>
     <module>signalfuse-commons-protoc-java</module>
-    <module>signalfuse-client-java</module>
     <module>signalfuse-codahale</module>
   </modules>
 </project>

@@ -1,19 +1,10 @@
 package com.signalfuse.codahale.metrics;
 
-import static org.junit.Assert.assertEquals;
-
+import java.util.Collections;
 import java.util.SortedMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
-
-import com.signalfuse.metrics.MetricFactoryBuilder;
-import com.signalfuse.metrics.connection.InjectedDataPointReceiverFactory;
-import com.signalfuse.metrics.connection.StoredDataPointReceiver;
-import com.signalfuse.metrics.datumhandler.DirectCallDatumHandler;
-import com.signalfuse.metrics.metricbuilder.MetricFactory;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -21,6 +12,12 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.signalfuse.metrics.auth.StaticAuthToken;
+import com.signalfuse.metrics.connection.StoredDataPointReceiver;
+import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
+import com.signalfuse.metrics.flush.AggregateMetricSender;
+
+import static org.junit.Assert.assertEquals;
 
 public class SignalFuseReporterTest {
     @Test
@@ -28,11 +25,9 @@ public class SignalFuseReporterTest {
         StoredDataPointReceiver dbank = new StoredDataPointReceiver();
         assertEquals(0, dbank.addDataPoints.size());
 
-        MetricFactoryBuilder builder = new MetricFactoryBuilder().usingToken("")
-            .usingDatumHandlerFactory(new DirectCallDatumHandler.Factory());
-
-        MetricFactory metricFactory = builder.usingDataPointReceiverFactory(
-                new InjectedDataPointReceiverFactory(dbank)).build();
+        AggregateMetricSender aggregateMetricSender = new AggregateMetricSender("", dbank,
+                new StaticAuthToken(""),
+                Collections.<OnSendErrorHandler>emptyList());
 
         MetricRegistry metricRegistery = new MetricRegistry();
         String name = "sf_reporter";
@@ -41,7 +36,7 @@ public class SignalFuseReporterTest {
         TimeUnit durationUnit = TimeUnit.SECONDS;
         final Semaphore S = new Semaphore(0);
         LockedSignalFuseReporter reporter = new LockedSignalFuseReporter(metricRegistery, name,
-            filter, rateUnit, durationUnit, metricFactory, S);
+                filter, rateUnit, durationUnit, aggregateMetricSender, S);
 
         metricRegistery.register("gauge", new Gauge<Integer>() {
             public Integer getValue() {
@@ -67,7 +62,7 @@ public class SignalFuseReporterTest {
 
         private LockedSignalFuseReporter(MetricRegistry registry, String name,
                                          MetricFilter filter, TimeUnit rateUnit,
-                                         TimeUnit durationUnit, MetricFactory metricFactory,
+                                         TimeUnit durationUnit, AggregateMetricSender metricFactory,
                                          Semaphore S) {
             super(registry, name, filter, rateUnit, durationUnit, metricFactory, MetricDetails.ALL);
             this.S = S;
