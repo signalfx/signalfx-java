@@ -14,4 +14,6 @@ public interface DataPointReceiverFactory {
      */
     DataPointReceiver createDataPointReceiver(DataPointReceiverEndpoint dataPointEndpoint)
             throws SignalfuseMetricsException;
+
+    public DataPointReceiverFactory setTimeoutMs(int timeoutMs);
 }

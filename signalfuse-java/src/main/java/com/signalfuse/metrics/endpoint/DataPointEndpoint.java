@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
  * @author jack
  */
 public class DataPointEndpoint implements DataPointReceiverEndpoint {
-    private static final String DEFAULT_SCHEME = "http";
-    private static final String DEFAULT_HOSTNAME = "api.com.signalfuse.signalfuse.com";
-    public static final int DEFAULT_PORT = 8080;
+    public static final String DEFAULT_SCHEME = "https";
+    public static final String DEFAULT_HOSTNAME = "api.signalfuse.com";
+    public static final int DEFAULT_PORT = 443;
     private static final Logger log = LoggerFactory.getLogger(DataPointEndpoint.class);
     
     /**
@@ -50,16 +50,16 @@ public class DataPointEndpoint implements DataPointReceiverEndpoint {
     }
 
     private static String getDefaultScheme() {
-        return getPropertyOrEnv("com.signalfuse.signalfuse.api.scheme", "SIGNALFUSE_API_SCHEME", DEFAULT_SCHEME);
+        return getPropertyOrEnv("com.signalfuse.api.scheme", "SIGNALFUSE_API_SCHEME", DEFAULT_SCHEME);
     }
 
     private static String getDefaultHostname() {
-        return getPropertyOrEnv("com.signalfuse.signalfuse.api.hostname",
+        return getPropertyOrEnv("com.signalfuse.api.hostname",
                                 "SIGNALFUSE_API_HOSTNAME", DEFAULT_HOSTNAME);
     }
 
     private static int getDefaultPort() throws NumberFormatException {
-        final String foundPort = getPropertyOrEnv("com.signalfuse.signalfuse.api.port",
+        final String foundPort = getPropertyOrEnv("com.signalfuse.api.port",
                                     "SIGNALFUSE_API_PORT", Integer.toString(DEFAULT_PORT));
         try {
             return Integer.parseInt(foundPort);

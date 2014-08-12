@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -10,12 +9,12 @@
     <version>1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>signalfuse-codahale</artifactId>
-  <name>Codahale to SignalFuse</name>
+  <artifactId>signalfuse-dropwizard</artifactId>
+  <name>SignalFuse dropwizard integration</name>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
-    Codahale yammer metrics plugin for signalfuse
+    Integrates with https://github.com/dropwizard/dropwizard/
   </description>
 
   <url>http://www.signalfuse.com</url>
@@ -47,27 +46,48 @@
   <dependencies>
     <dependency>
       <groupId>com.signalfuse.public</groupId>
-      <artifactId>signalfuse-java</artifactId>
+      <artifactId>signalfuse-codahale</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.signalfuse.public</groupId>
-      <artifactId>signalfuse-protoc</artifactId>
+      <artifactId>signalfuse-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-metrics</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.codahale.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.codahale.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
-      <version>3.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit-dep</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
+
+  <build>
+  </build>
 </project>

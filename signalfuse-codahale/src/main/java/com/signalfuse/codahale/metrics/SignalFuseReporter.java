@@ -1,15 +1,13 @@
 package com.signalfuse.codahale.metrics;
 
 import java.io.Closeable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
-
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.flush.AggregateMetricSender;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Counting;
 import com.codahale.metrics.Gauge;
@@ -22,9 +20,21 @@ import com.codahale.metrics.Sampling;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
+import com.signalfuse.metrics.SignalfuseMetricsException;
+import com.signalfuse.metrics.SourceNameHelper;
+import com.signalfuse.metrics.auth.AuthToken;
+import com.signalfuse.metrics.auth.StaticAuthToken;
+import com.signalfuse.metrics.connection.DataPointReceiver;
+import com.signalfuse.metrics.connection.DataPointReceiverFactory;
+import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
+import com.signalfuse.metrics.endpoint.DataPointEndpoint;
+import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
+import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
+import com.signalfuse.metrics.flush.AggregateMetricSender;
 
 /**
- * Reporter object for codahale metrics that reports values to com.signalfuse.signalfuse at some interval.
+ * Reporter object for codahale metrics that reports values to com.signalfuse.signalfuse at some
+ * interval.
  */
 public class SignalFuseReporter extends ScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
@@ -34,16 +44,19 @@ public class SignalFuseReporter extends ScheduledReporter {
      * Creates a new {@link com.codahale.metrics.ScheduledReporter} instance.
      *
      * @param registry
-     *            the {@link com.codahale.metrics.MetricRegistry} containing the metrics this
-     *            reporter will report
+     *         the {@link com.codahale.metrics.MetricRegistry} containing the metrics this
+     *         reporter will report
      * @param name
-     *            the reporter's name
-     * @param filter          Which metrics to not report
-     * @param detailsToAdd    Which types of metric details to report
+     *         the reporter's name
+     * @param filter
+     *         Which metrics to not report
+     * @param detailsToAdd
+     *         Which types of metric details to report
      */
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
-                                 AggregateMetricSender aggregateMetricSender, Set<MetricDetails> detailsToAdd) {
+                                 AggregateMetricSender aggregateMetricSender,
+                                 Set<MetricDetails> detailsToAdd) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.detailsToAdd = detailsToAdd;
@@ -53,7 +66,8 @@ public class SignalFuseReporter extends ScheduledReporter {
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
                        SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
-        AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(aggregateMetricSender.createSession());
+        AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
+                aggregateMetricSender.createSession());
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
                 Object gaugeValue = entry.getValue().getValue();
@@ -62,7 +76,8 @@ public class SignalFuseReporter extends ScheduledReporter {
                 }
             }
             for (Map.Entry<String, Counter> entry : counters.entrySet()) {
-                session.metricSenderSession.setCumulativeCounter(entry.getKey(), entry.getValue().getCount());
+                session.metricSenderSession
+                        .setCumulativeCounter(entry.getKey(), entry.getValue().getCount());
             }
             for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
                 session.addHistogram(entry.getKey(), entry.getValue());
@@ -81,11 +96,12 @@ public class SignalFuseReporter extends ScheduledReporter {
             }
         }
     }
-    
+
     private final class AggregateMetricSenderSessionWrapper implements Closeable {
         private final AggregateMetricSender.Session metricSenderSession;
 
-        private AggregateMetricSenderSessionWrapper(AggregateMetricSender.Session metricSenderSession) {
+        private AggregateMetricSenderSessionWrapper(
+                AggregateMetricSender.Session metricSenderSession) {
             this.metricSenderSession = metricSenderSession;
         }
 
@@ -158,7 +174,8 @@ public class SignalFuseReporter extends ScheduledReporter {
         // helpers
         private void checkedAddCumulativeCounter(MetricDetails type, String baseName, long value) {
             if (detailsToAdd.contains(type)) {
-                metricSenderSession.setCumulativeCounter(baseName + '.' + type.getDescription(), value);
+                metricSenderSession
+                        .setCumulativeCounter(baseName + '.' + type.getDescription(), value);
             }
         }
 
@@ -205,6 +222,103 @@ public class SignalFuseReporter extends ScheduledReporter {
 
         public String getDescription() {
             return description;
+        }
+    }
+
+    public static final class Builder {
+        private final MetricRegistry registry;
+        private String defaultSourceName;
+        private AuthToken authToken;
+        private DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
+        private String name = "signalfuse-reporter";
+        private int timeoutMs = HttpDataPointProtobufReceiverFactory.DEFAULT_TIMEOUT_MS;
+        private DataPointReceiverFactory dataPointReceiverFactory = new
+                HttpDataPointProtobufReceiverFactory();
+        private MetricFilter filter = MetricFilter.ALL;
+        private TimeUnit rateUnit = TimeUnit.SECONDS;
+        private TimeUnit durationUnit = TimeUnit.MILLISECONDS; // Maybe nano eventually?
+        private Set<MetricDetails> detailsToAdd = MetricDetails.ALL;
+        private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections
+                .emptyList();
+
+        public Builder(MetricRegistry registry, String authToken) {
+            this(registry, new StaticAuthToken(authToken));
+        }
+
+        public Builder(MetricRegistry registry, AuthToken authToken) {
+            this(registry, authToken, SourceNameHelper.getDefaultSourceName());
+        }
+
+        public Builder(MetricRegistry registry, AuthToken authToken, String defaultSourceName) {
+            this.registry = registry;
+            this.authToken = authToken;
+            this.defaultSourceName = defaultSourceName;
+        }
+
+        public Builder setDefaultSourceName(String defaultSourceName) {
+            this.defaultSourceName = defaultSourceName;
+            return this;
+        }
+
+        public Builder setAuthToken(AuthToken authToken) {
+            this.authToken = authToken;
+            return this;
+        }
+
+        public Builder setDataPointEndpoint(DataPointReceiverEndpoint dataPointEndpoint) {
+            this.dataPointEndpoint = dataPointEndpoint;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setTimeoutMs(int timeoutMs) {
+            this.timeoutMs = timeoutMs;
+            return this;
+        }
+
+        public Builder setDataPointReceiverFactory(
+                DataPointReceiverFactory dataPointReceiverFactory) {
+            this.dataPointReceiverFactory = dataPointReceiverFactory;
+            return this;
+        }
+
+        public Builder setFilter(MetricFilter filter) {
+            this.filter = filter;
+            return this;
+        }
+
+        public Builder setRateUnit(TimeUnit rateUnit) {
+            this.rateUnit = rateUnit;
+            return this;
+        }
+
+        public Builder setDurationUnit(TimeUnit durationUnit) {
+            this.durationUnit = durationUnit;
+            return this;
+        }
+
+        public Builder setDetailsToAdd(Set<MetricDetails> detailsToAdd) {
+            this.detailsToAdd = detailsToAdd;
+            return this;
+        }
+
+        public Builder setOnSendErrorHandlerCollection(
+                Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
+            this.onSendErrorHandlerCollection = onSendErrorHandlerCollection;
+            return this;
+        }
+
+        public SignalFuseReporter build() {
+            DataPointReceiver dataPointReceiver = dataPointReceiverFactory.setTimeoutMs(timeoutMs)
+                    .createDataPointReceiver(dataPointEndpoint);
+            AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
+                    defaultSourceName, dataPointReceiver, authToken, onSendErrorHandlerCollection);
+            return new SignalFuseReporter(registry, name, filter, rateUnit, durationUnit,
+                    aggregateMetricSender, detailsToAdd);
         }
     }
 }

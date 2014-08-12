@@ -4,7 +4,7 @@ import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
-    private static final int DEFAULT_TIMEOUT_MS = 2000;
+    public static final int DEFAULT_TIMEOUT_MS = 2000;
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
 
     public HttpDataPointProtobufReceiverFactory setTimeoutMs(int timeoutMs) {
