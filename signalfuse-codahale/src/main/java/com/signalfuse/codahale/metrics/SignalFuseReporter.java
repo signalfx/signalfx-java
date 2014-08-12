@@ -1,11 +1,13 @@
 package com.signalfuse.codahale.metrics;
 
+import java.io.Closeable;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
+import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
 
 import com.codahale.metrics.Counter;
@@ -80,15 +82,19 @@ public class SignalFuseReporter extends ScheduledReporter {
         }
     }
     
-    private final class AggregateMetricSenderSessionWrapper implements AutoCloseable {
+    private final class AggregateMetricSenderSessionWrapper implements Closeable {
         private final AggregateMetricSender.Session metricSenderSession;
 
         private AggregateMetricSenderSessionWrapper(AggregateMetricSender.Session metricSenderSession) {
             this.metricSenderSession = metricSenderSession;
         }
 
-        public void close() throws Exception {
-            metricSenderSession.close();
+        public void close() {
+            try {
+                metricSenderSession.close();
+            } catch (Exception e) {
+                throw new SignalfuseMetricsException("Unable to close session and send metrics", e);
+            }
         }
 
         // These three called from report

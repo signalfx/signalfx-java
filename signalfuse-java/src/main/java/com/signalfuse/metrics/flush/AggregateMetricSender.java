@@ -1,5 +1,6 @@
 package com.signalfuse.metrics.flush;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -119,7 +120,7 @@ public class AggregateMetricSender {
             }
         }
 
-        public void close() throws Exception {
+        public void close() {
             final String authTokenStr;
             try {
                 authTokenStr = authToken.getAuthToken();
@@ -156,7 +157,7 @@ public class AggregateMetricSender {
         }
     }
 
-    public interface Session extends AutoCloseable {
+    public interface Session extends Closeable {
         Session setCumulativeCounter(String metric, long value);
 
         Session setCumulativeCounter(String source, String metric, long value);
