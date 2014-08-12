@@ -47,7 +47,7 @@
   <dependencies>
     <dependency>
       <groupId>com.signalfuse.public</groupId>
-      <artifactId>signalfuse-core-java</artifactId>
+      <artifactId>signalfuse-java</artifactId>
     </dependency>
     <dependency>
       <groupId>com.signalfuse.public</groupId>
