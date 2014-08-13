@@ -105,16 +105,6 @@
         <version>2.2.2</version>
       </dependency>
       <dependency>
-        <groupId>io.dropwizard</groupId>
-        <artifactId>dropwizard-metrics</artifactId>
-        <version>0.7.0</version>
-      </dependency>
-      <dependency>
-        <groupId>io.dropwizard</groupId>
-        <artifactId>dropwizard-jackson</artifactId>
-        <version>0.7.0</version>
-      </dependency>
-      <dependency>
         <groupId>com.codahale.metrics</groupId>
         <artifactId>metrics-core</artifactId>
         <version>3.0.2</version>
@@ -217,7 +207,6 @@
 
   <modules>
     <module>signalfuse-protoc</module>
-    <module>signalfuse-dropwizard</module>
     <module>signalfuse-java</module>
     <module>signalfuse-commons-protoc-java</module>
     <module>signalfuse-codahale</module>
