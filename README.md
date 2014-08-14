@@ -7,10 +7,50 @@ need a SignalFuse account and organization API token to use those. For
 more information on SignalFuse and to create an account, go to
 http://www.signalfuse.com.
 
+The recommended way to send metrics with java is to use codahale metrics.
+If you want to send metrics without integrating with codahale, the module
+signalfuse-java will support this.
+
 Supported languages
 -------------------
 
  * Java 6+ with `signalfuse-metrics`.
+ 
+Install
+----------
+
+    git clone https://github.com/signalfx/signalfuse-java.git
+    cd signalfuse-java
+    mvn install
+ 
+
+Setup in maven
+--------------
+
+    <dependency>
+      <groupId>com.signalfuse.public</groupId>
+      <artifactId>signalfuse-codahale</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+
+Setting up Coahale
+------------------
+
+    MetricRegistry registry = new MetricRegistry();
+    SignalFuseReporter.builder(
+        registry,
+        "SIGNALFUSE_AUTH_TOKEN"
+    ).build().start(1, TimeUnit.SECONDS);
+      
+
+After setting up Codahale
+-------------------------
+
+After setting up a SignalFuseReporter, you can use codahale metrics like normal
+and at the set frequency your metrics will be reported to SignalFuse.  More
+information about codahale metrics [on their web page](http://metrics.codahale.com/).
+
 
 Build Status
 ------------
