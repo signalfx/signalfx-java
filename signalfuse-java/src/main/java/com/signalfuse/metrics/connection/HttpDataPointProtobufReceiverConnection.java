@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -18,12 +19,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HttpDataPointProtobufReceiverConnection implements DataPointReceiver {
     private static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
@@ -37,7 +39,8 @@ public class HttpDataPointProtobufReceiverConnection implements DataPointReceive
 
     public HttpDataPointProtobufReceiverConnection(DataPointReceiverEndpoint dataPointEndpoint,
                                             int timeoutMs) {
-        this.host = new HttpHost(dataPointEndpoint.getHostname(), dataPointEndpoint.getPort());
+        this.host = new HttpHost(dataPointEndpoint.getHostname(), dataPointEndpoint.getPort(),
+                dataPointEndpoint.getScheme());
         this.requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs)
                 .setConnectionRequestTimeout(timeoutMs).setConnectTimeout(timeoutMs).build();
     }
