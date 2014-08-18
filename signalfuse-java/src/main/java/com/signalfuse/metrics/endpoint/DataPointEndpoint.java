@@ -83,6 +83,6 @@ public class DataPointEndpoint implements DataPointReceiverEndpoint {
 
     @Override
     public String toString() {
-        return getScheme() + "//" + getHostname() + ':' + getPort();
+        return getScheme() + "://" + getHostname() + ':' + getPort();
     }
 }

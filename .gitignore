@@ -31,3 +31,4 @@ cleanmvn.dot
 *.iml
 .idea
 /analytics/server/log/
+*.versionsBackup

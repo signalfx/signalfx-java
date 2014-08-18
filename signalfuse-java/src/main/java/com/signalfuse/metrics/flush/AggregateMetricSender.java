@@ -4,12 +4,16 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.auth.AuthToken;
 import com.signalfuse.metrics.auth.NoAuthTokenException;
 import com.signalfuse.metrics.connection.DataPointReceiver;
+import com.signalfuse.metrics.connection.DataPointReceiverFactory;
 import com.signalfuse.metrics.errorhandler.MetricErrorImpl;
 import com.signalfuse.metrics.errorhandler.MetricErrorType;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
@@ -17,20 +21,23 @@ import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public class AggregateMetricSender {
     private final String defaultSourceName;
-    private final Map<String, com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers
-            .MetricType> registeredMetricPairs;
-    private final DataPointReceiver dataPointReceiver;
+    private final Set<String> registeredMetricPairs;
+    private final DataPointReceiverFactory dataPointReceiverFactory;
     private final AuthToken authToken;
     private final Collection<OnSendErrorHandler> onSendErrorHandlerCollection;
 
-    public AggregateMetricSender(String defaultSourceName, DataPointReceiver dataPointReceiver,
+    public AggregateMetricSender(String defaultSourceName, DataPointReceiverFactory dataPointReceiverFactory,
                                  AuthToken authToken,
                                  Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
         this.defaultSourceName = defaultSourceName;
-        registeredMetricPairs = new HashMap<String, SignalFuseProtocolBuffers.MetricType>();
-        this.dataPointReceiver = dataPointReceiver;
+        registeredMetricPairs = new HashSet<String>();
+        this.dataPointReceiverFactory = dataPointReceiverFactory;
         this.authToken = authToken;
         this.onSendErrorHandlerCollection = onSendErrorHandlerCollection;
+    }
+
+    public String getDefaultSourceName() {
+        return defaultSourceName;
     }
 
     private void communicateError(String message, MetricErrorType code,
@@ -62,8 +69,7 @@ public class AggregateMetricSender {
         }
 
         public Session setCumulativeCounter(String source, String metric, long value) {
-            check(metric, SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER);
-            addDatapoint(source, metric, value);
+            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, value);
             return this;
         }
 
@@ -72,7 +78,24 @@ public class AggregateMetricSender {
         }
 
         public Session incrementCounter(String source, String metric, long value) {
-            check(metric, SignalFuseProtocolBuffers.MetricType.COUNTER);
+            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.COUNTER, value);
+            return this;
+        }
+
+        @Override
+        public Session setDatapoint(String source, String metric,
+                                              SignalFuseProtocolBuffers.MetricType metricType,
+                                              long value) {
+            check(metric, metricType);
+            addDatapoint(source, metric, value);
+            return this;
+        }
+
+        @Override
+        public Session setDatapoint(String source, String metric,
+                                              SignalFuseProtocolBuffers.MetricType metricType,
+                                              double value) {
+            check(metric, metricType);
             addDatapoint(source, metric, value);
             return this;
         }
@@ -82,8 +105,7 @@ public class AggregateMetricSender {
         }
 
         public Session setGauge(String source, String metric, long value) {
-            check(metric, SignalFuseProtocolBuffers.MetricType.GAUGE);
-            addDatapoint(source, metric, value);
+            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.GAUGE, value);
             return this;
         }
 
@@ -92,8 +114,7 @@ public class AggregateMetricSender {
         }
 
         public Session setGauge(String source, String metric, double value) {
-            check(metric, SignalFuseProtocolBuffers.MetricType.GAUGE);
-            addDatapoint(source, metric, value);
+            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.GAUGE, value);
             return this;
         }
 
@@ -115,7 +136,7 @@ public class AggregateMetricSender {
         private void check(String metricPair,
                            com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.MetricType
                                    metricType) {
-            if (!registeredMetricPairs.containsKey(metricPair)) {
+            if (!registeredMetricPairs.contains(metricPair)) {
                 toBeRegisteredMetricPairs.put(metricPair, metricType);
             }
         }
@@ -130,10 +151,17 @@ public class AggregateMetricSender {
                 return;
             }
 
+            DataPointReceiver dataPointReceiver = dataPointReceiverFactory.createDataPointReceiver();
+
             if (!toBeRegisteredMetricPairs.isEmpty()) {
                 try {
-                    dataPointReceiver.registerMetrics(authTokenStr,
+                    Map<String, Boolean> registeredPairs = dataPointReceiver.registerMetrics(authTokenStr,
                             toBeRegisteredMetricPairs);
+                    for (Map.Entry<String, Boolean> i: registeredPairs.entrySet()) {
+                        if (i.getValue()) {
+                            registeredMetricPairs.add(i.getKey());
+                        }
+                    }
                 } catch (SignalfuseMetricsException e) {
                     communicateError("Unable to register metrics",
                             MetricErrorType.REGISTRATION_ERROR,
@@ -142,7 +170,13 @@ public class AggregateMetricSender {
                 }
             }
 
-            registeredMetricPairs.putAll(toBeRegisteredMetricPairs);
+            Iterator<SignalFuseProtocolBuffers.DataPoint> i = pointsToFlush.iterator();
+            while (i.hasNext()) {
+                SignalFuseProtocolBuffers.DataPoint currentEntry = i.next();
+                if (!registeredMetricPairs.contains(currentEntry.getMetric())) {
+                    i.remove();
+                }
+            }
 
             if (!pointsToFlush.isEmpty()) {
                 try {
@@ -173,5 +207,9 @@ public class AggregateMetricSender {
         Session incrementCounter(String metric, long value);
 
         Session incrementCounter(String source, String metric, long value);
+
+        Session setDatapoint(String source, String metric, SignalFuseProtocolBuffers.MetricType metricType, long value);
+
+        Session setDatapoint(String source, String metric, SignalFuseProtocolBuffers.MetricType metricType, double value);
     }
 }

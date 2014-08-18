@@ -14,6 +14,6 @@ public interface DataPointReceiver {
                             List<SignalFuseProtocolBuffers.Datum> datumPoints)
             throws SignalfuseMetricsException;
 
-    void registerMetrics(String auth, Map<String, SignalFuseProtocolBuffers.MetricType> metricTypes)
+    Map<String, Boolean> registerMetrics(String auth, Map<String, SignalFuseProtocolBuffers.MetricType> metricTypes)
             throws SignalfuseMetricsException;
 }

@@ -1,21 +1,14 @@
 package com.signalfuse.codahale.metrics;
 
-import java.util.Collections;
-import java.util.SortedMap;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
+import com.google.common.collect.ImmutableSet;
+import com.signalfuse.codahale.reporter.SignalFuseReporter;
 import com.signalfuse.metrics.auth.StaticAuthToken;
+import com.signalfuse.metrics.connection.StaticDataPointReceiverFactory;
 import com.signalfuse.metrics.connection.StoredDataPointReceiver;
-import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
-import com.signalfuse.metrics.flush.AggregateMetricSender;
+import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,56 +18,53 @@ public class SignalFuseReporterTest {
         StoredDataPointReceiver dbank = new StoredDataPointReceiver();
         assertEquals(0, dbank.addDataPoints.size());
 
-        AggregateMetricSender aggregateMetricSender = new AggregateMetricSender("", dbank,
-                new StaticAuthToken(""),
-                Collections.<OnSendErrorHandler>emptyList());
-
         MetricRegistry metricRegistery = new MetricRegistry();
-        String name = "sf_reporter";
-        MetricFilter filter = MetricFilter.ALL;
-        TimeUnit rateUnit = TimeUnit.SECONDS;
-        TimeUnit durationUnit = TimeUnit.SECONDS;
-        final Semaphore S = new Semaphore(0);
-        LockedSignalFuseReporter reporter = new LockedSignalFuseReporter(metricRegistery, name,
-                filter, rateUnit, durationUnit, aggregateMetricSender, S);
+        SignalFuseReporter reporter = new SignalFuseReporter.Builder(metricRegistery, new StaticAuthToken(""), "myserver")
+                .setDataPointReceiverFactory(new StaticDataPointReceiverFactory(dbank))
+                .setDetailsToAdd(ImmutableSet.of(SignalFuseReporter.MetricDetails.COUNT, SignalFuseReporter.MetricDetails.MIN, SignalFuseReporter.MetricDetails.MAX))
+                .build();
 
         metricRegistery.register("gauge", new Gauge<Integer>() {
             public Integer getValue() {
                 return 1;
             }
         });
+
+        reporter.getMetricMetadata().tagMetric(metricRegistery.counter("counter"))
+                .withMetricName("newname")
+                .withSourceName("newsource")
+                .withMetricType(SignalFuseProtocolBuffers.MetricType.GAUGE);
         metricRegistery.counter("counter").inc();
         metricRegistery.counter("counter").inc();
 
-        reporter.start(1, TimeUnit.MICROSECONDS);
-        S.acquire(1);
+        metricRegistery.timer("atimer").time().close();
 
-        assertEquals(2, dbank.addDataPoints.size());
-        assertEquals(2, (int) dbank.addDataPoints.get(1).getValue().getIntValue());
-    }
+        reporter.report();
 
-    /**
-     * A version of SignalFuseReporter that lets us know (via a Semaphore) when it's report() is
-     * called, then stops itself
-     */
-    private static final class LockedSignalFuseReporter extends SignalFuseReporter {
-        private final Semaphore S;
+        assertEquals(5, dbank.addDataPoints.size());
+        assertEquals("newname", dbank.addDataPoints.get(1).getMetric());
+        assertEquals("newsource", dbank.addDataPoints.get(1).getSource());
+        assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
+                "newname"));
+        assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get("atimer.count"));
+        assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get("atimer.max"));
+        assertEquals(2, dbank.lastValueFor("newsource", "newname").getIntValue());
 
-        private LockedSignalFuseReporter(MetricRegistry registry, String name,
-                                         MetricFilter filter, TimeUnit rateUnit,
-                                         TimeUnit durationUnit, AggregateMetricSender metricFactory,
-                                         Semaphore S) {
-            super(registry, name, filter, rateUnit, durationUnit, metricFactory, MetricDetails.ALL);
-            this.S = S;
-        }
+        assertEquals("atimer.count", dbank.addDataPoints.get(2).getMetric());
 
-        @Override
-        public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
-                           SortedMap<String, Histogram> histograms,
-                           SortedMap<String, Meter> meters, SortedMap<String, Timer> timers) {
-            super.report(gauges, counters, histograms, meters, timers);
-            S.release();
-            this.stop();
-        }
+        dbank.addDataPoints.clear();
+        reporter.getMetricMetadata().tagMetric(metricRegistery.counter("raw_counter"))
+                .withMetricType(SignalFuseProtocolBuffers.MetricType.COUNTER);
+        metricRegistery.counter("raw_counter").inc(10);
+        reporter.report();
+        assertEquals(6, dbank.addDataPoints.size());
+        assertEquals(10, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
+        assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("raw_counter"));
+        metricRegistery.counter("raw_counter").inc(14);
+        dbank.addDataPoints.clear();
+        reporter.report();
+        assertEquals(6, dbank.addDataPoints.size());
+        assertEquals(14, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
+
     }
 }

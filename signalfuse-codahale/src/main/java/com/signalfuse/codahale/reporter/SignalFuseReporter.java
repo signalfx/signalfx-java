@@ -1,36 +1,32 @@
-package com.signalfuse.codahale.metrics;
+package com.signalfuse.codahale.reporter;
 
-import java.io.Closeable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Counting;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metered;
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Sampling;
 import com.codahale.metrics.ScheduledReporter;
-import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
-import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.SourceNameHelper;
 import com.signalfuse.metrics.auth.AuthToken;
 import com.signalfuse.metrics.auth.StaticAuthToken;
-import com.signalfuse.metrics.connection.DataPointReceiver;
 import com.signalfuse.metrics.connection.DataPointReceiverFactory;
 import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
 import com.signalfuse.metrics.endpoint.DataPointEndpoint;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
+import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 /**
  * Reporter object for codahale metrics that reports values to com.signalfuse.signalfuse at some
@@ -39,6 +35,8 @@ import com.signalfuse.metrics.flush.AggregateMetricSender;
 public class SignalFuseReporter extends ScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
+    private final MetricMetadata metricMetadata;
+    private final Map<Metric, Long> hardCounterValueCache;
 
     /**
      * Creates a new {@link com.codahale.metrics.ScheduledReporter} instance.
@@ -56,10 +54,13 @@ public class SignalFuseReporter extends ScheduledReporter {
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
                                  AggregateMetricSender aggregateMetricSender,
-                                 Set<MetricDetails> detailsToAdd) {
+                                 Set<MetricDetails> detailsToAdd,
+                                 MetricMetadata metricMetadata) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.detailsToAdd = detailsToAdd;
+        this.metricMetadata = metricMetadata;
+        this.hardCounterValueCache = new HashMap<Metric, Long>();
     }
 
     @Override
@@ -67,17 +68,16 @@ public class SignalFuseReporter extends ScheduledReporter {
                        SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
-                aggregateMetricSender.createSession());
+                aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
+                aggregateMetricSender.getDefaultSourceName(), hardCounterValueCache);
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
-                Object gaugeValue = entry.getValue().getValue();
-                if (gaugeValue instanceof Number) {
-                    session.reportGauge(entry.getKey(), (Number) gaugeValue);
-                }
+                session.addMetric(entry.getValue(), entry.getKey(),
+                        SignalFuseProtocolBuffers.MetricType.GAUGE, entry.getValue().getValue());
             }
             for (Map.Entry<String, Counter> entry : counters.entrySet()) {
-                session.metricSenderSession
-                        .setCumulativeCounter(entry.getKey(), entry.getValue().getCount());
+                session.addMetric(entry.getValue(), entry.getKey(),
+                        SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, entry.getValue().getCount());
             }
             for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
                 session.addHistogram(entry.getKey(), entry.getValue());
@@ -97,99 +97,8 @@ public class SignalFuseReporter extends ScheduledReporter {
         }
     }
 
-    private final class AggregateMetricSenderSessionWrapper implements Closeable {
-        private final AggregateMetricSender.Session metricSenderSession;
-
-        private AggregateMetricSenderSessionWrapper(
-                AggregateMetricSender.Session metricSenderSession) {
-            this.metricSenderSession = metricSenderSession;
-        }
-
-        public void close() {
-            try {
-                metricSenderSession.close();
-            } catch (Exception e) {
-                throw new SignalfuseMetricsException("Unable to close session and send metrics", e);
-            }
-        }
-
-        // These three called from report
-        private void addTimer(String key, Timer value) {
-            addMetered(key, value);
-            addSampling(key, value);
-        }
-
-        private void addHistogram(String baseName,
-                                  Histogram histogram) {
-            addCounting(baseName, histogram);
-            addSampling(baseName, histogram);
-        }
-
-        private void addMetered(String baseName, Metered metered) {
-            addCounting(baseName, metered);
-            checkedAdd(MetricDetails.RATE_15_MIN, baseName, metered.getFifteenMinuteRate());
-            checkedAdd(MetricDetails.RATE_5_MIN, baseName, metered.getFiveMinuteRate());
-            checkedAdd(MetricDetails.RATE_1_MIN, baseName, metered.getOneMinuteRate());
-            if (detailsToAdd.contains(MetricDetails.RATE_MEAN)) {
-                checkedAdd(MetricDetails.RATE_MEAN, baseName, metered.getMeanRate());
-            }
-        }
-
-        // Shared
-        private void addCounting(String baseName, Counting counting) {
-            checkedAddCumulativeCounter(MetricDetails.COUNT, baseName, counting.getCount());
-        }
-
-        private void addSampling(String baseName, Sampling sampling) {
-            final Snapshot snapshot = sampling.getSnapshot();
-            checkedAdd(MetricDetails.MEDIAN, baseName, snapshot.getMedian());
-            checkedAdd(MetricDetails.PERCENT_75, baseName, snapshot.get75thPercentile());
-            checkedAdd(MetricDetails.PERCENT_95, baseName, snapshot.get95thPercentile());
-            checkedAdd(MetricDetails.PERCENT_98, baseName, snapshot.get98thPercentile());
-            checkedAdd(MetricDetails.PERCENT_99, baseName, snapshot.get99thPercentile());
-            checkedAdd(MetricDetails.PERCENT_999, baseName, snapshot.get999thPercentile());
-            checkedAdd(MetricDetails.MAX, baseName, snapshot.getMax());
-            checkedAdd(MetricDetails.MIN, baseName, snapshot.getMin());
-
-            // These are slower to calculate.  Only calculate if we need.
-            if (detailsToAdd.contains(MetricDetails.STD_DEV)) {
-                checkedAdd(MetricDetails.STD_DEV, baseName, snapshot.getStdDev());
-            }
-            if (detailsToAdd.contains(MetricDetails.MEAN)) {
-                checkedAdd(MetricDetails.MEAN, baseName, snapshot.getMean());
-            }
-        }
-
-        private void reportGauge(String baseName, Number value) {
-            if (Double.isInfinite(value.doubleValue()) || Double.isNaN(value.doubleValue())) {
-                return;
-            }
-            if (value instanceof Long || value instanceof Integer) {
-                metricSenderSession.setGauge(baseName, value.longValue());
-            } else {
-                metricSenderSession.setGauge(baseName, value.doubleValue());
-            }
-        }
-
-        // helpers
-        private void checkedAddCumulativeCounter(MetricDetails type, String baseName, long value) {
-            if (detailsToAdd.contains(type)) {
-                metricSenderSession
-                        .setCumulativeCounter(baseName + '.' + type.getDescription(), value);
-            }
-        }
-
-        private void checkedAdd(MetricDetails type, String baseName, double value) {
-            if (detailsToAdd.contains(type)) {
-                metricSenderSession.setGauge(baseName + '.' + type.getDescription(), value);
-            }
-        }
-
-        private void checkedAdd(MetricDetails type, String baseName, long value) {
-            if (detailsToAdd.contains(type)) {
-                metricSenderSession.setGauge(baseName + '.' + type.getDescription(), value);
-            }
-        }
+    public MetricMetadata getMetricMetadata() {
+        return metricMetadata;
     }
 
     public enum MetricDetails {
@@ -213,7 +122,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         RATE_1_MIN("rate.1min"),
         RATE_5_MIN("rate.5min"),
         RATE_15_MIN("rate.15min");
-        public static final Set<MetricDetails> ALL = EnumSet.allOf(MetricDetails.class);
+        public static final Set<MetricDetails> ALL = Collections.unmodifiableSet(EnumSet.allOf(MetricDetails.class));
         private final String description;
 
         MetricDetails(String description) {
@@ -233,13 +142,13 @@ public class SignalFuseReporter extends ScheduledReporter {
         private String name = "signalfuse-reporter";
         private int timeoutMs = HttpDataPointProtobufReceiverFactory.DEFAULT_TIMEOUT_MS;
         private DataPointReceiverFactory dataPointReceiverFactory = new
-                HttpDataPointProtobufReceiverFactory();
+                HttpDataPointProtobufReceiverFactory(dataPointEndpoint);
         private MetricFilter filter = MetricFilter.ALL;
         private TimeUnit rateUnit = TimeUnit.SECONDS;
         private TimeUnit durationUnit = TimeUnit.MILLISECONDS; // Maybe nano eventually?
         private Set<MetricDetails> detailsToAdd = MetricDetails.ALL;
-        private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections
-                .emptyList();
+        private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections.emptyList();
+        private MetricMetadata metricMetadata = new MetricMetadataImpl();
 
         public Builder(MetricRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
@@ -267,6 +176,9 @@ public class SignalFuseReporter extends ScheduledReporter {
 
         public Builder setDataPointEndpoint(DataPointReceiverEndpoint dataPointEndpoint) {
             this.dataPointEndpoint = dataPointEndpoint;
+            this.dataPointReceiverFactory =
+                    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                            .setTimeoutMs(this.timeoutMs);
             return this;
         }
 
@@ -277,6 +189,9 @@ public class SignalFuseReporter extends ScheduledReporter {
 
         public Builder setTimeoutMs(int timeoutMs) {
             this.timeoutMs = timeoutMs;
+            this.dataPointReceiverFactory =
+                    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                            .setTimeoutMs(this.timeoutMs);
             return this;
         }
 
@@ -312,13 +227,16 @@ public class SignalFuseReporter extends ScheduledReporter {
             return this;
         }
 
+        public Builder setMetricMetadata(MetricMetadata metricMetadata) {
+            this.metricMetadata = metricMetadata;
+            return this;
+        }
+
         public SignalFuseReporter build() {
-            DataPointReceiver dataPointReceiver = dataPointReceiverFactory.setTimeoutMs(timeoutMs)
-                    .createDataPointReceiver(dataPointEndpoint);
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
-                    defaultSourceName, dataPointReceiver, authToken, onSendErrorHandlerCollection);
+                    defaultSourceName, dataPointReceiverFactory, authToken, onSendErrorHandlerCollection);
             return new SignalFuseReporter(registry, name, filter, rateUnit, durationUnit,
-                    aggregateMetricSender, detailsToAdd);
+                    aggregateMetricSender, detailsToAdd, metricMetadata);
         }
     }
 }

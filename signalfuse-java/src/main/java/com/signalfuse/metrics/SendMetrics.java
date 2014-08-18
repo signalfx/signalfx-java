@@ -25,8 +25,7 @@ public final class SendMetrics {
         DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint(host,
                 DataPointEndpoint.DEFAULT_PORT);
         AggregateMetricSender mf = new AggregateMetricSender("test",
-                new HttpDataPointProtobufReceiverFactory()
-                        .createDataPointReceiver(dataPointEndpoint),
+                new HttpDataPointProtobufReceiverFactory(dataPointEndpoint),
                 new StaticAuthToken(auth_token),
                 Collections.<OnSendErrorHandler>emptyList());
         int count = 0;

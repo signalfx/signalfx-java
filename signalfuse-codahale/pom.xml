@@ -7,12 +7,12 @@
   <parent>
     <groupId>com.signalfuse.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>1-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>signalfuse-codahale</artifactId>
   <name>Codahale to SignalFuse</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.0.6-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
     Codahale yammer metrics plugin for signalfuse
@@ -52,6 +52,10 @@
     <dependency>
       <groupId>com.signalfuse.public</groupId>
       <artifactId>signalfuse-protoc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
