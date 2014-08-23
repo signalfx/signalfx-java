@@ -1,2 +1,2 @@
 #!/bin/bash
-mvn -Drelease-sign-artifacts=true clean deploy
+mvn -DperformRelease=true clean deploy
