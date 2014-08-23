@@ -40,16 +40,6 @@ public class SignalFuseReporter extends ScheduledReporter {
 
     /**
      * Creates a new {@link com.codahale.metrics.ScheduledReporter} instance.
-     *
-     * @param registry
-     *         the {@link com.codahale.metrics.MetricRegistry} containing the metrics this
-     *         reporter will report
-     * @param name
-     *         the reporter's name
-     * @param filter
-     *         Which metrics to not report
-     * @param detailsToAdd
-     *         Which types of metric details to report
      */
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,

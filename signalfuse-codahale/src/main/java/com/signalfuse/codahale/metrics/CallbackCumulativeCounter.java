@@ -8,7 +8,7 @@ import com.codahale.metrics.Gauge;
  * Sometimes you want the rate of something like you would with a {@link Counter}, but you can't get
  * individual events and instead must set a total "count" of events at some periodic rate.  This
  * class abstracts that out into a {@link Counter} that codahale can understand.
- * <p/>
+ * </p>
  */
 public class CallbackCumulativeCounter extends Counter {
     private final Callback callback;
