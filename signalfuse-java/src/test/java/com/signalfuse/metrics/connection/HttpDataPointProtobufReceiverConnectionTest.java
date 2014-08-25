@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
         Server server = new Server(0);
         server.setHandler(new MyHandler());
         server.start();
-        final int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
+        final int port = server.getConnectors()[0].getLocalPort();
         DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
                 new DataPointEndpoint("http", "localhost", port)).createDataPointReceiver();
         dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
