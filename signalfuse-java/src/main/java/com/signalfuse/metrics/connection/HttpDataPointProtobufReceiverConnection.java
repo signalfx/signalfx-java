@@ -34,7 +34,9 @@ import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 public class HttpDataPointProtobufReceiverConnection implements DataPointReceiver {
     private static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
     private static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
-    private static final String USER_AGENT = "SignalFx-java-client/" + version();
+    // Do not modify this line.  It is auto replaced to a version number.
+    public static final String VERSION_NUMBER = "0.0.6-SNAPSHOT";
+    static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     private static final Logger log = LoggerFactory
             .getLogger(HttpDataPointProtobufReceiverConnection.class);
     private final CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -47,17 +49,6 @@ public class HttpDataPointProtobufReceiverConnection implements DataPointReceive
                 dataPointEndpoint.getScheme());
         this.requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs)
                 .setConnectionRequestTimeout(timeoutMs).setConnectTimeout(timeoutMs).build();
-    }
-
-    private static final String version() {
-        final Properties properties = new Properties();
-        try {
-            properties.load(HttpDataPointProtobufReceiverConnection.class
-                    .getResourceAsStream("signalfuse.java.client.version"));
-            return properties.getProperty("signalfuse.java.client.version", "0.0.0");
-        } catch (IOException e) {
-            return "0.0.1";
-        }
     }
 
     private CloseableHttpResponse postToEndpoint(String auth, InputStream postBodyInputStream,
