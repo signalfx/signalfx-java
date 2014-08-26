@@ -32,6 +32,7 @@ message DataPoint {
     optional string metric = 2;
     optional int64 timestamp = 3;
     optional Datum value = 4;
+    optional MetricType metricType = 5;
 }
 
 message PointValue {
