@@ -4,6 +4,7 @@ import org.junit.Test;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
+import com.signalfuse.codahale.reporter.SfUtil;
 import com.signalfuse.codahale.reporter.SignalFuseReporter;
 import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.StaticDataPointReceiverFactory;
@@ -21,7 +22,8 @@ public class SignalFuseReporterTest {
         MetricRegistry metricRegistery = new MetricRegistry();
         SignalFuseReporter reporter = new SignalFuseReporter.Builder(metricRegistery, new StaticAuthToken(""), "myserver")
                 .setDataPointReceiverFactory(new StaticDataPointReceiverFactory(dbank))
-                .setDetailsToAdd(ImmutableSet.of(SignalFuseReporter.MetricDetails.COUNT, SignalFuseReporter.MetricDetails.MIN, SignalFuseReporter.MetricDetails.MAX))
+                .setDetailsToAdd(ImmutableSet.of(SignalFuseReporter.MetricDetails.COUNT,
+                        SignalFuseReporter.MetricDetails.MIN, SignalFuseReporter.MetricDetails.MAX))
                 .build();
 
         metricRegistery.register("gauge", new Gauge<Integer>() {
@@ -55,16 +57,24 @@ public class SignalFuseReporterTest {
         dbank.addDataPoints.clear();
         reporter.getMetricMetadata().tagMetric(metricRegistery.counter("raw_counter"))
                 .withMetricType(SignalFuseProtocolBuffers.MetricType.COUNTER);
+        SfUtil.cumulativeCounter(metricRegistery, "cumulative_counter_callback", reporter.getMetricMetadata(), new Gauge<Long>(){
+            private long i = 0;
+            @Override public Long getValue() {
+                return i++;
+            }
+        });
         metricRegistery.counter("raw_counter").inc(10);
         reporter.report();
-        assertEquals(6, dbank.addDataPoints.size());
+        assertEquals(7, dbank.addDataPoints.size());
         assertEquals(10, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
+        assertEquals(0, dbank.lastValueFor("myserver", "cumulative_counter_callback").getIntValue());
         assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("raw_counter"));
+        assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get("cumulative_counter_callback"));
         metricRegistery.counter("raw_counter").inc(14);
         dbank.addDataPoints.clear();
         reporter.report();
-        assertEquals(6, dbank.addDataPoints.size());
+        assertEquals(7, dbank.addDataPoints.size());
         assertEquals(14, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
-
+        assertEquals(1, dbank.lastValueFor("myserver", "cumulative_counter_callback").getIntValue());
     }
 }
