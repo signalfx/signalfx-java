@@ -28,7 +28,7 @@ public class MetricMetadataImpl implements MetricMetadata {
     @Override
     public Optional<SignalFuseProtocolBuffers.MetricType> getMetricType(Metric metric) {
         Metadata existingMetaData = metaDataCollection.get(metric);
-        if (existingMetaData == null) {
+        if (existingMetaData == null || existingMetaData.metricType == null) {
             return Optional.absent();
         } else {
             return Optional.of(existingMetaData.metricType);
@@ -80,7 +80,7 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     private static final class Metadata {
         private final Map<String, String> tags;
-        private SignalFuseProtocolBuffers.MetricType metricType = null;
+        private SignalFuseProtocolBuffers.MetricType metricType;
 
         private Metadata() {
             tags = new ConcurrentHashMap<String, String>(6);

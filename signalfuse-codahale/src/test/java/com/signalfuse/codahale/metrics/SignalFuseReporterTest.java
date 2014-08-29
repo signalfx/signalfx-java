@@ -12,6 +12,7 @@ import com.signalfuse.metrics.connection.StoredDataPointReceiver;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class SignalFuseReporterTest {
     @Test
@@ -36,6 +37,8 @@ public class SignalFuseReporterTest {
                 .withMetricName("newname")
                 .withSourceName("newsource")
                 .withMetricType(SignalFuseProtocolBuffers.MetricType.GAUGE);
+        reporter.getMetricMetadata().tagMetric(metricRegistery.counter("counter2"))
+                .withMetricName("newname2");
         metricRegistery.counter("counter").inc();
         metricRegistery.counter("counter").inc();
 
@@ -43,7 +46,7 @@ public class SignalFuseReporterTest {
 
         reporter.report();
 
-        assertEquals(5, dbank.addDataPoints.size());
+        assertEquals(6, dbank.addDataPoints.size());
         assertEquals("newname", dbank.addDataPoints.get(1).getMetric());
         assertEquals("newsource", dbank.addDataPoints.get(1).getSource());
         assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
@@ -52,7 +55,7 @@ public class SignalFuseReporterTest {
         assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get("atimer.max"));
         assertEquals(2, dbank.lastValueFor("newsource", "newname").getIntValue());
 
-        assertEquals("atimer.count", dbank.addDataPoints.get(2).getMetric());
+        assertNotNull(dbank.lastValueFor("myserver", "atimer.count"));
 
         dbank.addDataPoints.clear();
         reporter.getMetricMetadata().tagMetric(metricRegistery.counter("raw_counter"))
@@ -65,7 +68,7 @@ public class SignalFuseReporterTest {
         });
         metricRegistery.counter("raw_counter").inc(10);
         reporter.report();
-        assertEquals(7, dbank.addDataPoints.size());
+        assertEquals(8, dbank.addDataPoints.size());
         assertEquals(10, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
         assertEquals(0, dbank.lastValueFor("myserver", "cumulative_counter_callback").getIntValue());
         assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("raw_counter"));
@@ -73,7 +76,7 @@ public class SignalFuseReporterTest {
         metricRegistery.counter("raw_counter").inc(14);
         dbank.addDataPoints.clear();
         reporter.report();
-        assertEquals(7, dbank.addDataPoints.size());
+        assertEquals(8, dbank.addDataPoints.size());
         assertEquals(14, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
         assertEquals(1, dbank.lastValueFor("myserver", "cumulative_counter_callback").getIntValue());
     }
