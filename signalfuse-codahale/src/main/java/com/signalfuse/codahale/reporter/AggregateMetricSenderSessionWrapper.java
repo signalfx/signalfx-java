@@ -19,7 +19,6 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final Set<SignalFuseReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
-    private final Map<Metric, Long> hardCounterValueCache;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -30,7 +29,6 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
-        this.hardCounterValueCache = hardCounterValueCache;
     }
 
     public void close() {
@@ -143,33 +141,26 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             // Unsupported type
             return;
         }
-        final String metricDetailsMetricNamePrefix;
+        final String metricDetailsMetricNameSuffix;
         if (metricDetails.isPresent()) {
             if (!detailsToAdd.contains(metricDetails.get())) {
                 return;
             }
-            metricDetailsMetricNamePrefix = "." + metricDetails.get().getDescription();
+            metricDetailsMetricNameSuffix = "." + metricDetails.get().getDescription();
         } else {
-            metricDetailsMetricNamePrefix = "";
+            metricDetailsMetricNameSuffix = "";
         }
         Optional<SignalFuseProtocolBuffers.MetricType> userSetMetricType = metricMetadata.getMetricType(metric);
         SignalFuseProtocolBuffers.MetricType metricType = userSetMetricType.or(defaultMetricType);
         Map<String, String> tags = metricMetadata.getTags(metric);
         final String sourceName = Optional.fromNullable(tags.get(MetricMetadata.SOURCE)).or(defaultSourceName);
-        final String metricName = Optional.fromNullable(tags.get(MetricMetadata.METRIC)).or(codahaleName) + metricDetailsMetricNamePrefix;
+        final String metricName = Optional.fromNullable(tags.get(MetricMetadata.METRIC)).or(codahaleName) + metricDetailsMetricNameSuffix;
         if (value instanceof Long || value instanceof Integer || value instanceof Short) {
-            final long valueToActuallySendToSignalFuse;
-            if (metricType.equals(SignalFuseProtocolBuffers.MetricType.COUNTER)) {
-                final long lastSeenCounterValue = Optional.fromNullable(hardCounterValueCache.put(metric, value.longValue())).or(0L).longValue();
-                valueToActuallySendToSignalFuse = value.longValue() - lastSeenCounterValue;
-            } else {
-                valueToActuallySendToSignalFuse = value.longValue();
-            }
-            metricSenderSession.setDatapoint(sourceName, metricName, metricType, valueToActuallySendToSignalFuse);
+            metricSenderSession.setDatapoint(sourceName, metricName, metricType, value.longValue());
         } else {
             final double doubleToSend = value.doubleValue();
             if (Double.isInfinite(doubleToSend) || Double.isNaN(doubleToSend)) {
-                // Invalid values.  Don't report
+                return;
             }
             metricSenderSession.setDatapoint(sourceName, metricName, metricType, value.doubleValue());
         }

@@ -1,6 +1,5 @@
 package com.signalfuse.codahale.metrics;
 
-import java.util.concurrent.atomic.AtomicLong;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 
@@ -21,7 +20,6 @@ import com.codahale.metrics.Metric;
  *     }
  *
  *     </pre>
- * </p>
  */
 public class SettableLongGauge implements Metric, Gauge<Long> {
     /**

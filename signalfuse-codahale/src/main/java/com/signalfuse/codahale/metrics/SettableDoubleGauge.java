@@ -2,7 +2,6 @@ package com.signalfuse.codahale.metrics;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
-import com.google.common.util.concurrent.AtomicDouble;
 
 /**
  * <p>
@@ -19,9 +18,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  *       // ...
  *       settable.setValue(3.156);
  *     }
- *
  *     </pre>
- * </p>
  */
 public class SettableDoubleGauge implements Metric, Gauge<Double> {
     /**

@@ -38,9 +38,6 @@ public class SignalFuseReporter extends ScheduledReporter {
     private final MetricMetadata metricMetadata;
     private final Map<Metric, Long> hardCounterValueCache;
 
-    /**
-     * Creates a new {@link com.codahale.metrics.ScheduledReporter} instance.
-     */
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
                                  AggregateMetricSender aggregateMetricSender,
@@ -66,8 +63,15 @@ public class SignalFuseReporter extends ScheduledReporter {
                         SignalFuseProtocolBuffers.MetricType.GAUGE, entry.getValue().getValue());
             }
             for (Map.Entry<String, Counter> entry : counters.entrySet()) {
-                session.addMetric(entry.getValue(), entry.getKey(),
-                        SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, entry.getValue().getCount());
+                if (entry.getValue() instanceof IncrementalCounter) {
+                    session.addMetric(entry.getValue(), entry.getKey(),
+                            SignalFuseProtocolBuffers.MetricType.COUNTER,
+                            ((IncrementalCounter)entry.getValue()).getCountChange());
+                } else {
+                    session.addMetric(entry.getValue(), entry.getKey(),
+                            SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER,
+                            entry.getValue().getCount());
+                }
             }
             for (Map.Entry<String, Histogram> entry : histograms.entrySet()) {
                 session.addHistogram(entry.getKey(), entry.getValue());

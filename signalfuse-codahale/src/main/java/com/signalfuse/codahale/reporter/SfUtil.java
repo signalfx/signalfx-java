@@ -1,10 +1,8 @@
 package com.signalfuse.codahale.reporter;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
-import com.signalfuse.codahale.reporter.MetricMetadata;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 /**

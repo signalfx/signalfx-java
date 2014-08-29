@@ -2,8 +2,11 @@ package com.signalfuse.codahale.reporter;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
@@ -71,6 +74,29 @@ public class MetricMetadataImpl implements MetricMetadata {
                 SignalFuseProtocolBuffers.MetricType metricType) {
             thisMetricsMetadata.metricType = metricType;
             return this;
+        }
+
+        @Override public M register(MetricRegistry metricRegistry) {
+            final String existingMetricName =
+                    Preconditions.checkNotNull(thisMetricsMetadata.tags.get(MetricMetadata.METRIC),
+                            "The register helper needs a base metric name to build a readable " +
+                                    "metric.  use withMetricName or codahale directly");
+
+            //  The names should be unique so we sort each parameter by the tag key.
+            SortedMap<String, String> extraParameters = new TreeMap<String, String>();
+            for (Map.Entry<String, String> entry: thisMetricsMetadata.tags.entrySet()) {
+                // Don't readd the metric name
+                if (!MetricMetadata.METRIC.equals(entry.getKey())) {
+                    extraParameters.put(entry.getKey(), entry.getValue());
+                }
+            }
+            StringBuilder compositeName = new StringBuilder();
+            // Add each entry in sorted order
+            for (Map.Entry<String, String> entry: extraParameters.entrySet()) {
+                compositeName.append(entry.getValue()).append('.');
+            }
+            compositeName.append(existingMetricName);
+            return metricRegistry.register(compositeName.toString(), metric);
         }
 
         @Override public M metric() {

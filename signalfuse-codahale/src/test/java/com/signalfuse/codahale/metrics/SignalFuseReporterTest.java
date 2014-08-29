@@ -1,9 +1,11 @@
 package com.signalfuse.codahale.metrics;
 
 import org.junit.Test;
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
+import com.signalfuse.codahale.reporter.IncrementalCounter;
 import com.signalfuse.codahale.reporter.SfUtil;
 import com.signalfuse.codahale.reporter.SignalFuseReporter;
 import com.signalfuse.metrics.auth.StaticAuthToken;
@@ -52,7 +54,8 @@ public class SignalFuseReporterTest {
         assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
                 "newname"));
         assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get("atimer.count"));
-        assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get("atimer.max"));
+        assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
+                "atimer.max"));
         assertEquals(2, dbank.lastValueFor("newsource", "newname").getIntValue());
 
         assertNotNull(dbank.lastValueFor("myserver", "atimer.count"));
@@ -60,24 +63,40 @@ public class SignalFuseReporterTest {
         dbank.addDataPoints.clear();
         reporter.getMetricMetadata().tagMetric(metricRegistery.counter("raw_counter"))
                 .withMetricType(SignalFuseProtocolBuffers.MetricType.COUNTER);
-        SfUtil.cumulativeCounter(metricRegistery, "cumulative_counter_callback", reporter.getMetricMetadata(), new Gauge<Long>(){
+        SfUtil.cumulativeCounter(metricRegistery, "cumulative_counter_callback",
+                reporter.getMetricMetadata(), new Gauge<Long>() {
             private long i = 0;
+
             @Override public Long getValue() {
                 return i++;
             }
         });
+        Counter distributedCounter = reporter.getMetricMetadata()
+                .tagMetric(new IncrementalCounter())
+                .withMetricName("user_login.hits")
+                .withSourceName("webpage")
+                .register(metricRegistery);
+        assertNotNull(metricRegistery.getCounters().get("webpage.user_login.hits"));
+        distributedCounter.inc(123);
         metricRegistery.counter("raw_counter").inc(10);
         reporter.report();
-        assertEquals(8, dbank.addDataPoints.size());
+        assertEquals(9, dbank.addDataPoints.size());
         assertEquals(10, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
         assertEquals(0, dbank.lastValueFor("myserver", "cumulative_counter_callback").getIntValue());
+        assertEquals(123, dbank.lastValueFor("webpage", "user_login.hits").getIntValue());
+        distributedCounter.inc(1);
+        distributedCounter.inc(3);
+        assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("user_login.hits"));
         assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("raw_counter"));
-        assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get("cumulative_counter_callback"));
+        assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER,
+                dbank.registeredMetrics.get("cumulative_counter_callback"));
         metricRegistery.counter("raw_counter").inc(14);
         dbank.addDataPoints.clear();
         reporter.report();
-        assertEquals(8, dbank.addDataPoints.size());
-        assertEquals(14, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
+        assertEquals(9, dbank.addDataPoints.size());
+        // Users have to use an IncrementalCounter if they want to see the count value of 14 each time
+        assertEquals(24, dbank.lastValueFor("myserver", "raw_counter").getIntValue());
         assertEquals(1, dbank.lastValueFor("myserver", "cumulative_counter_callback").getIntValue());
+        assertEquals(4, dbank.lastValueFor("webpage", "user_login.hits").getIntValue());
     }
 }
