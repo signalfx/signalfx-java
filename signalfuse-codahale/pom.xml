@@ -7,12 +7,12 @@
   <parent>
     <groupId>com.signalfuse.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.0.7</version>
   </parent>
 
   <artifactId>signalfuse-codahale</artifactId>
   <name>Codahale to SignalFuse</name>
-  <version>0.0.7-SNAPSHOT</version>
+  <version>0.0.7</version>
   <packaging>jar</packaging>
   <description>
     Codahale yammer metrics plugin for signalfuse
