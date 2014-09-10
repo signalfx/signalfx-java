@@ -34,7 +34,7 @@ Setup in maven
     </dependency>
 
 
-Setting up Coahale
+Setting up Codahale
 ------------------
 
     MetricRegistry registry = new MetricRegistry();
