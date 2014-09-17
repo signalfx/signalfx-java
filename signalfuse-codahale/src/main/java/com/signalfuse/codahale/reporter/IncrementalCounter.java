@@ -1,10 +1,8 @@
 package com.signalfuse.codahale.reporter;
 
-import java.util.Map;
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Optional;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.codahale.metrics.Metric;
+import com.signalfuse.codahale.metrics.MetricBuilder;
 
 /**
  * <p>
@@ -47,5 +45,22 @@ public class IncrementalCounter extends Counter {
         final long countChange = currentCount - lastValue;
         lastValue = currentCount;
         return countChange;
+    }
+
+    public final static class Builder implements MetricBuilder<IncrementalCounter> {
+        public static final Builder INSTANCE = new Builder();
+
+        private Builder() {
+        }
+
+        @Override
+        public IncrementalCounter newMetric() {
+            return new IncrementalCounter();
+        }
+
+        @Override
+        public boolean isInstance(Metric metric) {
+            return metric instanceof IncrementalCounter;
+        }
     }
 }

@@ -43,7 +43,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
             }
             if (!request.getHeader("User-Agent")
                     .equals(HttpDataPointProtobufReceiverConnection.USER_AGENT)) {
-                error("Invalid User agent", response, baseRequest);
+                error("Invalid User agent: " + request.getHeader("User-Agent"), response, baseRequest);
                 return;
             }
             SignalFuseProtocolBuffers.DataPoint first_datapoint =

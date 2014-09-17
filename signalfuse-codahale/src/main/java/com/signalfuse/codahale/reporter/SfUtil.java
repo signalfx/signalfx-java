@@ -1,8 +1,12 @@
 package com.signalfuse.codahale.reporter;
 
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableSet;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 /**
@@ -34,7 +38,29 @@ public class SfUtil {
                                            String name,
                                            MetricMetadata metricMetadata,
                                            Gauge<Long> callback) {
-        return metricMetadata.tagMetric(metricRegistry.register(name, callback)).withMetricType(
+        return metricMetadata.forMetric(metricRegistry.register(name, callback)).withMetricType(
                 SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER).metric();
+    }
+
+    /**
+     * Removes any of the given metrics from the registry and returns the number of metrics removed
+     * @param metricRegistry     Registry to remove from
+     * @param metricsToRemove    Which metrics to remove
+     * @return The number of metrics removed
+     */
+    public static int removeMetrics(MetricRegistry metricRegistry, final Metric... metricsToRemove) {
+        final Set<Metric> toRemove = ImmutableSet.copyOf(metricsToRemove);
+        final AtomicInteger totalRemoved = new AtomicInteger(0);
+        metricRegistry.removeMatching(new MetricFilter() {
+            @Override
+            public boolean matches(String name, Metric metric) {
+                final boolean shouldRemove = toRemove.contains(metric);
+                if (shouldRemove) {
+                    totalRemoved.incrementAndGet();
+                }
+                return shouldRemove;
+            }
+        });
+        return totalRemoved.get();
     }
 }

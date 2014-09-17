@@ -9,6 +9,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.signalfuse.codahale.metrics.MetricBuilder;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public class MetricMetadataImpl implements MetricMetadata {
@@ -40,6 +41,11 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     @Override
     public synchronized <M extends Metric> Tagger<M> tagMetric(M metric) {
+        return forMetric(metric);
+    }
+
+    @Override
+    public synchronized <M extends Metric> Tagger<M> forMetric(M metric) {
         if (metaDataCollection.containsKey(metric)) {
             return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
         } else {
@@ -50,33 +56,37 @@ public class MetricMetadataImpl implements MetricMetadata {
         }
     }
 
-    private static final class TaggerImpl<M extends Metric> implements Tagger<M> {
+    @Override
+    public <M extends Metric> BuilderTagger<M> forBuilder(
+            MetricBuilder<M> metricBuilder) {
+        return new BuilderTaggerImpl<M>(metricBuilder, metaDataCollection, new Metadata());
+    }
 
-        private final M metric;
-        private final Metadata thisMetricsMetadata;
+    private static abstract class TaggerBaseImpl<M extends Metric, T extends TaggerBase<M, T>>
+            implements TaggerBase<M, T>{
+        protected final Metadata thisMetricsMetadata;
 
-        TaggerImpl(M metric, Metadata thisMetricsMetadata) {
-            this.metric = metric;
+        TaggerBaseImpl(Metadata thisMetricsMetadata) {
             this.thisMetricsMetadata = thisMetricsMetadata;
         }
 
-        @Override public Tagger<M> withSourceName(String sourceName) {
+        public T withSourceName(String sourceName) {
             thisMetricsMetadata.tags.put(SOURCE, sourceName);
-            return this;
+            return (T) this;
         }
 
-        @Override public Tagger<M> withMetricName(String metricName) {
+        public T withMetricName(String metricName) {
             thisMetricsMetadata.tags.put(METRIC, metricName);
-            return this;
+            return (T) this;
         }
 
-        @Override public Tagger<M> withMetricType(
+        public T withMetricType(
                 SignalFuseProtocolBuffers.MetricType metricType) {
             thisMetricsMetadata.metricType = metricType;
-            return this;
+            return (T) this;
         }
 
-        @Override public M register(MetricRegistry metricRegistry) {
+        protected String createCodahaleName() {
             final String existingMetricName =
                     Preconditions.checkNotNull(thisMetricsMetadata.tags.get(MetricMetadata.METRIC),
                             "The register helper needs a base metric name to build a readable " +
@@ -96,11 +106,72 @@ public class MetricMetadataImpl implements MetricMetadata {
                 compositeName.append(entry.getValue()).append('.');
             }
             compositeName.append(existingMetricName);
-            return metricRegistry.register(compositeName.toString(), metric);
+            return compositeName.toString();
+        }
+    }
+
+    private static final class TaggerImpl<M extends Metric> extends TaggerBaseImpl<M, Tagger<M>>
+            implements Tagger<M> {
+        private final M metric;
+
+        TaggerImpl(M metric, Metadata thisMetricsMetadata) {
+            super(thisMetricsMetadata);
+            this.metric = metric;
+        }
+
+        @Override
+        public M register(MetricRegistry metricRegistry) {
+            String compositeName = createCodahaleName();
+            return metricRegistry.register(compositeName, metric);
         }
 
         @Override public M metric() {
             return metric;
+        }
+    }
+
+    private class BuilderTaggerImpl<M extends Metric> extends TaggerBaseImpl<M, BuilderTagger<M>>
+            implements BuilderTagger<M> {
+        private final MetricBuilder metricBuilder;
+        private final Map<Metric, Metadata> metaDataCollection;
+
+        public <M extends Metric> BuilderTaggerImpl(MetricBuilder<M> metricBuilder,
+                                                    Map<Metric, Metadata> metaDataCollection,
+                                                    Metadata thisMetricsMetadata) {
+            super(thisMetricsMetadata);
+            this.metricBuilder = metricBuilder;
+            this.metaDataCollection = metaDataCollection;
+        }
+
+        @Override
+        public M createOrGet(MetricRegistry metricRegistry) {
+            String compositeName = createCodahaleName();
+            // Lock on an object that is shared by the metadata tagger, not *this* which is not.
+            synchronized (metaDataCollection) {
+                Metric existingMetric = metricRegistry.getMetrics().get(compositeName);
+                if (existingMetric != null) {
+                    if (!metricBuilder.isInstance(existingMetric)) {
+                        throw new IllegalArgumentException(
+                                String.format("The metric %s is not of the correct type",
+                                        compositeName));
+                    }
+                    if (!thisMetricsMetadata.equals(metaDataCollection.get(existingMetric))) {
+                        throw new IllegalArgumentException(String.format(
+                                "Existing metric has different tags.  Unable to differentiate " +
+                                        "metrics: %s",
+                                compositeName));
+                    }
+                    return (M) existingMetric;
+                }
+                // This could throw a IllegalArgumentException.  That would only happen if another
+                // metric was made with our name, but not constructed by the metadata tagger.  This
+                // is super strange and deserves an exception.
+                Metric newMetric = metricRegistry
+                        .register(compositeName, metricBuilder.newMetric());
+                Preconditions.checkArgument(
+                        null == metaDataCollection.put(newMetric, thisMetricsMetadata));
+                return (M) newMetric;
+            }
         }
     }
 
@@ -110,6 +181,34 @@ public class MetricMetadataImpl implements MetricMetadata {
 
         private Metadata() {
             tags = new ConcurrentHashMap<String, String>(6);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof Metadata)) {
+                return false;
+            }
+
+            Metadata metadata = (Metadata) o;
+
+            if (metricType != metadata.metricType) {
+                return false;
+            }
+            if (tags != null ? !tags.equals(metadata.tags) : metadata.tags != null) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = tags != null ? tags.hashCode() : 0;
+            result = 31 * result + (metricType != null ? metricType.hashCode() : 0);
+            return result;
         }
     }
 }

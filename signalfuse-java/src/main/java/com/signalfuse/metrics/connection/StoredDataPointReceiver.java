@@ -83,4 +83,9 @@ public class StoredDataPointReceiver implements DataPointReceiver {
             return vals.get(vals.size() - 1);
         }
     }
+
+    public boolean clearValues(String source, String metric) {
+        Pair<String, String> key = Pair.of(source, metric);
+        return pointsFor.remove(key) != null;
+    }
 }

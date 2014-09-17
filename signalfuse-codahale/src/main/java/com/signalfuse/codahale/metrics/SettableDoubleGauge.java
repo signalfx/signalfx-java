@@ -43,4 +43,21 @@ public class SettableDoubleGauge implements Metric, Gauge<Double> {
     public Double getValue() {
         return value;
     }
+
+
+    public final static class Builder implements MetricBuilder<SettableDoubleGauge> {
+        public static final Builder INSTANCE = new Builder();
+        private Builder() {
+        }
+
+        @Override
+        public SettableDoubleGauge newMetric() {
+            return new SettableDoubleGauge();
+        }
+
+        @Override
+        public boolean isInstance(Metric metric) {
+            return metric instanceof SettableDoubleGauge;
+        }
+    }
 }
