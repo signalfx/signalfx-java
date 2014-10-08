@@ -35,7 +35,7 @@ public class HttpDataPointProtobufReceiverConnection implements DataPointReceive
     private static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
     private static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
     // Do not modify this line.  It is auto replaced to a version number.
-    public static final String VERSION_NUMBER = "0.0.8";
+    public static final String VERSION_NUMBER = "0.0.9";
     static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     private static final Logger log = LoggerFactory
             .getLogger(HttpDataPointProtobufReceiverConnection.class);
