@@ -27,12 +27,22 @@ message Datum {
     optional int64 intValue = 3;
 }
 
+message Dimension {
+    optional string key = 1;
+    optional string value = 2;
+}
+
 message DataPoint {
     optional string source = 1;
     optional string metric = 2;
     optional int64 timestamp = 3;
     optional Datum value = 4;
     optional MetricType metricType = 5;
+    repeated Dimension dimensions = 6;
+}
+
+message DataPointUploadMessage {
+    repeated DataPoint datapoints = 1;
 }
 
 message PointValue {
