@@ -27,11 +27,11 @@ Install from source (Not recommended)
 Setup in maven
 --------------
 
-     <dependency>
-         <groupId>com.signalfuse.public</groupId>
-         <artifactId>signalfuse-codahale</artifactId>
-         <version>0.0.9</version>
-     </dependency>
+    <dependency>
+        <groupId>com.signalfuse.public</groupId>
+        <artifactId>signalfuse-codahale</artifactId>
+        <version>0.0.9</version>
+    </dependency>
 
 
 Setting up Codahale
