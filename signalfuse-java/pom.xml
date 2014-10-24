@@ -6,12 +6,12 @@
   <parent>
     <groupId>com.signalfuse.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11-SNAPSHOT</version>
   </parent>
 
   <artifactId>signalfuse-java</artifactId>
   <name>SignalFuse java libraries</name>
-  <version>0.0.10</version>
+  <version>0.0.11-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
     Bare minimum core library needed to sending metrics to SignalFuse from Java clients
