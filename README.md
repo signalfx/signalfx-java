@@ -1,6 +1,8 @@
 SignalFuse client libraries
 ===========================
 
+[![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
+
 This repository contains libraries for instrumenting applications in a
 variety of languages and reporting these metrics to SignalFuse. You will
 need a SignalFuse account and organization API token to use those. For
@@ -19,38 +21,40 @@ Supported languages
 Install from source (Not recommended)
 -------------------------------------
 
-    git clone https://github.com/signalfx/signalfuse-java.git
-    cd signalfuse-java
-    mvn install
-
+```
+$ git clone https://github.com/signalfx/signalfuse-java.git
+$ cd signalfuse-java
+$ mvn install
+```
 
 Setup in maven
 --------------
 
-    <dependency>
-        <groupId>com.signalfuse.public</groupId>
-        <artifactId>signalfuse-codahale</artifactId>
-        <version>0.0.9</version>
-    </dependency>
-
+```xml
+<dependency>
+  <groupId>com.signalfuse.public</groupId>
+  <artifactId>signalfuse-codahale</artifactId>
+  <version>0.0.10</version>
+</dependency>
+```
 
 Setting up Codahale
 ------------------
 
-    MetricRegistry registry = new MetricRegistry();
-    new SignalFuseReporter.Builder(
-        registry,
-        "SIGNALFUSE_AUTH_TOKEN"
-    ).build().start(1, TimeUnit.SECONDS);
+```java
+MetricRegistry registry = new MetricRegistry();
+new SignalFuseReporter.Builder(
+    registry,
+    "SIGNALFUSE_AUTH_TOKEN"
+).build().start(1, TimeUnit.SECONDS);
+```
 
 After setting up Codahale
 -------------------------
 
-After setting up a SignalFuseReporter, you can use codahale metrics like normal
-and at the set frequency your metrics will be reported to SignalFuse.  More
-information about codahale metrics [on their web page](http://metrics.codahale.com/).
+After setting up a SignalFuseReporter, you can use codahale metrics as
+you normally would, reported at the frequency configured to the
+`SignalFuseReporter`.
 
-Build Status
-------------
-
-[![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
+More information on the Codahale Metrics library can be found on the
+[Codahale Metrics website](https://dropwizard.github.io/metrics/).
