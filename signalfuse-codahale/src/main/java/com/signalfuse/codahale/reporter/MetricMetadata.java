@@ -41,6 +41,7 @@ public interface MetricMetadata {
     public interface TaggerBase<M extends Metric, T extends TaggerBase<M, ?>> {
         T withSourceName(String sourceName);
         T withMetricName(String metricName);
+        T withDimension(String key, String value);
         T withMetricType(SignalFuseProtocolBuffers.MetricType metricType);
     }
 

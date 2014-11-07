@@ -100,6 +100,13 @@ public class AggregateMetricSender {
             return this;
         }
 
+        @Override
+        public Session setDatapoint(SignalFuseProtocolBuffers.DataPoint datapoint) {
+            check(datapoint.getMetric(), datapoint.getMetricType());
+            pointsToFlush.add(datapoint);
+            return this;
+        }
+
         public Session setGauge(String metric, long value) {
             return setGauge(defaultSourceName, metric, value);
         }
@@ -211,5 +218,7 @@ public class AggregateMetricSender {
         Session setDatapoint(String source, String metric, SignalFuseProtocolBuffers.MetricType metricType, long value);
 
         Session setDatapoint(String source, String metric, SignalFuseProtocolBuffers.MetricType metricType, double value);
+
+        Session setDatapoint(SignalFuseProtocolBuffers.DataPoint datapoint);
     }
 }

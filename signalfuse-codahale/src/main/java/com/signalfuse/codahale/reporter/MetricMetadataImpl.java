@@ -66,6 +66,12 @@ public class MetricMetadataImpl implements MetricMetadata {
             implements TaggerBase<M, T>{
         protected final Metadata thisMetricsMetadata;
 
+        @Override
+        public T withDimension(String key, String value) {
+            thisMetricsMetadata.tags.put(key, value);
+            return (T) this;
+        }
+
         TaggerBaseImpl(Metadata thisMetricsMetadata) {
             this.thisMetricsMetadata = thisMetricsMetadata;
         }

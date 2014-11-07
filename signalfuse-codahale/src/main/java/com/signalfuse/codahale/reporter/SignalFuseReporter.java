@@ -56,7 +56,7 @@ public class SignalFuseReporter extends ScheduledReporter {
                        SortedMap<String, Timer> timers) {
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
                 aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
-                aggregateMetricSender.getDefaultSourceName(), hardCounterValueCache);
+                aggregateMetricSender.getDefaultSourceName(), "sf_source");
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
                 session.addMetric(entry.getValue(), entry.getKey(),
@@ -143,6 +143,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         private Set<MetricDetails> detailsToAdd = MetricDetails.ALL;
         private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections.emptyList();
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
+        private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
 
         public Builder(MetricRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
@@ -172,7 +173,8 @@ public class SignalFuseReporter extends ScheduledReporter {
             this.dataPointEndpoint = dataPointEndpoint;
             this.dataPointReceiverFactory =
                     new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
-                            .setTimeoutMs(this.timeoutMs);
+                            .setTimeoutMs(this.timeoutMs)
+                            .setVersion(this.version);
             return this;
         }
 
@@ -185,6 +187,16 @@ public class SignalFuseReporter extends ScheduledReporter {
             this.timeoutMs = timeoutMs;
             this.dataPointReceiverFactory =
                     new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                            .setVersion(this.version)
+                            .setTimeoutMs(this.timeoutMs);
+            return this;
+        }
+
+        public Builder setVersion(int version) {
+            this.version = version;
+            this.dataPointReceiverFactory =
+                    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                            .setVersion(this.version)
                             .setTimeoutMs(this.timeoutMs);
             return this;
         }

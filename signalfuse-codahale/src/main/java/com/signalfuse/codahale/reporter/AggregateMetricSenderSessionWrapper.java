@@ -10,6 +10,7 @@ import com.codahale.metrics.Sampling;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
@@ -19,16 +20,19 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final Set<SignalFuseReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
+    private final String sourceDimension;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
             Set<SignalFuseReporter.MetricDetails> detailsToAdd,
             MetricMetadata metricMetadata,
-            String defaultSourceName, Map<Metric, Long> hardCounterValueCache) {
+            String defaultSourceName,
+            String sourceDimension) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
+        this.sourceDimension = sourceDimension;
     }
 
     public void close() {
@@ -155,14 +159,43 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         Map<String, String> tags = metricMetadata.getTags(metric);
         final String sourceName = Optional.fromNullable(tags.get(MetricMetadata.SOURCE)).or(defaultSourceName);
         final String metricName = Optional.fromNullable(tags.get(MetricMetadata.METRIC)).or(codahaleName) + metricDetailsMetricNameSuffix;
+
+        SignalFuseProtocolBuffers.DataPoint.Builder builder = SignalFuseProtocolBuffers.DataPoint
+                .newBuilder()
+                .setMetric(metricName)
+                .setMetricType(metricType);
+
+        if (!sourceDimension.equals("")) {
+            builder.addDimensions(SignalFuseProtocolBuffers.Dimension.newBuilder()
+                    .setKey(sourceDimension).setValue(sourceName));
+        }
+
+        if (sourceDimension.equals("sf_source")) {
+            builder.setSource(sourceName);
+        }
+
+        ImmutableSet<String> ignoredDimensions = ImmutableSet.of(
+                MetricMetadata.SOURCE, MetricMetadata.METRIC);
+
+        for (Map.Entry<String, String> entry: tags.entrySet()) {
+            if (!ignoredDimensions.contains(entry.getKey())) {
+                builder.addDimensions(SignalFuseProtocolBuffers.Dimension.newBuilder()
+                        .setKey(entry.getKey()).setValue(entry.getValue()));
+            }
+        }
+
         if (value instanceof Long || value instanceof Integer || value instanceof Short) {
-            metricSenderSession.setDatapoint(sourceName, metricName, metricType, value.longValue());
+            builder.setValue(SignalFuseProtocolBuffers.Datum
+                    .newBuilder().setIntValue(value.longValue()));
         } else {
             final double doubleToSend = value.doubleValue();
             if (Double.isInfinite(doubleToSend) || Double.isNaN(doubleToSend)) {
                 return;
             }
-            metricSenderSession.setDatapoint(sourceName, metricName, metricType, value.doubleValue());
+            builder.setValue(SignalFuseProtocolBuffers.Datum.newBuilder()
+                    .setDoubleValue(doubleToSend));
         }
+
+        metricSenderSession.setDatapoint(builder.build());
     }
 }
