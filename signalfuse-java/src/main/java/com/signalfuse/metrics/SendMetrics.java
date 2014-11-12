@@ -39,7 +39,7 @@ public final class SendMetrics {
         int count = 0;
         while (true) {
             System.out.println("Sending data: " + System.currentTimeMillis());
-            Thread.sleep(10);
+            Thread.sleep(25);
             AggregateMetricSender.Session i = mf.createSession();
             try {
                 count += 2;

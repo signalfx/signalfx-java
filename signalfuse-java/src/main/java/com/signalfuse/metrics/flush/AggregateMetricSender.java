@@ -87,7 +87,12 @@ public class AggregateMetricSender {
                                               SignalFuseProtocolBuffers.MetricType metricType,
                                               long value) {
             check(metric, metricType);
-            addDatapoint(source, metric, value);
+            pointsToFlush.add(SignalFuseProtocolBuffers.DataPoint.newBuilder()
+                                      .setSource(source)
+                                      .setMetricType(metricType)
+                                      .setMetric(metric).setValue(
+                            SignalFuseProtocolBuffers.Datum.newBuilder().setIntValue(value).build())
+                                      .build());
             return this;
         }
 
@@ -96,7 +101,12 @@ public class AggregateMetricSender {
                                               SignalFuseProtocolBuffers.MetricType metricType,
                                               double value) {
             check(metric, metricType);
-            addDatapoint(source, metric, value);
+            pointsToFlush.add(SignalFuseProtocolBuffers.DataPoint.newBuilder()
+                                      .setSource(source)
+                                      .setMetricType(metricType)
+                                      .setMetric(metric).setValue(
+                            SignalFuseProtocolBuffers.Datum.newBuilder().setDoubleValue(value).build())
+                                      .build());
             return this;
         }
 
@@ -123,21 +133,6 @@ public class AggregateMetricSender {
         public Session setGauge(String source, String metric, double value) {
             setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.GAUGE, value);
             return this;
-        }
-
-        private void addDatapoint(String source, String metric, double value) {
-            pointsToFlush.add(SignalFuseProtocolBuffers.DataPoint.newBuilder().setSource(source)
-                    .setMetric(metric).setValue(
-                            SignalFuseProtocolBuffers.Datum.newBuilder().setDoubleValue(value)
-                                    .build())
-                    .build());
-        }
-
-        private void addDatapoint(String source, String metric, long value) {
-            pointsToFlush.add(SignalFuseProtocolBuffers.DataPoint.newBuilder().setSource(source)
-                    .setMetric(metric).setValue(
-                            SignalFuseProtocolBuffers.Datum.newBuilder().setIntValue(value).build())
-                    .build());
         }
 
         private void check(String metricPair,
