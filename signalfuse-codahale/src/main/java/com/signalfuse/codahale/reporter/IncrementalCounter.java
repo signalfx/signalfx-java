@@ -40,7 +40,7 @@ public class IncrementalCounter extends Counter {
      *
      * @return Counter difference
      */
-    synchronized long getCountChange() {
+    public synchronized long getCountChange() {
         final long currentCount = getCount();
         final long countChange = currentCount - lastValue;
         lastValue = currentCount;
