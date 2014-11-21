@@ -34,7 +34,7 @@ Setup in maven
 <dependency>
   <groupId>com.signalfuse.public</groupId>
   <artifactId>signalfuse-codahale</artifactId>
-  <version>0.0.10</version>
+  <version>0.0.12</version>
 </dependency>
 ```
 
@@ -58,3 +58,8 @@ you normally would, reported at the frequency configured to the
 
 More information on the Codahale Metrics library can be found on the
 [Codahale Metrics website](https://dropwizard.github.io/metrics/).
+
+Build status
+------------
+
+[![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
