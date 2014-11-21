@@ -46,10 +46,10 @@ public class HttpDataPointProtobufReceiverConnectionTest {
                 error("Invalid User agent: " + request.getHeader("User-Agent"), response, baseRequest);
                 return;
             }
-            SignalFuseProtocolBuffers.DataPoint first_datapoint =
-                    SignalFuseProtocolBuffers.DataPoint
-                            .parseDelimitedFrom(baseRequest.getInputStream());
-            if (!first_datapoint.getSource().equals("source")) {
+            SignalFuseProtocolBuffers.DataPointUploadMessage all_datapoints =
+                    SignalFuseProtocolBuffers.DataPointUploadMessage.parseFrom(
+                            baseRequest.getInputStream());
+            if (!all_datapoints.getDatapoints(0).getSource().equals("source")) {
                 error("Invalid datapoint source", response, baseRequest);
                 return;
             }
