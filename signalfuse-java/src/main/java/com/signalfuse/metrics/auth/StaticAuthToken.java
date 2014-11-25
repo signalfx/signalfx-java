@@ -1,7 +1,7 @@
 package com.signalfuse.metrics.auth;
 
 /**
- * Uses a static auth token
+ * Uses a static auth token passed as a string
  * 
  * @author jack
  */

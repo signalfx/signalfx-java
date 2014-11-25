@@ -19,6 +19,30 @@ import com.signalfuse.metrics.errorhandler.MetricErrorType;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
+/**
+ * The primary java class to send metrics.  To use this class, create a session, add points to
+ * the session, and when you are done, close the session.  For example:
+ *
+ * <pre>
+ * {@code
+ *  AggregateMetricSender sender;
+ *     try (AggregateMetricSender.Session i = mf.createSession()) {
+ *         i.incrementCounter("testcounter2", 1);
+ *         i.setDatapoint(
+ *            SignalFuseProtocolBuffers.DataPoint.newBuilder()
+ *              .setMetric("curtime")
+ *              .setValue(
+ *                SignalFuseProtocolBuffers.Datum.newBuilder()
+ *                .setIntValue(System.currentTimeMillis()))
+ *              .addDimensions(
+ *                SignalFuseProtocolBuffers.Dimension.newBuilder()
+ *                  .setKey("source")
+ *                  .setValue("java"))
+ *              .build());
+ *     }
+ * }
+ * </pre>
+ */
 public class AggregateMetricSender {
     private final String defaultSourceName;
     private final Set<String> registeredMetricPairs;

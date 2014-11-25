@@ -43,9 +43,9 @@ public final class SendMetrics {
             AggregateMetricSender.Session i = mf.createSession();
             try {
                 count += 2;
-                i.incrementCounter("testcounter2", 1);
-                i.setCumulativeCounter("cumulativeCounter", count);
-                i.setGauge("testgauge2", System.currentTimeMillis());
+//                i.incrementCounter("testcounter2", 1);
+//                i.setCumulativeCounter("cumulativeCounter", count);
+//                i.setGauge("testgauge2", System.currentTimeMillis());
                 i.setDatapoint(
                         SignalFuseProtocolBuffers.DataPoint.newBuilder()
                                 .setMetric("curtime")

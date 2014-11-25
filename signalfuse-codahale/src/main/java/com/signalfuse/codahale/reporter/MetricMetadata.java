@@ -39,9 +39,32 @@ public interface MetricMetadata {
     public <M extends Metric> BuilderTagger<M> forBuilder(MetricBuilder<M> metricBuilder);
 
     public interface TaggerBase<M extends Metric, T extends TaggerBase<M, ?>> {
+        /**
+         * @Deprecated
+         */
         T withSourceName(String sourceName);
+
+        /**
+         * Changes the metric name of this metric from the default (which is the codahale metric
+         * name), to another string
+         * @param metricName    The new name in SignalFuse of this metric
+         * @return this
+         */
         T withMetricName(String metricName);
+
+        /**
+         * Adds a dimension to this metric
+         * @param key      The dimension key to add
+         * @param value    The dimensino value to add
+         * @return this
+         */
         T withDimension(String key, String value);
+
+        /**
+         * Changes the default metric type of this metric to the SignalFuse metric type passed in
+         * @param metricType    The new metric type of this metric
+         * @return this
+         */
         T withMetricType(SignalFuseProtocolBuffers.MetricType metricType);
     }
 
@@ -53,6 +76,11 @@ public interface MetricMetadata {
          * @return The new metric
          */
         M register(MetricRegistry metricRegistry);
+
+        /**
+         * Returns the tagged metric
+         * @return the tagged metric
+         */
         M metric();
     }
 
