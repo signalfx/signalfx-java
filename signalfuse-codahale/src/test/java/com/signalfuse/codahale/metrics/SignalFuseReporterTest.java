@@ -1,13 +1,6 @@
 package com.signalfuse.codahale.metrics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-
 import org.junit.Test;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
@@ -21,6 +14,9 @@ import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.StaticDataPointReceiverFactory;
 import com.signalfuse.metrics.connection.StoredDataPointReceiver;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class SignalFuseReporterTest {
     @Test
@@ -79,18 +75,8 @@ public class SignalFuseReporterTest {
                 return i++;
             }
         });
-
-        final Queue customerQueue = new ArrayBlockingQueue();
-        metricMetadata.forMetric(new Gauge<Long>() {
-            @Override
-            public Long getValue() {
-                return customerQueue.size();
-            }
-        }).withDimension("queue_name", "customer_backlog")
-                .register(metricRegistery);
         Counter distributedCounter = metricMetadata
                 .forMetric(new IncrementalCounter())
-                .withDimension("queue_name", "customer_backlog")
                 .withMetricName("user_login.hits")
                 .withSourceName("webpage")
                 .register(metricRegistery);
