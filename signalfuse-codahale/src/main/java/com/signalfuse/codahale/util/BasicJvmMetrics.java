@@ -87,7 +87,7 @@ public class BasicJvmMetrics {
     /**
      * Construct the basic JVM metrics using a supplied SignalFuse MetricFactory.
      *
-     * @param metricRegistry
+     * @param metricRegistry The registry to give these metrics to
      */
     public BasicJvmMetrics(MetricRegistry metricRegistry) {
 

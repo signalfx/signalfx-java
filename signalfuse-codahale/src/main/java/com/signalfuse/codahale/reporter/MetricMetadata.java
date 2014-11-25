@@ -40,7 +40,11 @@ public interface MetricMetadata {
 
     public interface TaggerBase<M extends Metric, T extends TaggerBase<M, ?>> {
         /**
-         * @Deprecated
+         *  Tag the metric with a sf_source
+         * @param sourceName    Source name for the sf_source
+         * @return this
+         * @deprecated The use of the build in source parameter is deprecated and discouraged.  Use
+         *             {@link #withDimension(String, String)} instead.
          */
         T withSourceName(String sourceName);
 
