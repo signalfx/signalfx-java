@@ -30,8 +30,29 @@ signalfuse-java will support this.
 
 ```
 $ git clone https://github.com/signalfx/signalfuse-java.git
+Cloning into 'signalfuse-java'...
+remote: Counting objects: 930, done.
+remote: Compressing objects: 100% (67/67), done.
+remote: Total 930 (delta 20), reused 0 (delta 0)
+Receiving objects: 100% (930/930), 146.79 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (289/289), done.
+Checking connectivity... done.
 $ cd signalfuse-java
 $ mvn install
+[INFO] Scanning for projects...
+...
+...
+...
+[INFO] SignalFuse parent .................................. SUCCESS [  2.483 s]
+[INFO] SignalFuse Protocol Buffer definitions ............. SUCCESS [  5.503 s]
+[INFO] SignalFuse Protobuf Utilities ...................... SUCCESS [  2.269 s]
+[INFO] SignalFuse java libraries .......................... SUCCESS [  3.728 s]
+[INFO] Codahale to SignalFuse ............................. SUCCESS [  2.910 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 17.120 s
+[INFO] ------------------------------------------------------------------------
 ```
 
 ## Sending metrics
@@ -63,10 +84,13 @@ new SignalFuseReporter.Builder(
         });
 ```
 
-#### Adding SignalFuse metadata to Codahale metrics
+#### Adding Dimensions and SignalFuse metadata to Codahale metrics
 
 You can add SignalFuse specific metadata to codahale metrics by using
-the MetricMetadata of the reporter.
+the MetricMetadata of the reporter.  When you use MetricMetadata, rather
+than register your metric directly with the metricRegistry, you should
+call the .register() method you get from the call forMetric().  This will
+construct a unique codahale string for your metric.
 
 ```java
 // This will send the size of a queue as a gauge, tagging the queue
