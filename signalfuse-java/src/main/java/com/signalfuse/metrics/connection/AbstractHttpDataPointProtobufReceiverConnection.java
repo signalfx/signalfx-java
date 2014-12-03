@@ -25,7 +25,7 @@ import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public abstract class AbstractHttpDataPointProtobufReceiverConnection implements DataPointReceiver {
     // Do not modify this line.  It is auto replaced to a version number.
-    public static final String VERSION_NUMBER = "0.0.11-SNAPSHOT";
+    public static final String VERSION_NUMBER = "0.0.13";
     static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     protected static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
     protected static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
