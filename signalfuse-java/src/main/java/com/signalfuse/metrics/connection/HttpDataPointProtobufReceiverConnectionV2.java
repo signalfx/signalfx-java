@@ -1,20 +1,23 @@
 package com.signalfuse.metrics.connection;
 
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ByteArrayEntity;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.entity.ByteArrayEntity;
+
+import com.signalfuse.metrics.SignalfuseMetricsException;
+import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
+import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+
 public class HttpDataPointProtobufReceiverConnectionV2
         extends AbstractHttpDataPointProtobufReceiverConnection {
     public HttpDataPointProtobufReceiverConnectionV2(
-            DataPointReceiverEndpoint dataPointEndpoint, int timeoutMs) {
-        super(dataPointEndpoint, timeoutMs);
+            DataPointReceiverEndpoint dataPointEndpoint, int timeoutMs,
+            HttpClientConnectionManager httpClientConnectionManager) {
+        super(dataPointEndpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override

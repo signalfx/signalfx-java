@@ -1,9 +1,8 @@
 package com.signalfuse.metrics.connection;
 
-import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -11,6 +10,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -18,8 +18,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
+import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
+import com.signalfuse.metrics.SignalfuseMetricsException;
+import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
+import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public abstract class AbstractHttpDataPointProtobufReceiverConnection implements DataPointReceiver {
     // Do not modify this line.  It is auto replaced to a version number.
@@ -29,13 +31,16 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection implements
     protected static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
     private static final Logger log = LoggerFactory
             .getLogger(AbstractHttpDataPointProtobufReceiverConnection.class);
-    private final CloseableHttpClient client = HttpClientBuilder.create().build();
+    private final CloseableHttpClient client;
     private final HttpHost host;
     private final RequestConfig requestConfig;
 
     public AbstractHttpDataPointProtobufReceiverConnection(
             DataPointReceiverEndpoint dataPointEndpoint,
-            int timeoutMs) {
+            int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
+        this.client = HttpClientBuilder.create()
+                .setConnectionManager(httpClientConnectionManager)
+                .build();
         this.host = new HttpHost(dataPointEndpoint.getHostname(), dataPointEndpoint.getPort(),
                 dataPointEndpoint.getScheme());
         this.requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs)

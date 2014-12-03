@@ -1,5 +1,8 @@
 package com.signalfuse.metrics.connection;
 
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 
@@ -8,6 +11,8 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     public static final int DEFAULT_VERSION = 2;
 
     private final DataPointReceiverEndpoint dataPointEndpoint;
+    private HttpClientConnectionManager httpClientConnectionManager =
+            new BasicHttpClientConnectionManager();
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
 
@@ -25,13 +30,18 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
         return this;
     }
 
+    public void setHttpClientConnectionManager(
+            HttpClientConnectionManager httpClientConnectionManager) {
+        this.httpClientConnectionManager = httpClientConnectionManager;
+    }
+
     @Override
     public DataPointReceiver createDataPointReceiver() throws
             SignalfuseMetricsException {
         if (version == 1) {
-            return new HttpDataPointProtobufReceiverConnection(dataPointEndpoint, this.timeoutMs);
+            return new HttpDataPointProtobufReceiverConnection(dataPointEndpoint, this.timeoutMs, httpClientConnectionManager);
         } else {
-            return new HttpDataPointProtobufReceiverConnectionV2(dataPointEndpoint, this.timeoutMs);
+            return new HttpDataPointProtobufReceiverConnectionV2(dataPointEndpoint, this.timeoutMs, httpClientConnectionManager);
         }
 
     }

@@ -1,5 +1,19 @@
 package com.signalfuse.metrics.connection;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.InputStreamEntity;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,24 +22,13 @@ import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.InputStreamEntity;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class HttpDataPointProtobufReceiverConnection
         extends AbstractHttpDataPointProtobufReceiverConnection {
     public HttpDataPointProtobufReceiverConnection(
-            DataPointReceiverEndpoint dataPointEndpoint, int timeoutMs) {
-        super(dataPointEndpoint, timeoutMs);
+            DataPointReceiverEndpoint dataPointEndpoint, int timeoutMs,
+            HttpClientConnectionManager httpClientConnectionManager) {
+        super(dataPointEndpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override
