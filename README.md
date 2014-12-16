@@ -105,6 +105,35 @@ construct a unique codahale string for your metric.
                 .register(metricRegistery);
 ```
 
+#### Adding Dimensions without knowing if they already exist
+
+It is recommended to create your Codahale object as a counter
+or gauge as a field of your class then use that field to increment
+values, but if you don't want to maintain this for code cleanlyness
+you can create it on the fly with our builders.  For example, if you
+wanted a timer with the dimension of the store it is from you could
+use code like this.
+
+```java
+        Timer t = metricMetadata.forBuilder(MetricBuilder.TIMERS)
+                .withMetricName("request_time")
+                .withDimension("storename", "electronics")
+                .createOrGet(metricRegistery);
+
+        Timer.Context c = t.time();
+        try {
+            System.out.println("Doing store things");
+        } finally {
+            c.close();
+        }
+
+        // Java 7 alternative:
+//        try (Timer.Context ignored = t.time()) {
+//            System.out.println("Doing store things");
+//        }
+
+```
+
 #### After setting up Codahale
 
 After setting up a SignalFuseReporter, you can use codahale metrics as

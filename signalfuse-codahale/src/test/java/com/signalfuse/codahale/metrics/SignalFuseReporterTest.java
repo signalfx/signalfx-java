@@ -1,10 +1,15 @@
 package com.signalfuse.codahale.metrics;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
 import com.signalfuse.codahale.reporter.IncrementalCounter;
 import com.signalfuse.codahale.reporter.MetricMetadata;
@@ -14,9 +19,6 @@ import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.StaticDataPointReceiverFactory;
 import com.signalfuse.metrics.connection.StoredDataPointReceiver;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class SignalFuseReporterTest {
     @Test
@@ -156,5 +158,20 @@ public class SignalFuseReporterTest {
         } catch (IllegalArgumentException e) {
             // Expected
         }
+
+        Timer t = metricMetadata.forBuilder(MetricBuilder.TIMERS)
+                .withMetricName("request_time")
+                .withDimension("storename", "electronics")
+                .createOrGet(metricRegistery);
+        Timer.Context c = t.time();
+        try {
+            System.out.println("Doing store things");
+        } finally {
+            c.close();
+        }
+        // Java 7 alternative:
+//        try (Timer.Context ignored = t.time()) {
+//            System.out.println("Doing store things");
+//        }
     }
 }
