@@ -109,7 +109,7 @@ construct a unique codahale string for your metric.
 
 It is recommended to create your Codahale object as a counter
 or gauge as a field of your class then use that field to increment
-values, but if you don't want to maintain this for code cleanlyness
+values, but if you don't want to maintain this for code cleanliness 
 you can create it on the fly with our builders.  For example, if you
 wanted a timer with the dimension of the store it is from you could
 use code like this.
