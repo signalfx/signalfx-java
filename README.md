@@ -66,11 +66,13 @@ More information on the Codahale Metrics library can be found on the
 #### Setting up Codahale
 
 ```java
-MetricRegistry registry = new MetricRegistry();
-new SignalFuseReporter.Builder(
-    registry,
+final MetricRegistry metricRegistery = new MetricRegistry();
+final SignalFuseReporter signalfuseReporter = new SignalFuseReporter.Builder(
+    metricRegistery,
     "SIGNALFUSE_AUTH_TOKEN"
-).build().start(1, TimeUnit.SECONDS);
+).build();
+signalfuseReporter.start(1, TimeUnit.SECONDS);
+final MetricMetadata metricMetadata = signalfuseReporter.getMetricMetadata();
 ```
 
 #### Sending a metric with Codahale
@@ -109,7 +111,7 @@ construct a unique codahale string for your metric.
 
 It is recommended to create your Codahale object as a counter
 or gauge as a field of your class then use that field to increment
-values, but if you don't want to maintain this for code cleanliness 
+values, but if you don't want to maintain this for code cleanliness
 you can create it on the fly with our builders.  For example, if you
 wanted a timer with the dimension of the store it is from you could
 use code like this.
