@@ -17,12 +17,13 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
+import com.signalfuse.endpoint.SignalFuseEndpoint;
+import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
 import com.signalfuse.metrics.SourceNameHelper;
 import com.signalfuse.metrics.auth.AuthToken;
 import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.DataPointReceiverFactory;
 import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
-import com.signalfuse.metrics.endpoint.DataPointEndpoint;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
@@ -132,11 +133,11 @@ public class SignalFuseReporter extends ScheduledReporter {
         private final MetricRegistry registry;
         private String defaultSourceName;
         private AuthToken authToken;
-        private DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
+        private SignalFuseReceiverEndpoint endpoint = new SignalFuseEndpoint();
         private String name = "signalfuse-reporter";
         private int timeoutMs = HttpDataPointProtobufReceiverFactory.DEFAULT_TIMEOUT_MS;
         private DataPointReceiverFactory dataPointReceiverFactory = new
-                HttpDataPointProtobufReceiverFactory(dataPointEndpoint);
+                HttpDataPointProtobufReceiverFactory(endpoint);
         private MetricFilter filter = MetricFilter.ALL;
         private TimeUnit rateUnit = TimeUnit.SECONDS;
         private TimeUnit durationUnit = TimeUnit.MILLISECONDS; // Maybe nano eventually?
@@ -169,13 +170,18 @@ public class SignalFuseReporter extends ScheduledReporter {
             return this;
         }
 
-        public Builder setDataPointEndpoint(DataPointReceiverEndpoint dataPointEndpoint) {
-            this.dataPointEndpoint = dataPointEndpoint;
+        public Builder setEndpoint(SignalFuseReceiverEndpoint endpoint) {
+            this.endpoint = endpoint;
             this.dataPointReceiverFactory =
-                    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                    new HttpDataPointProtobufReceiverFactory(endpoint)
                             .setTimeoutMs(this.timeoutMs)
                             .setVersion(this.version);
             return this;
+        }
+
+        @Deprecated
+        public Builder setDataPointEndpoint(DataPointReceiverEndpoint dataPointEndpoint) {
+            return setEndpoint(dataPointEndpoint);
         }
 
         public Builder setName(String name) {
@@ -186,7 +192,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         public Builder setTimeoutMs(int timeoutMs) {
             this.timeoutMs = timeoutMs;
             this.dataPointReceiverFactory =
-                    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                    new HttpDataPointProtobufReceiverFactory(endpoint)
                             .setVersion(this.version)
                             .setTimeoutMs(this.timeoutMs);
             return this;
@@ -195,7 +201,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         public Builder setVersion(int version) {
             this.version = version;
             this.dataPointReceiverFactory =
-                    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint)
+                    new HttpDataPointProtobufReceiverFactory(endpoint)
                             .setVersion(this.version)
                             .setTimeoutMs(this.timeoutMs);
             return this;

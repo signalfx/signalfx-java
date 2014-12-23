@@ -8,16 +8,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity;
 
+import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
 import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionV2
         extends AbstractHttpDataPointProtobufReceiverConnection {
     public HttpDataPointProtobufReceiverConnectionV2(
-            DataPointReceiverEndpoint dataPointEndpoint, int timeoutMs,
+            SignalFuseReceiverEndpoint endpoint, int timeoutMs,
             HttpClientConnectionManager httpClientConnectionManager) {
-        super(dataPointEndpoint, timeoutMs, httpClientConnectionManager);
+        super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class HttpDataPointProtobufReceiverConnectionV2
                 .addAllDatapoints(dataPoints).build().toByteArray();
         return new ByteArrayEntity(bodyBytes, PROTO_TYPE);
     }
-    
+
     @Override
     public Map<String, Boolean> registerMetrics(String auth,
                                                 Map<String, SignalFuseProtocolBuffers.MetricType> metricTypes)

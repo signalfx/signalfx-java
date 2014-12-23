@@ -19,16 +19,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
+import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
 import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnection
         extends AbstractHttpDataPointProtobufReceiverConnection {
     public HttpDataPointProtobufReceiverConnection(
-            DataPointReceiverEndpoint dataPointEndpoint, int timeoutMs,
+            SignalFuseReceiverEndpoint endpoint, int timeoutMs,
             HttpClientConnectionManager httpClientConnectionManager) {
-        super(dataPointEndpoint, timeoutMs, httpClientConnectionManager);
+        super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override
@@ -38,6 +38,7 @@ public class HttpDataPointProtobufReceiverConnection
                         dataPoints.iterator()), PROTO_TYPE);
     }
 
+    @Override
     protected String getEndpointForAddDatapoints() {
         return "/v1/datapoint";
     }
@@ -64,7 +65,7 @@ public class HttpDataPointProtobufReceiverConnection
 
         final byte[] map_as_json;
         try {
-            map_as_json = new ObjectMapper().writeValueAsBytes(postBodyList);
+            map_as_json = MAPPER.writeValueAsBytes(postBodyList);
         } catch (JsonProcessingException e) {
             throw new SignalfuseMetricsException("Unable to write protocol buffer", e);
         }

@@ -1,13 +1,14 @@
 package com.signalfuse.metrics.endpoint;
 
+import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+
+
 /**
- * Date: 5/6/14
- * Time: 4:21 PM
+ * @deprecated use {@link SignalFuseReceiverEndpoint}
+ * @author tedo
  *
- * @author jack
  */
-public interface DataPointReceiverEndpoint {
-    String getScheme();
-    String getHostname();
-    int getPort();
+@Deprecated
+public interface DataPointReceiverEndpoint extends SignalFuseReceiverEndpoint{
+
 }

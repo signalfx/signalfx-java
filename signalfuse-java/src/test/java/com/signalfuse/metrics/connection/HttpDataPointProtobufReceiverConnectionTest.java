@@ -12,7 +12,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.signalfuse.metrics.endpoint.DataPointEndpoint;
+import com.signalfuse.connection.AbstractHttpReceiverConnection;
+import com.signalfuse.endpoint.SignalFuseEndpoint;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
@@ -27,7 +28,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
         server.start();
         final int port = server.getConnectors()[0].getLocalPort();
         DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
-                new DataPointEndpoint("http", "localhost", port)).createDataPointReceiver();
+                new SignalFuseEndpoint("http", "localhost", port)).createDataPointReceiver();
         dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
                 SignalFuseProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
         server.stop();
@@ -42,7 +43,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
                 return;
             }
             if (!request.getHeader("User-Agent")
-                    .equals(HttpDataPointProtobufReceiverConnection.USER_AGENT)) {
+                    .equals(AbstractHttpReceiverConnection.USER_AGENT)) {
                 error("Invalid User agent: " + request.getHeader("User-Agent"), response, baseRequest);
                 return;
             }

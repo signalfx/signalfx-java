@@ -5,10 +5,10 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Properties;
 
+import com.signalfuse.endpoint.SignalFuseEndpoint;
+import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
 import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
-import com.signalfuse.metrics.endpoint.DataPointEndpoint;
-import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
@@ -24,14 +24,14 @@ public final class SendMetrics {
         final String hostUrlStr = prop.getProperty("host");
         final URL hostUrl = new URL(hostUrlStr);
         System.out.println("Auth=" + auth_token + " .. host=" + hostUrl);
-        DataPointReceiverEndpoint dataPointEndpoint =
-                new DataPointEndpoint(hostUrl.getProtocol(),
+        SignalFuseReceiverEndpoint endpoint =
+                new SignalFuseEndpoint(hostUrl.getProtocol(),
                                       hostUrl.getHost(),
                                       hostUrl.getPort());
         AggregateMetricSender mf =
                 new AggregateMetricSender("test.SendMetrics",
                                           new HttpDataPointProtobufReceiverFactory(
-                                                  dataPointEndpoint)
+                                                  endpoint)
                                                   .setVersion(2),
                                           new StaticAuthToken(auth_token),
                                           Collections.<OnSendErrorHandler>emptyList());
