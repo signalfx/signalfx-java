@@ -38,14 +38,24 @@ public class SignalFuseReporter extends ScheduledReporter {
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final Map<Metric, Long> hardCounterValueCache;
+    private final boolean useLocalTime;
 
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
                                  AggregateMetricSender aggregateMetricSender,
                                  Set<MetricDetails> detailsToAdd,
                                  MetricMetadata metricMetadata) {
+        this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd, metricMetadata, false);
+    }
+
+    public SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
+                              TimeUnit rateUnit, TimeUnit durationUnit,
+                              AggregateMetricSender aggregateMetricSender,
+                              Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
+                              boolean useLocalTime) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
+        this.useLocalTime = useLocalTime;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.hardCounterValueCache = new HashMap<Metric, Long>();
@@ -145,6 +155,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections.emptyList();
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
+        private boolean useLocalTime = false;
 
         public Builder(MetricRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
@@ -244,11 +255,21 @@ public class SignalFuseReporter extends ScheduledReporter {
             return this;
         }
 
+        /**
+         * Will use the local system time, rather than zero, on sent datapoints.
+         * @param useLocalTime    If true, use local system time
+         * @return this
+         */
+        public Builder useLocalTime(boolean useLocalTime) {
+            this.useLocalTime = useLocalTime;
+            return this;
+        }
+
         public SignalFuseReporter build() {
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
                     defaultSourceName, dataPointReceiverFactory, authToken, onSendErrorHandlerCollection);
             return new SignalFuseReporter(registry, name, filter, rateUnit, durationUnit,
-                    aggregateMetricSender, detailsToAdd, metricMetadata);
+                    aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime);
         }
     }
 }

@@ -21,6 +21,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
     private final String sourceDimension;
+    private final boolean injectCurrentTimestamp;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -28,11 +29,22 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension) {
+        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension, false);
+    }
+
+    AggregateMetricSenderSessionWrapper(
+            AggregateMetricSender.Session metricSenderSession,
+            Set<SignalFuseReporter.MetricDetails> detailsToAdd,
+            MetricMetadata metricMetadata,
+            String defaultSourceName,
+            String sourceDimension,
+            boolean injectCurrentTimestamp) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
+        this.injectCurrentTimestamp = injectCurrentTimestamp;
     }
 
     public void close() {
@@ -182,6 +194,11 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 builder.addDimensions(SignalFuseProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
+        }
+
+        if (injectCurrentTimestamp) {
+            final long currentTimestamp = System.currentTimeMillis();
+            builder.setTimestamp(currentTimestamp);
         }
 
         if (value instanceof Long || value instanceof Integer || value instanceof Short) {
