@@ -30,7 +30,7 @@ for dir in stdout.strip().split("\n"):
     (stdout, _, code) = execute(["mvn", "versions:set", 'versions:update-child-modules', '-DnewVersion=%s' % version], expected_code=0)
     os.chdir(base_dir)
 
-files_to_change = ['signalfuse-java/src/main/java/com/signalfuse/connection/AbstractHttpReceiverConnection.java ']
+files_to_change = ['signalfuse-java/src/main/java/com/signalfuse/connection/AbstractHttpReceiverConnection.java']
 for file_name in files_to_change:
     file_name = os.path.join(os.getcwd(), file_name)
     with open(file_name, 'r') as file:
