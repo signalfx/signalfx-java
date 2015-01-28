@@ -210,7 +210,7 @@ public class BasicJvmMetrics {
         }
     }
 
-    private class GcCountCallback implements Gauge<Long> {
+    private static class GcCountCallback implements Gauge<Long> {
         final private List<GarbageCollectorMXBean> gcBeans;
 
         private GcCountCallback(List<GarbageCollectorMXBean> gcBeans) {
@@ -231,7 +231,7 @@ public class BasicJvmMetrics {
     }
 
     private abstract class LoadCallback<T> implements Gauge<Double> {
-        private final int PERCENT = 100;
+        private static final int PERCENT = 100;
 
         private long previousTime;
         private double previousValue;

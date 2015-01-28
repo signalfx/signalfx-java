@@ -3,16 +3,15 @@ package com.signalfuse.codahale.reporter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
@@ -37,7 +36,6 @@ public class SignalFuseReporter extends ScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
-    private final Map<Metric, Long> hardCounterValueCache;
     private final boolean useLocalTime;
 
     protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
@@ -58,7 +56,6 @@ public class SignalFuseReporter extends ScheduledReporter {
         this.useLocalTime = useLocalTime;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
-        this.hardCounterValueCache = new HashMap<Metric, Long>();
     }
 
     @Override
@@ -67,7 +64,7 @@ public class SignalFuseReporter extends ScheduledReporter {
                        SortedMap<String, Timer> timers) {
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
                 aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
-                aggregateMetricSender.getDefaultSourceName(), "sf_source");
+                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime);
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
                 session.addMetric(entry.getValue(), entry.getKey(),
