@@ -16,6 +16,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
+import com.google.common.collect.ImmutableSet;
 import com.signalfuse.endpoint.SignalFuseEndpoint;
 import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
 import com.signalfuse.metrics.SourceNameHelper;
@@ -125,6 +126,8 @@ public class SignalFuseReporter extends ScheduledReporter {
         RATE_5_MIN("rate.5min"),
         RATE_15_MIN("rate.15min");
         public static final Set<MetricDetails> ALL = Collections.unmodifiableSet(EnumSet.allOf(MetricDetails.class));
+        public static final Set<MetricDetails> DEFAULTS = ImmutableSet.of(COUNT, MIN, MEAN, MAX);
+
         private final String description;
 
         MetricDetails(String description) {
@@ -148,7 +151,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         private MetricFilter filter = MetricFilter.ALL;
         private TimeUnit rateUnit = TimeUnit.SECONDS;
         private TimeUnit durationUnit = TimeUnit.MILLISECONDS; // Maybe nano eventually?
-        private Set<MetricDetails> detailsToAdd = MetricDetails.ALL;
+        private Set<MetricDetails> detailsToAdd = MetricDetails.DEFAULTS;
         private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections.emptyList();
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
