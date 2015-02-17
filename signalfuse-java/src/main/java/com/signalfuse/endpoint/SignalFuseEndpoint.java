@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SignalFuseEndpoint implements SignalFuseReceiverEndpoint {
     public static final String DEFAULT_SCHEME = "https";
-    public static final String DEFAULT_HOSTNAME = "api.signalfuse.com";
+    public static final String DEFAULT_HOSTNAME = "ingest.signalfx.com";
     public static final int DEFAULT_PORT = 443;
     private static final Logger log = LoggerFactory.getLogger(SignalFuseEndpoint.class);
     

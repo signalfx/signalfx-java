@@ -44,7 +44,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
             }
             if (!request.getHeader("User-Agent")
                     .equals(AbstractHttpReceiverConnection.USER_AGENT)) {
-                error("Invalid User agent: " + request.getHeader("User-Agent"), response, baseRequest);
+                error("Invalid User agent: " + request.getHeader("User-Agent") + " vs " + AbstractHttpReceiverConnection.USER_AGENT, response, baseRequest);
                 return;
             }
             SignalFuseProtocolBuffers.DataPointUploadMessage all_datapoints =
