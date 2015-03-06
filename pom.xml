@@ -12,7 +12,7 @@
   <groupId>com.signalfuse.public</groupId>
   <artifactId>clients-parent</artifactId>
   <name>SignalFuse parent</name>
-  <version>0.0.19</version>
+  <version>0.0.20-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>
@@ -100,22 +100,22 @@
       <dependency>
         <groupId>com.signalfuse.public</groupId>
         <artifactId>signalfuse-protoc</artifactId>
-        <version>0.0.19</version>
+        <version>0.0.20-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>com.signalfuse.public</groupId>
         <artifactId>signalfuse-codahale</artifactId>
-        <version>0.0.19</version>
+        <version>0.0.20-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>com.signalfuse.public</groupId>
         <artifactId>signalfuse-commons-protoc-java</artifactId>
-        <version>0.0.19</version>
+        <version>0.0.20-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>com.signalfuse.public</groupId>
         <artifactId>signalfuse-java</artifactId>
-        <version>0.0.19</version>
+        <version>0.0.20-SNAPSHOT</version>
       </dependency>
 
       <!-- ********************** -->

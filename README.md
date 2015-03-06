@@ -22,7 +22,7 @@ signalfuse-java will support this.
 <dependency>
   <groupId>com.signalfuse.public</groupId>
   <artifactId>signalfuse-codahale</artifactId>
-  <version>0.0.18</version>
+  <version>0.0.19</version>
 </dependency>
 ```
 
