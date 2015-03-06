@@ -47,6 +47,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         this.injectCurrentTimestamp = injectCurrentTimestamp;
     }
 
+    @Override
     public void close() {
         try {
             metricSenderSession.close();
@@ -177,13 +178,9 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 .setMetric(metricName)
                 .setMetricType(metricType);
 
-        if (!sourceDimension.equals("")) {
+        if (!sourceDimension.equals("") && !tags.containsKey(sourceDimension)) {
             builder.addDimensions(SignalFuseProtocolBuffers.Dimension.newBuilder()
                     .setKey(sourceDimension).setValue(sourceName));
-        }
-
-        if (sourceDimension.equals("sf_source")) {
-            builder.setSource(sourceName);
         }
 
         ImmutableSet<String> ignoredDimensions = ImmutableSet.of(
