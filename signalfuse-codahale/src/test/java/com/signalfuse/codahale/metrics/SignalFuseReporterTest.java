@@ -34,6 +34,7 @@ public class SignalFuseReporterTest {
                 .build();
 
         Metric gauge = metricRegistery.register("gauge", new Gauge<Integer>() {
+            @Override
             public Integer getValue() {
                 return 1;
             }
@@ -55,7 +56,8 @@ public class SignalFuseReporterTest {
 
         assertEquals(6, dbank.addDataPoints.size());
         assertEquals("newname", dbank.addDataPoints.get(1).getMetric());
-        assertEquals("newsource", dbank.addDataPoints.get(1).getSource());
+        assertEquals("newsource", dbank.addDataPoints.get(1).getDimensions(0).getValue());
+        assertEquals("sf_source", dbank.addDataPoints.get(1).getDimensions(0).getKey());
         assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
                 "newname"));
         assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get(

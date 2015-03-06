@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.Dimension;
 
 /**
  * Factory that just stores results to later be tested.
- * 
+ *
  * @author jack
  */
 public class StoredDataPointReceiver implements DataPointReceiver {
@@ -39,13 +41,26 @@ public class StoredDataPointReceiver implements DataPointReceiver {
         }
         addDataPoints.addAll(dataPoints);
         for (SignalFuseProtocolBuffers.DataPoint dp: dataPoints) {
-            Pair<String, String> key = Pair.of(dp.getSource(), dp.getMetric());
+            String source = dp.getSource();
+            if ("".equals(source)) {
+                source = findSfSourceDim(dp.getDimensionsList());
+            }
+            Pair<String, String> key = Pair.of(source, dp.getMetric());
             if (pointsFor.containsKey(key)) {
                 pointsFor.get(key).add(dp.getValue());
             } else {
                 pointsFor.put(key, Lists.newArrayList(dp.getValue()));
             }
         }
+    }
+
+    private String findSfSourceDim(List<Dimension> dimensionsList) {
+        for (Dimension dim: dimensionsList) {
+            if ("sf_source".equals(dim.getKey())) {
+                return dim.getValue();
+            }
+        }
+        return "";
     }
 
     @Override
