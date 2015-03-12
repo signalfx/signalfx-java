@@ -22,7 +22,7 @@ signalfx-java will support this.
 <dependency>
   <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-codahale</artifactId>
-  <version>0.0.19</version>
+  <version>0.0.20</version>
 </dependency>
 ```
 
