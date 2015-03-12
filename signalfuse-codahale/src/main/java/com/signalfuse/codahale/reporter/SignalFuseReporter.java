@@ -1,4 +1,4 @@
-package com.signalfuse.codahale.reporter;
+package com.signalfx.codahale.reporter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -17,20 +17,20 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
-import com.signalfuse.endpoint.SignalFxEndpoint;
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
-import com.signalfuse.metrics.SourceNameHelper;
-import com.signalfuse.metrics.auth.AuthToken;
-import com.signalfuse.metrics.auth.StaticAuthToken;
-import com.signalfuse.metrics.connection.DataPointReceiverFactory;
-import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
-import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
-import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
-import com.signalfuse.metrics.flush.AggregateMetricSender;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.endpoint.SignalFxEndpoint;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.SourceNameHelper;
+import com.signalfx.metrics.auth.AuthToken;
+import com.signalfx.metrics.auth.StaticAuthToken;
+import com.signalfx.metrics.connection.DataPointReceiverFactory;
+import com.signalfx.metrics.connection.HttpDataPointProtobufReceiverFactory;
+import com.signalfx.metrics.endpoint.DataPointReceiverEndpoint;
+import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
+import com.signalfx.metrics.flush.AggregateMetricSender;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
- * Reporter object for codahale metrics that reports values to com.signalfuse.signalfuse at some
+ * Reporter object for codahale metrics that reports values to com.signalfx.signalfx at some
  * interval.
  */
 public class SignalFxReporter extends ScheduledReporter {
@@ -144,7 +144,7 @@ public class SignalFxReporter extends ScheduledReporter {
         private String defaultSourceName;
         private AuthToken authToken;
         private SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint();
-        private String name = "signalfuse-reporter";
+        private String name = "signalfx-reporter";
         private int timeoutMs = HttpDataPointProtobufReceiverFactory.DEFAULT_TIMEOUT_MS;
         private DataPointReceiverFactory dataPointReceiverFactory = new
                 HttpDataPointProtobufReceiverFactory(endpoint);

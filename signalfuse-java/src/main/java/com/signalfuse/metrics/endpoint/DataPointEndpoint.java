@@ -1,6 +1,6 @@
-package com.signalfuse.metrics.endpoint;
+package com.signalfx.metrics.endpoint;
 
-import com.signalfuse.endpoint.SignalFxEndpoint;
+import com.signalfx.endpoint.SignalFxEndpoint;
 
 /**
  * Parameters that specify how to connect to SignalFx API endpoint

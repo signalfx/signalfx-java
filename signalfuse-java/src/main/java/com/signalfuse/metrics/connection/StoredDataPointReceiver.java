@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,9 +10,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.Dimension;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.Dimension;
 
 /**
  * Factory that just stores results to later be tested.

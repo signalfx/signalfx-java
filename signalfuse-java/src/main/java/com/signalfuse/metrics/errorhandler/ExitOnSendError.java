@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.errorhandler;
+package com.signalfx.metrics.errorhandler;
 
 /**
  * Handler that calls exit() on any failure at all

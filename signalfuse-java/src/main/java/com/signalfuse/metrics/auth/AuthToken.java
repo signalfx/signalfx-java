@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.auth;
+package com.signalfx.metrics.auth;
 
 /**
  * Identifies how to find the auth token during datapoint requests

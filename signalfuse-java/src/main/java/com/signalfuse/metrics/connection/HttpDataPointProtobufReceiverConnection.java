@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,10 +18,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnection
         extends AbstractHttpDataPointProtobufReceiverConnection {

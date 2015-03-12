@@ -1,10 +1,10 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
-import com.signalfuse.metrics.SignalfuseMetricsException;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.SignalfuseMetricsException;
 
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;

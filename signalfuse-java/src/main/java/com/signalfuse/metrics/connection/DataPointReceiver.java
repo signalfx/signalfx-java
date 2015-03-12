@@ -1,10 +1,10 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import java.util.List;
 import java.util.Map;
 
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public interface DataPointReceiver {
     void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)

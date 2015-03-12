@@ -1,4 +1,4 @@
-package com.signalfuse.common.proto;
+package com.signalfx.common.proto;
 
 import java.util.Arrays;
 import org.junit.Test;

@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.signalfuse.public</groupId>
+    <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
     <version>0.0.20-SNAPSHOT</version>
   </parent>
 
-  <artifactId>signalfuse-java</artifactId>
+  <artifactId>signalfx-java</artifactId>
   <name>SignalFx java libraries</name>
   <version>0.0.20-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -17,7 +17,7 @@
     Bare minimum core library needed to sending metrics to SignalFx from Java clients
   </description>
 
-  <url>http://www.signalfuse.com</url>
+  <url>http://www.signalfx.com</url>
 
   <licenses>
     <license>
@@ -28,18 +28,18 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:signalfx/signalfuse-clients.git</connection>
-    <developerConnection>scm:git:git@github.com:signalfx/signalfuse-clients.git</developerConnection>
-    <url>git@github.com:signalfx/signalfuse-clients.git</url>
+    <connection>scm:git:git@github.com:signalfx/signalfx-clients.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfx-clients.git</developerConnection>
+    <url>git@github.com:signalfx/signalfx-clients.git</url>
   </scm>
 
   <developers>
     <developer>
       <id>jack</id>
       <name>Jack Lindamood</name>
-      <email>jack@signalfuse.com</email>
+      <email>jack@signalfx.com</email>
       <organization>SignalFx</organization>
-      <organizationUrl>http://www.signalfuse.com</organizationUrl>
+      <organizationUrl>http://www.signalfx.com</organizationUrl>
     </developer>
   </developers>
 
@@ -60,12 +60,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.signalfuse.public</groupId>
-      <artifactId>signalfuse-protoc</artifactId>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-protoc</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.signalfuse.public</groupId>
-      <artifactId>signalfuse-commons-protoc-java</artifactId>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-commons-protoc-java</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.auth;
+package com.signalfx.metrics.auth;
 
 /**
  * Uses a static auth token passed as a string

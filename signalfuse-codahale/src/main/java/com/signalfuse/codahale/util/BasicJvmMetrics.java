@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2014 SignalFx, Inc.
  */
-package com.signalfuse.codahale.util;
+package com.signalfx.codahale.util;
 
 
 import java.lang.management.GarbageCollectorMXBean;

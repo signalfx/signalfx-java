@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.signalfuse.public</groupId>
+    <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
     <version>0.0.20-SNAPSHOT</version>
   </parent>
 
-  <artifactId>signalfuse-protoc</artifactId>
+  <artifactId>signalfx-protoc</artifactId>
   <name>SignalFx Protocol Buffer definitions</name>
   <version>0.0.20-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -18,7 +18,7 @@
     Protocol buffer definitions for sending datapoints to SignalFx
   </description>
 
-  <url>http://www.signalfuse.com</url>
+  <url>http://www.signalfx.com</url>
 
   <licenses>
     <license>
@@ -29,19 +29,19 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:signalfx/signalfuse-clients.git</connection>
-    <developerConnection>scm:git:git@github.com:signalfx/signalfuse-clients.git
+    <connection>scm:git:git@github.com:signalfx/signalfx-clients.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfx-clients.git
     </developerConnection>
-    <url>git@github.com:signalfx/signalfuse-clients.git</url>
+    <url>git@github.com:signalfx/signalfx-clients.git</url>
   </scm>
 
   <developers>
     <developer>
       <id>jack</id>
       <name>Jack Lindamood</name>
-      <email>jack@signalfuse.com</email>
+      <email>jack@signalfx.com</email>
       <organization>SignalFx</organization>
-      <organizationUrl>http://www.signalfuse.com</organizationUrl>
+      <organizationUrl>http://www.signalfx.com</organizationUrl>
     </developer>
   </developers>
 

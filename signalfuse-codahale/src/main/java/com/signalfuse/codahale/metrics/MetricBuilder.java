@@ -1,4 +1,4 @@
-package com.signalfuse.codahale.metrics;
+package com.signalfx.codahale.metrics;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.ExponentiallyDecayingReservoir;

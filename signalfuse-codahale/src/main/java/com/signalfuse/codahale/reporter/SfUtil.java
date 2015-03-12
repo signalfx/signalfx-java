@@ -1,4 +1,4 @@
-package com.signalfuse.codahale.reporter;
+package com.signalfx.codahale.reporter;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7,7 +7,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Utility functions that make common Signalfuse operations easier to do.
@@ -17,7 +17,7 @@ public class SfUtil {
 
     /**
      * <p>
-     * Creates a {@link com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER}
+     * Creates a {@link com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER}
      * type metric who's value is returned from a callback.  The metric is internally stored as the
      * {@link com.codahale.metrics.Gauge} type inside the {@link com.codahale.metrics.MetricRegistry},
      * but the callback is expected to behave like a cumulative counter and the value is sent to

@@ -1,4 +1,4 @@
-package com.signalfuse.metrics;
+package com.signalfx.metrics;
 
 public class SignalfuseMetricsException extends RuntimeException {
     private static final long serialVersionUID = 1L;

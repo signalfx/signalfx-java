@@ -1,6 +1,6 @@
-package com.signalfuse.metrics.endpoint;
+package com.signalfx.metrics.endpoint;
 
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 
 
 /**

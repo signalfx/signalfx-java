@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2014 SignalFx, Inc.
  */
-package com.signalfuse.codahale.metrics.util;
+package com.signalfx.codahale.metrics.util;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -18,7 +18,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
-import com.signalfuse.codahale.util.BasicJvmMetrics;
+import com.signalfx.codahale.util.BasicJvmMetrics;
 
 public class BasicJvmMetrisTest {
 

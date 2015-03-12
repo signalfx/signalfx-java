@@ -1,11 +1,11 @@
-package com.signalfuse.codahale.reporter;
+package com.signalfx.codahale.reporter;
 
 import java.util.Map;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
-import com.signalfuse.codahale.metrics.MetricBuilder;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.codahale.metrics.MetricBuilder;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Allows users to modify a metric with different source or metric parts than the default we pick
@@ -19,7 +19,7 @@ public interface MetricMetadata {
 
     /**
      * Create an object to tag a metric with data.  Registering two different metrics with the same
-     * metadata will result in an exception.  In that case, use {@link #forBuilder(com.signalfuse.codahale.metrics.MetricBuilder)}
+     * metadata will result in an exception.  In that case, use {@link #forBuilder(com.signalfx.codahale.metrics.MetricBuilder)}
      * @param metric    The metric will tag.
      * @param <M>       The type of metric.  It is implied by the metric type.
      * @return An object to tag the given metric.

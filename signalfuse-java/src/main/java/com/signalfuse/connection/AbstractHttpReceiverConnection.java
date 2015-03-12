@@ -1,4 +1,4 @@
-package com.signalfuse.connection;
+package com.signalfx.connection;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 
 public abstract class AbstractHttpReceiverConnection {
 

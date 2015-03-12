@@ -1,4 +1,4 @@
-package com.signalfuse.endpoint;
+package com.signalfx.endpoint;
 
 /**
  * Date: 5/6/14

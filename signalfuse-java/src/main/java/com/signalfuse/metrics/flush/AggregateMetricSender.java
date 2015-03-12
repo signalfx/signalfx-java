@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.flush;
+package com.signalfx.metrics.flush;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -9,15 +9,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.auth.AuthToken;
-import com.signalfuse.metrics.auth.NoAuthTokenException;
-import com.signalfuse.metrics.connection.DataPointReceiver;
-import com.signalfuse.metrics.connection.DataPointReceiverFactory;
-import com.signalfuse.metrics.errorhandler.MetricErrorImpl;
-import com.signalfuse.metrics.errorhandler.MetricErrorType;
-import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.auth.AuthToken;
+import com.signalfx.metrics.auth.NoAuthTokenException;
+import com.signalfx.metrics.connection.DataPointReceiver;
+import com.signalfx.metrics.connection.DataPointReceiverFactory;
+import com.signalfx.metrics.errorhandler.MetricErrorImpl;
+import com.signalfx.metrics.errorhandler.MetricErrorType;
+import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * The primary java class to send metrics.  To use this class, create a session, add points to
@@ -65,10 +65,10 @@ public class AggregateMetricSender {
     }
 
     private void communicateError(String message, MetricErrorType code,
-                                  SignalfuseMetricsException signalfuseMetricsException) {
+                                  SignalfuseMetricsException signalfxMetricsException) {
         for (OnSendErrorHandler onSendErrorHandler : onSendErrorHandlerCollection) {
             onSendErrorHandler
-                    .handleError(new MetricErrorImpl(message, code, signalfuseMetricsException));
+                    .handleError(new MetricErrorImpl(message, code, signalfxMetricsException));
         }
     }
 
@@ -77,12 +77,12 @@ public class AggregateMetricSender {
     }
 
     private final class SessionImpl implements Session {
-        private final Map<String, com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers
+        private final Map<String, com.signalfx.metrics.protobuf.SignalFxProtocolBuffers
                 .MetricType> toBeRegisteredMetricPairs;
         private final List<SignalFxProtocolBuffers.DataPoint> pointsToFlush;
 
         private SessionImpl() {
-            toBeRegisteredMetricPairs = new HashMap<String, com.signalfuse.metrics.protobuf
+            toBeRegisteredMetricPairs = new HashMap<String, com.signalfx.metrics.protobuf
                     .SignalFxProtocolBuffers.MetricType>();
 
             pointsToFlush = new ArrayList<SignalFxProtocolBuffers.DataPoint>();
@@ -160,7 +160,7 @@ public class AggregateMetricSender {
         }
 
         private void check(String metricPair,
-                           com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType
+                           com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType
                                    metricType) {
             if (!registeredMetricPairs.contains(metricPair)) {
                 toBeRegisteredMetricPairs.put(metricPair, metricType);

@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.errorhandler;
+package com.signalfx.metrics.errorhandler;
 
 public enum MetricErrorType {
      CONNECTION_ERROR,

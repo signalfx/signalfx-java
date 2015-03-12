@@ -1,4 +1,4 @@
-package com.signalfuse.common.proto;
+package com.signalfx.common.proto;
 
 import java.io.ByteArrayOutputStream;
 import com.google.common.base.Preconditions;

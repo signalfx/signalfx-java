@@ -1,4 +1,4 @@
-package com.signalfuse.common.proto;
+package com.signalfx.common.proto;
 
 import java.io.IOException;
 import java.io.InputStream;

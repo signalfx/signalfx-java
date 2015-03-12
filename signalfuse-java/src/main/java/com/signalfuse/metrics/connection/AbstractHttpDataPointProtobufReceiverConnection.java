@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,11 +11,11 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 
-import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
-import com.signalfuse.connection.AbstractHttpReceiverConnection;
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
+import com.signalfx.connection.AbstractHttpReceiverConnection;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public abstract class AbstractHttpDataPointProtobufReceiverConnection extends AbstractHttpReceiverConnection implements DataPointReceiver {
 

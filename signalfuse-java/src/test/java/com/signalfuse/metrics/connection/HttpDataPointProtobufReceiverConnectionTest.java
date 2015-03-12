@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -12,9 +12,9 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.signalfuse.connection.AbstractHttpReceiverConnection;
-import com.signalfuse.endpoint.SignalFxEndpoint;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.connection.AbstractHttpReceiverConnection;
+import com.signalfx.endpoint.SignalFxEndpoint;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
     private static final Logger log = LoggerFactory

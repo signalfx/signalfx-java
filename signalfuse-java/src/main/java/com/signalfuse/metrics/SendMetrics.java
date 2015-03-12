@@ -1,17 +1,17 @@
-package com.signalfuse.metrics;
+package com.signalfx.metrics;
 
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Properties;
 
-import com.signalfuse.endpoint.SignalFxEndpoint;
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
-import com.signalfuse.metrics.auth.StaticAuthToken;
-import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
-import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
-import com.signalfuse.metrics.flush.AggregateMetricSender;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.endpoint.SignalFxEndpoint;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.auth.StaticAuthToken;
+import com.signalfx.metrics.connection.HttpDataPointProtobufReceiverFactory;
+import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
+import com.signalfx.metrics.flush.AggregateMetricSender;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public final class SendMetrics {
     private SendMetrics() {

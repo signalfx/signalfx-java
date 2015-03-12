@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 /**
  * A factory that creates connections to datapoint given an endpoint to connect to.

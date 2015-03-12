@@ -1,4 +1,4 @@
-package com.signalfuse.codahale.metrics;
+package com.signalfx.codahale.metrics;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -11,14 +11,14 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
-import com.signalfuse.codahale.reporter.IncrementalCounter;
-import com.signalfuse.codahale.reporter.MetricMetadata;
-import com.signalfuse.codahale.reporter.SfUtil;
-import com.signalfuse.codahale.reporter.SignalFxReporter;
-import com.signalfuse.metrics.auth.StaticAuthToken;
-import com.signalfuse.metrics.connection.StaticDataPointReceiverFactory;
-import com.signalfuse.metrics.connection.StoredDataPointReceiver;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.codahale.reporter.IncrementalCounter;
+import com.signalfx.codahale.reporter.MetricMetadata;
+import com.signalfx.codahale.reporter.SfUtil;
+import com.signalfx.codahale.reporter.SignalFxReporter;
+import com.signalfx.metrics.auth.StaticAuthToken;
+import com.signalfx.metrics.connection.StaticDataPointReceiverFactory;
+import com.signalfx.metrics.connection.StoredDataPointReceiver;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class SignalFxReporterTest {
     @Test

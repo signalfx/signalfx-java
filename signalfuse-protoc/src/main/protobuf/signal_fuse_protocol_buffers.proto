@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.protobuf;
+package com.signalfx.metrics.protobuf;
 
 enum MetricType {
     /**

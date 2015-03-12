@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 public class StaticDataPointReceiverFactory implements DataPointReceiverFactory {
     private final DataPointReceiver dataPointReciever;

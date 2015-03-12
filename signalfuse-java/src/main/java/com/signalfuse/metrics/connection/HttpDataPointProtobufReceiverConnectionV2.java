@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.connection;
+package com.signalfx.metrics.connection;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,9 +8,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity;
 
-import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionV2
         extends AbstractHttpDataPointProtobufReceiverConnection {

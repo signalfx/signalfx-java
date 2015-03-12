@@ -1,4 +1,4 @@
-package com.signalfuse.codahale.reporter;
+package com.signalfx.codahale.reporter;
 
 import java.io.Closeable;
 import java.util.Map;
@@ -11,9 +11,9 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.flush.AggregateMetricSender;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.flush.AggregateMetricSender;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
     private final AggregateMetricSender.Session metricSenderSession;

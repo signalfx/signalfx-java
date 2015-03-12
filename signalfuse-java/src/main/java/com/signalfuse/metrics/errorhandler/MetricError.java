@@ -1,6 +1,6 @@
-package com.signalfuse.metrics.errorhandler;
+package com.signalfx.metrics.errorhandler;
 
-import com.signalfuse.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalfuseMetricsException;
 
 /**
  * An error that happened trying to send a metric.

@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.errorhandler;
+package com.signalfx.metrics.errorhandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,18 +1,18 @@
-# SignalFx client libraries [![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
+# SignalFx client libraries [![Build Status](https://travis-ci.org/signalfx/signalfx-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfx-java)
 
 This repository contains libraries for instrumenting applications in a
 variety of languages and reporting these metrics to SignalFx. You will
 need a SignalFx account and organization API token to use those. For
 more information on SignalFx and to create an account, go to
-http://www.signalfuse.com.
+http://www.signalfx.com.
 
 The recommended way to send metrics with java is to use codahale metrics.
 If you want to send metrics without integrating with codahale, the module
-signalfuse-java will support this.
+signalfx-java will support this.
 
 ## Supported languages
 
-* Java 6+ with `signalfuse-metrics`.
+* Java 6+ with `signalfx-metrics`.
 
 ## Installation
 
@@ -20,8 +20,8 @@ signalfuse-java will support this.
 
 ```xml
 <dependency>
-  <groupId>com.signalfuse.public</groupId>
-  <artifactId>signalfuse-codahale</artifactId>
+  <groupId>com.signalfx.public</groupId>
+  <artifactId>signalfx-codahale</artifactId>
   <version>0.0.19</version>
 </dependency>
 ```
@@ -29,15 +29,15 @@ signalfuse-java will support this.
 ### From source (Not recommended)
 
 ```
-$ git clone https://github.com/signalfx/signalfuse-java.git
-Cloning into 'signalfuse-java'...
+$ git clone https://github.com/signalfx/signalfx-java.git
+Cloning into 'signalfx-java'...
 remote: Counting objects: 930, done.
 remote: Compressing objects: 100% (67/67), done.
 remote: Total 930 (delta 20), reused 0 (delta 0)
 Receiving objects: 100% (930/930), 146.79 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (289/289), done.
 Checking connectivity... done.
-$ cd signalfuse-java
+$ cd signalfx-java
 $ mvn install
 [INFO] Scanning for projects...
 ...
@@ -67,18 +67,18 @@ More information on the Codahale Metrics library can be found on the
 
 ```java
 final MetricRegistry metricRegistery = new MetricRegistry();
-final SignalFxReporter signalfuseReporter = new SignalFxReporter.Builder(
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistery,
     "SIGNALFUSE_AUTH_TOKEN"
 ).build();
-signalfuseReporter.start(1, TimeUnit.SECONDS);
-final MetricMetadata metricMetadata = signalfuseReporter.getMetricMetadata();
+signalfxReporter.start(1, TimeUnit.SECONDS);
+final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 ```
 
 #### Sending a metric with Codahale
 
 ```java
-// This will send the current time in ms to signalfuse as a gauge
+// This will send the current time in ms to signalfx as a gauge
         metricRegistery.register("gauge", new Gauge<Long>() {
             public Long getValue() {
                 return System.currentTimeMillis;
@@ -146,7 +146,7 @@ you normally would, reported at the frequency configured to the
 
 You can also interact with our java library directly if you do not want to use
  Codahale.  To do this, you will need to build the metric to send to
- signalfuse manually using protocol buffers.
+ signalfx manually using protocol buffers.
 ```java
         DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
         AggregateMetricSender mf =

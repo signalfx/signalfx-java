@@ -1,4 +1,4 @@
-package com.signalfuse.metrics;
+package com.signalfx.metrics;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -12,7 +12,7 @@ public final class SourceNameHelper {
     }
 
     public static String getDefaultSourceName() {
-        String sourceName = System.getProperty("com.signalfuse.sourceName");
+        String sourceName = System.getProperty("com.signalfx.sourceName");
         if (sourceName != null && !sourceName.isEmpty()) {
             return sourceName;
         }

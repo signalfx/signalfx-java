@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.metric;
+package com.signalfx.metrics.metric;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -15,9 +15,9 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.DataPoint;
-import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.Datum;
+import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.DataPoint;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.Datum;
 import com.google.common.base.Preconditions;
 
 /**

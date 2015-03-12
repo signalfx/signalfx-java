@@ -1,4 +1,4 @@
-package com.signalfuse.metrics.errorhandler;
+package com.signalfx.metrics.errorhandler;
 
 /**
  * Listener interface to handle failures to send a metric

@@ -1,12 +1,12 @@
-package com.signalfuse.codahale.reporter;
+package com.signalfx.codahale.reporter;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Metric;
-import com.signalfuse.codahale.metrics.MetricBuilder;
+import com.signalfx.codahale.metrics.MetricBuilder;
 
 /**
  * <p>
- * An {@link com.signalfuse.codahale.reporter.IncrementalCounter} is a counter that reports
+ * An {@link com.signalfx.codahale.reporter.IncrementalCounter} is a counter that reports
  * incremental values to Signalfuse rather than absolute counts.  For example,
  * a regular {@link com.codahale.metrics.Counter} reports a monotonically increasing series of
  * values (1, 2, 3, 4, ...) while this class reports a series of increments (+1, +1, +1, +1), but
@@ -24,9 +24,9 @@ import com.signalfuse.codahale.metrics.MetricBuilder;
  * </p>
  * <p>
  * A {@link com.codahale.metrics.Counter} assumes metric type
- * {@link com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER},
+ * {@link com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER},
  * while this class assumes metric type
- * {@link com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType#COUNTER}
+ * {@link com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType#COUNTER}
  */
 public class IncrementalCounter extends Counter {
     /**
