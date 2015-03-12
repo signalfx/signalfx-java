@@ -5,15 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Parameters that specify how to connect to SignalFuse API endpoint
+ * Parameters that specify how to connect to SignalFx API endpoint
  * 
  * @author jack
  */
-public class SignalFuseEndpoint implements SignalFuseReceiverEndpoint {
+public class SignalFxEndpoint implements SignalFxReceiverEndpoint {
     public static final String DEFAULT_SCHEME = "https";
     public static final String DEFAULT_HOSTNAME = "ingest.signalfx.com";
     public static final int DEFAULT_PORT = 443;
-    private static final Logger log = LoggerFactory.getLogger(SignalFuseEndpoint.class);
+    private static final Logger log = LoggerFactory.getLogger(SignalFxEndpoint.class);
     
     /**
      * API protocol scheme - http or https
@@ -30,17 +30,17 @@ public class SignalFuseEndpoint implements SignalFuseReceiverEndpoint {
      */
     private final int port;
 
-    public SignalFuseEndpoint(String hostname, int port) {
+    public SignalFxEndpoint(String hostname, int port) {
         this(getDefaultScheme(), hostname, port);
     }
 
-    public SignalFuseEndpoint(String scheme, String hostname, int port) {
+    public SignalFxEndpoint(String scheme, String hostname, int port) {
         this.scheme = scheme;
         this.hostname = hostname;
         this.port = port;
     }
     
-    public SignalFuseEndpoint() {
+    public SignalFxEndpoint() {
         this(getDefaultScheme(), getDefaultHostname(), getDefaultPort());
     }
 

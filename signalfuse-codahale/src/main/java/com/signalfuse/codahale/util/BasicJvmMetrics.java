@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 SignalFuse, Inc.
+ * Copyright (C) 2014 SignalFx, Inc.
  */
 package com.signalfuse.codahale.util;
 
@@ -23,7 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 
 
 /**
- * Report a basic set of JVM metrics to SignalFuse.
+ * Report a basic set of JVM metrics to SignalFx.
  *
  * @author psi
  *
@@ -85,7 +85,7 @@ public class BasicJvmMetrics {
     private static final String OLD_GEN_POOL_NAME = "PS Old Gen";
 
     /**
-     * Construct the basic JVM metrics using a supplied SignalFuse MetricFactory.
+     * Construct the basic JVM metrics using a supplied SignalFx MetricFactory.
      *
      * @param metricRegistry The registry to give these metrics to
      */

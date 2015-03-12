@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 SignalFuse, Inc.
+ * Copyright (C) 2014 SignalFx, Inc.
  */
 package com.signalfuse.codahale.metrics.util;
 

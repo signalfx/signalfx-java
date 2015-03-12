@@ -13,11 +13,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
     private final AggregateMetricSender.Session metricSenderSession;
-    private final Set<SignalFuseReporter.MetricDetails> detailsToAdd;
+    private final Set<SignalFxReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
     private final String sourceDimension;
@@ -25,7 +25,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
-            Set<SignalFuseReporter.MetricDetails> detailsToAdd,
+            Set<SignalFxReporter.MetricDetails> detailsToAdd,
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension) {
@@ -34,7 +34,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
-            Set<SignalFuseReporter.MetricDetails> detailsToAdd,
+            Set<SignalFxReporter.MetricDetails> detailsToAdd,
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension,
@@ -65,81 +65,81 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     void addHistogram(String baseName,
                       Histogram histogram) {
         addMetric(histogram, baseName,
-                Optional.of(SignalFuseReporter.MetricDetails.COUNT),
-                SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, histogram.getCount());
+                Optional.of(SignalFxReporter.MetricDetails.COUNT),
+                SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, histogram.getCount());
         addSampling(baseName, histogram);
     }
 
     void addMetered(String baseName, Metered metered) {
         addMetric(metered, baseName,
-                SignalFuseReporter.MetricDetails.COUNT,
-                SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, metered.getCount());
+                SignalFxReporter.MetricDetails.COUNT,
+                SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, metered.getCount());
         addMetric(metered, baseName,
-                SignalFuseReporter.MetricDetails.RATE_15_MIN,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, metered.getFifteenMinuteRate());
+                SignalFxReporter.MetricDetails.RATE_15_MIN,
+                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getFifteenMinuteRate());
         addMetric(metered, baseName,
-                SignalFuseReporter.MetricDetails.RATE_1_MIN,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, metered.getOneMinuteRate());
+                SignalFxReporter.MetricDetails.RATE_1_MIN,
+                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getOneMinuteRate());
         addMetric(metered, baseName,
-                SignalFuseReporter.MetricDetails.RATE_5_MIN,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, metered.getFiveMinuteRate());
+                SignalFxReporter.MetricDetails.RATE_5_MIN,
+                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getFiveMinuteRate());
 
         addMetric(metered, baseName,
-                SignalFuseReporter.MetricDetails.RATE_MEAN,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, metered.getMeanRate());
+                SignalFxReporter.MetricDetails.RATE_MEAN,
+                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getMeanRate());
     }
 
     private void addSampling(String baseName, Sampling sampling) {
         Metric metric = (Metric)sampling;
         final Snapshot snapshot = sampling.getSnapshot();
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.MEDIAN,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.getMedian());
+                SignalFxReporter.MetricDetails.MEDIAN,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMedian());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.PERCENT_75,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.get75thPercentile());
+                SignalFxReporter.MetricDetails.PERCENT_75,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get75thPercentile());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.PERCENT_95,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.get95thPercentile());
+                SignalFxReporter.MetricDetails.PERCENT_95,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get95thPercentile());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.PERCENT_98,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.get98thPercentile());
+                SignalFxReporter.MetricDetails.PERCENT_98,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get98thPercentile());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.PERCENT_99,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.get99thPercentile());
+                SignalFxReporter.MetricDetails.PERCENT_99,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get99thPercentile());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.PERCENT_999,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.get999thPercentile());
+                SignalFxReporter.MetricDetails.PERCENT_999,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get999thPercentile());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.MAX,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.getMax());
+                SignalFxReporter.MetricDetails.MAX,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMax());
         addMetric(metric, baseName,
-                SignalFuseReporter.MetricDetails.MIN,
-                SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.getMin());
+                SignalFxReporter.MetricDetails.MIN,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMin());
 
 
         // These are slower to calculate.  Only calculate if we need.
-        if (detailsToAdd.contains(SignalFuseReporter.MetricDetails.STD_DEV)) {
+        if (detailsToAdd.contains(SignalFxReporter.MetricDetails.STD_DEV)) {
             addMetric(metric, baseName,
-                    SignalFuseReporter.MetricDetails.STD_DEV,
-                    SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.getStdDev());
+                    SignalFxReporter.MetricDetails.STD_DEV,
+                    SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getStdDev());
         }
-        if (detailsToAdd.contains(SignalFuseReporter.MetricDetails.MEAN)) {
+        if (detailsToAdd.contains(SignalFxReporter.MetricDetails.MEAN)) {
             addMetric(metric, baseName,
-                    SignalFuseReporter.MetricDetails.MEAN,
-                    SignalFuseProtocolBuffers.MetricType.GAUGE, snapshot.getMean());
+                    SignalFxReporter.MetricDetails.MEAN,
+                    SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMean());
         }
     }
 
     void addMetric(Metric metric, String codahaleName,
-                             SignalFuseProtocolBuffers.MetricType defaultMetricType,
+                             SignalFxProtocolBuffers.MetricType defaultMetricType,
                              Object originalValue) {
-        addMetric(metric, codahaleName, Optional.<SignalFuseReporter.MetricDetails>absent(),
+        addMetric(metric, codahaleName, Optional.<SignalFxReporter.MetricDetails>absent(),
                 defaultMetricType, originalValue);
     }
 
-    private void addMetric(Metric metric, String codahaleName, SignalFuseReporter.MetricDetails metricDetails,
-                          SignalFuseProtocolBuffers.MetricType defaultMetricType,
+    private void addMetric(Metric metric, String codahaleName, SignalFxReporter.MetricDetails metricDetails,
+                          SignalFxProtocolBuffers.MetricType defaultMetricType,
                           Object originalValue) {
         addMetric(metric, codahaleName, Optional.of(metricDetails),
                 defaultMetricType, originalValue);
@@ -147,8 +147,8 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     }
 
     void addMetric(Metric metric, String codahaleName,
-                   Optional<SignalFuseReporter.MetricDetails> metricDetails,
-                   SignalFuseProtocolBuffers.MetricType defaultMetricType, Object originalValue) {
+                   Optional<SignalFxReporter.MetricDetails> metricDetails,
+                   SignalFxProtocolBuffers.MetricType defaultMetricType, Object originalValue) {
         final Number value;
         if (originalValue instanceof Number) {
             value = (Number) originalValue;
@@ -167,19 +167,19 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         } else {
             metricDetailsMetricNameSuffix = "";
         }
-        Optional<SignalFuseProtocolBuffers.MetricType> userSetMetricType = metricMetadata.getMetricType(metric);
-        SignalFuseProtocolBuffers.MetricType metricType = userSetMetricType.or(defaultMetricType);
+        Optional<SignalFxProtocolBuffers.MetricType> userSetMetricType = metricMetadata.getMetricType(metric);
+        SignalFxProtocolBuffers.MetricType metricType = userSetMetricType.or(defaultMetricType);
         Map<String, String> tags = metricMetadata.getTags(metric);
         final String sourceName = Optional.fromNullable(tags.get(MetricMetadata.SOURCE)).or(defaultSourceName);
         final String metricName = Optional.fromNullable(tags.get(MetricMetadata.METRIC)).or(codahaleName) + metricDetailsMetricNameSuffix;
 
-        SignalFuseProtocolBuffers.DataPoint.Builder builder = SignalFuseProtocolBuffers.DataPoint
+        SignalFxProtocolBuffers.DataPoint.Builder builder = SignalFxProtocolBuffers.DataPoint
                 .newBuilder()
                 .setMetric(metricName)
                 .setMetricType(metricType);
 
         if (!sourceDimension.equals("") && !tags.containsKey(sourceDimension)) {
-            builder.addDimensions(SignalFuseProtocolBuffers.Dimension.newBuilder()
+            builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                     .setKey(sourceDimension).setValue(sourceName));
         }
 
@@ -188,7 +188,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
 
         for (Map.Entry<String, String> entry: tags.entrySet()) {
             if (!ignoredDimensions.contains(entry.getKey())) {
-                builder.addDimensions(SignalFuseProtocolBuffers.Dimension.newBuilder()
+                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
         }
@@ -199,14 +199,14 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         }
 
         if (value instanceof Long || value instanceof Integer || value instanceof Short) {
-            builder.setValue(SignalFuseProtocolBuffers.Datum
+            builder.setValue(SignalFxProtocolBuffers.Datum
                     .newBuilder().setIntValue(value.longValue()));
         } else {
             final double doubleToSend = value.doubleValue();
             if (Double.isInfinite(doubleToSend) || Double.isNaN(doubleToSend)) {
                 return;
             }
-            builder.setValue(SignalFuseProtocolBuffers.Datum.newBuilder()
+            builder.setValue(SignalFxProtocolBuffers.Datum.newBuilder()
                     .setDoubleValue(doubleToSend));
         }
 

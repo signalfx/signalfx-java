@@ -14,23 +14,23 @@ import com.google.common.collect.ImmutableSet;
 import com.signalfuse.codahale.reporter.IncrementalCounter;
 import com.signalfuse.codahale.reporter.MetricMetadata;
 import com.signalfuse.codahale.reporter.SfUtil;
-import com.signalfuse.codahale.reporter.SignalFuseReporter;
+import com.signalfuse.codahale.reporter.SignalFxReporter;
 import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.StaticDataPointReceiverFactory;
 import com.signalfuse.metrics.connection.StoredDataPointReceiver;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
-public class SignalFuseReporterTest {
+public class SignalFxReporterTest {
     @Test
     public void testReporter() throws InterruptedException {
         StoredDataPointReceiver dbank = new StoredDataPointReceiver();
         assertEquals(0, dbank.addDataPoints.size());
 
         MetricRegistry metricRegistery = new MetricRegistry();
-        SignalFuseReporter reporter = new SignalFuseReporter.Builder(metricRegistery, new StaticAuthToken(""), "myserver")
+        SignalFxReporter reporter = new SignalFxReporter.Builder(metricRegistery, new StaticAuthToken(""), "myserver")
                 .setDataPointReceiverFactory(new StaticDataPointReceiverFactory(dbank))
-                .setDetailsToAdd(ImmutableSet.of(SignalFuseReporter.MetricDetails.COUNT,
-                        SignalFuseReporter.MetricDetails.MIN, SignalFuseReporter.MetricDetails.MAX))
+                .setDetailsToAdd(ImmutableSet.of(SignalFxReporter.MetricDetails.COUNT,
+                        SignalFxReporter.MetricDetails.MIN, SignalFxReporter.MetricDetails.MAX))
                 .build();
 
         Metric gauge = metricRegistery.register("gauge", new Gauge<Integer>() {
@@ -44,7 +44,7 @@ public class SignalFuseReporterTest {
         metricMetadata.forMetric(metricRegistery.counter("counter"))
                 .withMetricName("newname")
                 .withSourceName("newsource")
-                .withMetricType(SignalFuseProtocolBuffers.MetricType.GAUGE);
+                .withMetricType(SignalFxProtocolBuffers.MetricType.GAUGE);
         metricMetadata.forMetric(metricRegistery.counter("counter2"))
                 .withMetricName("newname2");
         metricRegistery.counter("counter").inc();
@@ -58,11 +58,11 @@ public class SignalFuseReporterTest {
         assertEquals("newname", dbank.addDataPoints.get(1).getMetric());
         assertEquals("newsource", dbank.addDataPoints.get(1).getDimensions(0).getValue());
         assertEquals("sf_source", dbank.addDataPoints.get(1).getDimensions(0).getKey());
-        assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
+        assertEquals(SignalFxProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
                 "newname"));
-        assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get(
+        assertEquals(SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, dbank.registeredMetrics.get(
                 "atimer.count"));
-        assertEquals(SignalFuseProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
+        assertEquals(SignalFxProtocolBuffers.MetricType.GAUGE, dbank.registeredMetrics.get(
                 "atimer.max"));
         assertEquals(2, dbank.lastValueFor("newsource", "newname").getIntValue());
 
@@ -70,7 +70,7 @@ public class SignalFuseReporterTest {
 
         dbank.addDataPoints.clear();
         metricMetadata.forMetric(metricRegistery.counter("raw_counter"))
-                .withMetricType(SignalFuseProtocolBuffers.MetricType.COUNTER);
+                .withMetricType(SignalFxProtocolBuffers.MetricType.COUNTER);
         SfUtil.cumulativeCounter(metricRegistery, "cumulative_counter_callback",
                 metricMetadata, new Gauge<Long>() {
             private long i = 0;
@@ -110,10 +110,10 @@ public class SignalFuseReporterTest {
         assertEquals(2, dbank.lastValueFor("newsource", "newname").getIntValue());
         distributedCounter.inc(1);
         distributedCounter.inc(3);
-        assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER,
+        assertEquals(SignalFxProtocolBuffers.MetricType.COUNTER,
                 dbank.registeredMetrics.get("user_login.hits"));
-        assertEquals(SignalFuseProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("raw_counter"));
-        assertEquals(SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER,
+        assertEquals(SignalFxProtocolBuffers.MetricType.COUNTER, dbank.registeredMetrics.get("raw_counter"));
+        assertEquals(SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER,
                 dbank.registeredMetrics.get("cumulative_counter_callback"));
         metricRegistery.counter("raw_counter").inc(14);
         dbank.addDataPoints.clear();
@@ -140,7 +140,7 @@ public class SignalFuseReporterTest {
         try {
             metricMetadata.forBuilder(IncrementalCounter.Builder.INSTANCE).withSourceName("asource")
                     .withMetricName("name")
-                    .withMetricType(SignalFuseProtocolBuffers.MetricType.GAUGE)
+                    .withMetricType(SignalFxProtocolBuffers.MetricType.GAUGE)
                     .createOrGet(metricRegistery);
             throw new RuntimeException("I expect an error if it's a gauge");
         } catch (IllegalArgumentException e) {

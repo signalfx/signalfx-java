@@ -11,12 +11,12 @@
 
   <groupId>com.signalfuse.public</groupId>
   <artifactId>clients-parent</artifactId>
-  <name>SignalFuse parent</name>
+  <name>SignalFx parent</name>
   <version>0.0.20-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>
-    SignalFuse client language integrations
+    SignalFx client language integrations
   </description>
 
   <properties>
@@ -45,7 +45,7 @@
       <id>jack</id>
       <name>Jack Lindamood</name>
       <email>jack@signalfuse.com</email>
-      <organization>SignalFuse</organization>
+      <organization>SignalFx</organization>
       <organizationUrl>http://www.signalfuse.com</organizationUrl>
     </developer>
   </developers>

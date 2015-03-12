@@ -11,8 +11,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.Dimension;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.Dimension;
 
 /**
  * Factory that just stores results to later be tested.
@@ -20,27 +20,27 @@ import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.Dimension;
  * @author jack
  */
 public class StoredDataPointReceiver implements DataPointReceiver {
-    public final List<SignalFuseProtocolBuffers.DataPointOrBuilder> addDataPoints;
-    private final Map<Pair<String, String>, List<SignalFuseProtocolBuffers.Datum>> pointsFor;
-    public final Map<String, SignalFuseProtocolBuffers.MetricType> registeredMetrics;
+    public final List<SignalFxProtocolBuffers.DataPointOrBuilder> addDataPoints;
+    private final Map<Pair<String, String>, List<SignalFxProtocolBuffers.Datum>> pointsFor;
+    public final Map<String, SignalFxProtocolBuffers.MetricType> registeredMetrics;
     public boolean throwOnAdd = false;
 
     public StoredDataPointReceiver() {
         addDataPoints = Collections
-                .synchronizedList(new ArrayList<SignalFuseProtocolBuffers.DataPointOrBuilder>());
-        registeredMetrics = Collections.synchronizedMap(new HashMap<String, SignalFuseProtocolBuffers.MetricType>());
+                .synchronizedList(new ArrayList<SignalFxProtocolBuffers.DataPointOrBuilder>());
+        registeredMetrics = Collections.synchronizedMap(new HashMap<String, SignalFxProtocolBuffers.MetricType>());
 
         pointsFor = Maps.newHashMap();
     }
 
     @Override
-    public void addDataPoints(String auth, List<SignalFuseProtocolBuffers.DataPoint> dataPoints)
+    public void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
             throws SignalfuseMetricsException {
         if (throwOnAdd) {
             throw new SignalfuseMetricsException("Flag set to true");
         }
         addDataPoints.addAll(dataPoints);
-        for (SignalFuseProtocolBuffers.DataPoint dp: dataPoints) {
+        for (SignalFxProtocolBuffers.DataPoint dp: dataPoints) {
             String source = dp.getSource();
             if ("".equals(source)) {
                 source = findSfSourceDim(dp.getDimensionsList());
@@ -65,24 +65,24 @@ public class StoredDataPointReceiver implements DataPointReceiver {
 
     @Override
     public void backfillDataPoints(String auth, String source, String metric,
-                                   List<SignalFuseProtocolBuffers.Datum> datumPoints)
+                                   List<SignalFxProtocolBuffers.Datum> datumPoints)
             throws SignalfuseMetricsException {}
 
     @Override
     public Map<String, Boolean> registerMetrics(String auth,
-                                Map<String, SignalFuseProtocolBuffers.MetricType> metricTypes)
+                                Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
             throws SignalfuseMetricsException {
         registeredMetrics.putAll(metricTypes);
         Map<String, Boolean> ret = new HashMap<String, Boolean>();
-        for (Map.Entry<String, SignalFuseProtocolBuffers.MetricType> i: metricTypes.entrySet()) {
+        for (Map.Entry<String, SignalFxProtocolBuffers.MetricType> i: metricTypes.entrySet()) {
             ret.put(i.getKey(), true);
         }
         return ret;
     }
 
-    public List<SignalFuseProtocolBuffers.Datum> valuesFor(String source, String metric) {
+    public List<SignalFxProtocolBuffers.Datum> valuesFor(String source, String metric) {
         Pair<String, String> key = Pair.of(source, metric);
-        List<SignalFuseProtocolBuffers.Datum> ret = pointsFor.get(key);
+        List<SignalFxProtocolBuffers.Datum> ret = pointsFor.get(key);
         if (ret == null) {
             return Collections.emptyList();
         } else {
@@ -90,8 +90,8 @@ public class StoredDataPointReceiver implements DataPointReceiver {
         }
     }
 
-    public SignalFuseProtocolBuffers.Datum lastValueFor(String source, String metric) {
-        List<SignalFuseProtocolBuffers.Datum> vals = valuesFor(source, metric);
+    public SignalFxProtocolBuffers.Datum lastValueFor(String source, String metric) {
+        List<SignalFxProtocolBuffers.Datum> vals = valuesFor(source, metric);
         if (vals.isEmpty()) {
             throw new RuntimeException("No value for source/metric");
         } else {

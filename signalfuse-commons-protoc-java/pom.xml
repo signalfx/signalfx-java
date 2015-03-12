@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>signalfuse-commons-protoc-java</artifactId>
-  <name>SignalFuse Protobuf Utilities</name>
+  <name>SignalFx Protobuf Utilities</name>
   <version>0.0.20-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
@@ -38,7 +38,7 @@
       <id>jack</id>
       <name>Jack Lindamood</name>
       <email>jack@signalfuse.com</email>
-      <organization>SignalFuse</organization>
+      <organization>SignalFx</organization>
       <organizationUrl>http://www.signalfuse.com</organizationUrl>
     </developer>
   </developers>

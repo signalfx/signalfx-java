@@ -7,7 +7,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Utility functions that make common Signalfuse operations easier to do.
@@ -17,7 +17,7 @@ public class SfUtil {
 
     /**
      * <p>
-     * Creates a {@link com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.MetricType#CUMULATIVE_COUNTER}
+     * Creates a {@link com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER}
      * type metric who's value is returned from a callback.  The metric is internally stored as the
      * {@link com.codahale.metrics.Gauge} type inside the {@link com.codahale.metrics.MetricRegistry},
      * but the callback is expected to behave like a cumulative counter and the value is sent to
@@ -39,7 +39,7 @@ public class SfUtil {
                                            MetricMetadata metricMetadata,
                                            Gauge<Long> callback) {
         return metricMetadata.forMetric(metricRegistry.register(name, callback)).withMetricType(
-                SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER).metric();
+                SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER).metric();
     }
 
     /**

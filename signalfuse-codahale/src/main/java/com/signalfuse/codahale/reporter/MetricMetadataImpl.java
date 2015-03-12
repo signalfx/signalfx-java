@@ -10,7 +10,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.signalfuse.codahale.metrics.MetricBuilder;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class MetricMetadataImpl implements MetricMetadata {
     private final Map<Metric, Metadata> metaDataCollection;
@@ -30,7 +30,7 @@ public class MetricMetadataImpl implements MetricMetadata {
     }
 
     @Override
-    public Optional<SignalFuseProtocolBuffers.MetricType> getMetricType(Metric metric) {
+    public Optional<SignalFxProtocolBuffers.MetricType> getMetricType(Metric metric) {
         Metadata existingMetaData = metaDataCollection.get(metric);
         if (existingMetaData == null || existingMetaData.metricType == null) {
             return Optional.absent();
@@ -87,7 +87,7 @@ public class MetricMetadataImpl implements MetricMetadata {
         }
 
         public T withMetricType(
-                SignalFuseProtocolBuffers.MetricType metricType) {
+                SignalFxProtocolBuffers.MetricType metricType) {
             thisMetricsMetadata.metricType = metricType;
             return (T) this;
         }
@@ -183,7 +183,7 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     private static final class Metadata {
         private final Map<String, String> tags;
-        private SignalFuseProtocolBuffers.MetricType metricType;
+        private SignalFxProtocolBuffers.MetricType metricType;
 
         private Metadata() {
             tags = new ConcurrentHashMap<String, String>(6);

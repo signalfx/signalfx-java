@@ -1,14 +1,14 @@
 package com.signalfuse.metrics.endpoint;
 
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 
 
 /**
- * @deprecated use {@link SignalFuseReceiverEndpoint}
+ * @deprecated use {@link SignalFxReceiverEndpoint}
  * @author tedo
  *
  */
 @Deprecated
-public interface DataPointReceiverEndpoint extends SignalFuseReceiverEndpoint{
+public interface DataPointReceiverEndpoint extends SignalFxReceiverEndpoint{
 
 }

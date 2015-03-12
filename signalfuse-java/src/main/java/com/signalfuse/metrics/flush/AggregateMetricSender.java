@@ -17,7 +17,7 @@ import com.signalfuse.metrics.connection.DataPointReceiverFactory;
 import com.signalfuse.metrics.errorhandler.MetricErrorImpl;
 import com.signalfuse.metrics.errorhandler.MetricErrorType;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * The primary java class to send metrics.  To use this class, create a session, add points to
@@ -29,13 +29,13 @@ import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
  *     try (AggregateMetricSender.Session i = mf.createSession()) {
  *         i.incrementCounter("testcounter2", 1);
  *         i.setDatapoint(
- *            SignalFuseProtocolBuffers.DataPoint.newBuilder()
+ *            SignalFxProtocolBuffers.DataPoint.newBuilder()
  *              .setMetric("curtime")
  *              .setValue(
- *                SignalFuseProtocolBuffers.Datum.newBuilder()
+ *                SignalFxProtocolBuffers.Datum.newBuilder()
  *                .setIntValue(System.currentTimeMillis()))
  *              .addDimensions(
- *                SignalFuseProtocolBuffers.Dimension.newBuilder()
+ *                SignalFxProtocolBuffers.Dimension.newBuilder()
  *                  .setKey("source")
  *                  .setValue("java"))
  *              .build());
@@ -77,15 +77,15 @@ public class AggregateMetricSender {
     }
 
     private final class SessionImpl implements Session {
-        private final Map<String, com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers
+        private final Map<String, com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers
                 .MetricType> toBeRegisteredMetricPairs;
-        private final List<SignalFuseProtocolBuffers.DataPoint> pointsToFlush;
+        private final List<SignalFxProtocolBuffers.DataPoint> pointsToFlush;
 
         private SessionImpl() {
             toBeRegisteredMetricPairs = new HashMap<String, com.signalfuse.metrics.protobuf
-                    .SignalFuseProtocolBuffers.MetricType>();
+                    .SignalFxProtocolBuffers.MetricType>();
 
-            pointsToFlush = new ArrayList<SignalFuseProtocolBuffers.DataPoint>();
+            pointsToFlush = new ArrayList<SignalFxProtocolBuffers.DataPoint>();
         }
 
         public Session setCumulativeCounter(String metric, long value) {
@@ -93,7 +93,7 @@ public class AggregateMetricSender {
         }
 
         public Session setCumulativeCounter(String source, String metric, long value) {
-            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER, value);
+            setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, value);
             return this;
         }
 
@@ -102,40 +102,40 @@ public class AggregateMetricSender {
         }
 
         public Session incrementCounter(String source, String metric, long value) {
-            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.COUNTER, value);
+            setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.COUNTER, value);
             return this;
         }
 
         @Override
         public Session setDatapoint(String source, String metric,
-                                              SignalFuseProtocolBuffers.MetricType metricType,
+                                              SignalFxProtocolBuffers.MetricType metricType,
                                               long value) {
             check(metric, metricType);
-            pointsToFlush.add(SignalFuseProtocolBuffers.DataPoint.newBuilder()
+            pointsToFlush.add(SignalFxProtocolBuffers.DataPoint.newBuilder()
                                       .setSource(source)
                                       .setMetricType(metricType)
                                       .setMetric(metric).setValue(
-                            SignalFuseProtocolBuffers.Datum.newBuilder().setIntValue(value).build())
+                            SignalFxProtocolBuffers.Datum.newBuilder().setIntValue(value).build())
                                       .build());
             return this;
         }
 
         @Override
         public Session setDatapoint(String source, String metric,
-                                              SignalFuseProtocolBuffers.MetricType metricType,
+                                              SignalFxProtocolBuffers.MetricType metricType,
                                               double value) {
             check(metric, metricType);
-            pointsToFlush.add(SignalFuseProtocolBuffers.DataPoint.newBuilder()
+            pointsToFlush.add(SignalFxProtocolBuffers.DataPoint.newBuilder()
                                       .setSource(source)
                                       .setMetricType(metricType)
                                       .setMetric(metric).setValue(
-                            SignalFuseProtocolBuffers.Datum.newBuilder().setDoubleValue(value).build())
+                            SignalFxProtocolBuffers.Datum.newBuilder().setDoubleValue(value).build())
                                       .build());
             return this;
         }
 
         @Override
-        public Session setDatapoint(SignalFuseProtocolBuffers.DataPoint datapoint) {
+        public Session setDatapoint(SignalFxProtocolBuffers.DataPoint datapoint) {
             check(datapoint.getMetric(), datapoint.getMetricType());
             pointsToFlush.add(datapoint);
             return this;
@@ -146,7 +146,7 @@ public class AggregateMetricSender {
         }
 
         public Session setGauge(String source, String metric, long value) {
-            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.GAUGE, value);
+            setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.GAUGE, value);
             return this;
         }
 
@@ -155,12 +155,12 @@ public class AggregateMetricSender {
         }
 
         public Session setGauge(String source, String metric, double value) {
-            setDatapoint(source, metric, SignalFuseProtocolBuffers.MetricType.GAUGE, value);
+            setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.GAUGE, value);
             return this;
         }
 
         private void check(String metricPair,
-                           com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.MetricType
+                           com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType
                                    metricType) {
             if (!registeredMetricPairs.contains(metricPair)) {
                 toBeRegisteredMetricPairs.put(metricPair, metricType);
@@ -196,9 +196,9 @@ public class AggregateMetricSender {
                 }
             }
 
-            Iterator<SignalFuseProtocolBuffers.DataPoint> i = pointsToFlush.iterator();
+            Iterator<SignalFxProtocolBuffers.DataPoint> i = pointsToFlush.iterator();
             while (i.hasNext()) {
-                SignalFuseProtocolBuffers.DataPoint currentEntry = i.next();
+                SignalFxProtocolBuffers.DataPoint currentEntry = i.next();
                 if (!registeredMetricPairs.contains(currentEntry.getMetric())) {
                     i.remove();
                 }
@@ -234,10 +234,10 @@ public class AggregateMetricSender {
 
         Session incrementCounter(String source, String metric, long value);
 
-        Session setDatapoint(String source, String metric, SignalFuseProtocolBuffers.MetricType metricType, long value);
+        Session setDatapoint(String source, String metric, SignalFxProtocolBuffers.MetricType metricType, long value);
 
-        Session setDatapoint(String source, String metric, SignalFuseProtocolBuffers.MetricType metricType, double value);
+        Session setDatapoint(String source, String metric, SignalFxProtocolBuffers.MetricType metricType, double value);
 
-        Session setDatapoint(SignalFuseProtocolBuffers.DataPoint datapoint);
+        Session setDatapoint(SignalFxProtocolBuffers.DataPoint datapoint);
     }
 }

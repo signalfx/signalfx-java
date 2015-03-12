@@ -19,22 +19,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnection
         extends AbstractHttpDataPointProtobufReceiverConnection {
     public HttpDataPointProtobufReceiverConnection(
-            SignalFuseReceiverEndpoint endpoint, int timeoutMs,
+            SignalFxReceiverEndpoint endpoint, int timeoutMs,
             HttpClientConnectionManager httpClientConnectionManager) {
         super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override
-    protected HttpEntity getEntityForVersion(List<SignalFuseProtocolBuffers.DataPoint> dataPoints) {
+    protected HttpEntity getEntityForVersion(List<SignalFxProtocolBuffers.DataPoint> dataPoints) {
         return new InputStreamEntity(
-                new ProtocolBufferStreamingInputStream<SignalFuseProtocolBuffers.DataPoint>(
+                new ProtocolBufferStreamingInputStream<SignalFxProtocolBuffers.DataPoint>(
                         dataPoints.iterator()), PROTO_TYPE);
     }
 
@@ -45,10 +45,10 @@ public class HttpDataPointProtobufReceiverConnection
 
     @Override
     public Map<String, Boolean> registerMetrics(String auth,
-                                                Map<String, SignalFuseProtocolBuffers.MetricType> metricTypes)
+                                                Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
             throws SignalfuseMetricsException {
         Map<String, Boolean> res = new HashMap<String, Boolean>();
-        for (Map.Entry<String, SignalFuseProtocolBuffers.MetricType> i : metricTypes.entrySet()) {
+        for (Map.Entry<String, SignalFxProtocolBuffers.MetricType> i : metricTypes.entrySet()) {
             res.put(i.getKey(), false);
         }
         if (metricTypes.isEmpty()) {
@@ -56,7 +56,7 @@ public class HttpDataPointProtobufReceiverConnection
         }
         List<Map<String, String>> postBodyList = new ArrayList<Map<String, String>>(
                 metricTypes.size());
-        for (Map.Entry<String, SignalFuseProtocolBuffers.MetricType> entity : metricTypes
+        for (Map.Entry<String, SignalFxProtocolBuffers.MetricType> entity : metricTypes
                 .entrySet()) {
             postBodyList.add(ImmutableMap
                     .of("sf_metric", entity.getKey(), "sf_metricType",

@@ -13,8 +13,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.signalfuse.connection.AbstractHttpReceiverConnection;
-import com.signalfuse.endpoint.SignalFuseEndpoint;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.endpoint.SignalFxEndpoint;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
     private static final Logger log = LoggerFactory
@@ -28,9 +28,9 @@ public class HttpDataPointProtobufReceiverConnectionTest {
         server.start();
         final int port = server.getConnectors()[0].getLocalPort();
         DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
-                new SignalFuseEndpoint("http", "localhost", port)).createDataPointReceiver();
+                new SignalFxEndpoint("http", "localhost", port)).createDataPointReceiver();
         dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
-                SignalFuseProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+                SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
         server.stop();
     }
 
@@ -47,8 +47,8 @@ public class HttpDataPointProtobufReceiverConnectionTest {
                 error("Invalid User agent: " + request.getHeader("User-Agent") + " vs " + AbstractHttpReceiverConnection.USER_AGENT, response, baseRequest);
                 return;
             }
-            SignalFuseProtocolBuffers.DataPointUploadMessage all_datapoints =
-                    SignalFuseProtocolBuffers.DataPointUploadMessage.parseFrom(
+            SignalFxProtocolBuffers.DataPointUploadMessage all_datapoints =
+                    SignalFxProtocolBuffers.DataPointUploadMessage.parseFrom(
                             baseRequest.getInputStream());
             if (!all_datapoints.getDatapoints(0).getSource().equals("source")) {
                 error("Invalid datapoint source", response, baseRequest);

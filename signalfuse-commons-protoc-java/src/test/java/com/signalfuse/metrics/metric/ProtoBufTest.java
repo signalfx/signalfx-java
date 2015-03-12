@@ -16,8 +16,8 @@ import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.DataPoint;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.Datum;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.DataPoint;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.Datum;
 import com.google.common.base.Preconditions;
 
 /**

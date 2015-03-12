@@ -17,8 +17,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
-import com.signalfuse.endpoint.SignalFuseEndpoint;
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 import com.signalfuse.metrics.SourceNameHelper;
 import com.signalfuse.metrics.auth.AuthToken;
 import com.signalfuse.metrics.auth.StaticAuthToken;
@@ -27,19 +27,19 @@ import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
 import com.signalfuse.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Reporter object for codahale metrics that reports values to com.signalfuse.signalfuse at some
  * interval.
  */
-public class SignalFuseReporter extends ScheduledReporter {
+public class SignalFxReporter extends ScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final boolean useLocalTime;
 
-    protected SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
+    protected SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
                                  AggregateMetricSender aggregateMetricSender,
                                  Set<MetricDetails> detailsToAdd,
@@ -47,7 +47,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd, metricMetadata, false);
     }
 
-    public SignalFuseReporter(MetricRegistry registry, String name, MetricFilter filter,
+    public SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
                               TimeUnit rateUnit, TimeUnit durationUnit,
                               AggregateMetricSender aggregateMetricSender,
                               Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
@@ -69,16 +69,16 @@ public class SignalFuseReporter extends ScheduledReporter {
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
                 session.addMetric(entry.getValue(), entry.getKey(),
-                        SignalFuseProtocolBuffers.MetricType.GAUGE, entry.getValue().getValue());
+                        SignalFxProtocolBuffers.MetricType.GAUGE, entry.getValue().getValue());
             }
             for (Map.Entry<String, Counter> entry : counters.entrySet()) {
                 if (entry.getValue() instanceof IncrementalCounter) {
                     session.addMetric(entry.getValue(), entry.getKey(),
-                            SignalFuseProtocolBuffers.MetricType.COUNTER,
+                            SignalFxProtocolBuffers.MetricType.COUNTER,
                             ((IncrementalCounter)entry.getValue()).getCountChange());
                 } else {
                     session.addMetric(entry.getValue(), entry.getKey(),
-                            SignalFuseProtocolBuffers.MetricType.CUMULATIVE_COUNTER,
+                            SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER,
                             entry.getValue().getCount());
                 }
             }
@@ -143,7 +143,7 @@ public class SignalFuseReporter extends ScheduledReporter {
         private final MetricRegistry registry;
         private String defaultSourceName;
         private AuthToken authToken;
-        private SignalFuseReceiverEndpoint endpoint = new SignalFuseEndpoint();
+        private SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint();
         private String name = "signalfuse-reporter";
         private int timeoutMs = HttpDataPointProtobufReceiverFactory.DEFAULT_TIMEOUT_MS;
         private DataPointReceiverFactory dataPointReceiverFactory = new
@@ -181,7 +181,7 @@ public class SignalFuseReporter extends ScheduledReporter {
             return this;
         }
 
-        public Builder setEndpoint(SignalFuseReceiverEndpoint endpoint) {
+        public Builder setEndpoint(SignalFxReceiverEndpoint endpoint) {
             this.endpoint = endpoint;
             this.dataPointReceiverFactory =
                     new HttpDataPointProtobufReceiverFactory(endpoint)
@@ -265,10 +265,10 @@ public class SignalFuseReporter extends ScheduledReporter {
             return this;
         }
 
-        public SignalFuseReporter build() {
+        public SignalFxReporter build() {
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
                     defaultSourceName, dataPointReceiverFactory, authToken, onSendErrorHandlerCollection);
-            return new SignalFuseReporter(registry, name, filter, rateUnit, durationUnit,
+            return new SignalFxReporter(registry, name, filter, rateUnit, durationUnit,
                     aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime);
         }
     }

@@ -10,11 +10,11 @@
   </parent>
 
   <artifactId>signalfuse-java</artifactId>
-  <name>SignalFuse java libraries</name>
+  <name>SignalFx java libraries</name>
   <version>0.0.20-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
-    Bare minimum core library needed to sending metrics to SignalFuse from Java clients
+    Bare minimum core library needed to sending metrics to SignalFx from Java clients
   </description>
 
   <url>http://www.signalfuse.com</url>
@@ -38,7 +38,7 @@
       <id>jack</id>
       <name>Jack Lindamood</name>
       <email>jack@signalfuse.com</email>
-      <organization>SignalFuse</organization>
+      <organization>SignalFx</organization>
       <organizationUrl>http://www.signalfuse.com</organizationUrl>
     </developer>
   </developers>

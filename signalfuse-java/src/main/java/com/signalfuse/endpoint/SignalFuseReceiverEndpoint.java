@@ -6,7 +6,7 @@ package com.signalfuse.endpoint;
  *
  * @author jack
  */
-public interface SignalFuseReceiverEndpoint {
+public interface SignalFxReceiverEndpoint {
     String getScheme();
     String getHostname();
     int getPort();

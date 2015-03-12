@@ -1,14 +1,14 @@
 package com.signalfuse.metrics.endpoint;
 
-import com.signalfuse.endpoint.SignalFuseEndpoint;
+import com.signalfuse.endpoint.SignalFxEndpoint;
 
 /**
- * Parameters that specify how to connect to SignalFuse API endpoint
+ * Parameters that specify how to connect to SignalFx API endpoint
  *
- * @deprecated use {@link SignalFuseEndpoint}
+ * @deprecated use {@link SignalFxEndpoint}
  * @author jack
  */
 @Deprecated
-public class DataPointEndpoint extends SignalFuseEndpoint{
+public class DataPointEndpoint extends SignalFxEndpoint{
 
 }

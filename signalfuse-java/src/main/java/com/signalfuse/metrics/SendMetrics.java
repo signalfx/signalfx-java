@@ -5,13 +5,13 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Properties;
 
-import com.signalfuse.endpoint.SignalFuseEndpoint;
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 import com.signalfuse.metrics.auth.StaticAuthToken;
 import com.signalfuse.metrics.connection.HttpDataPointProtobufReceiverFactory;
 import com.signalfuse.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfuse.metrics.flush.AggregateMetricSender;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 public final class SendMetrics {
     private SendMetrics() {
@@ -24,8 +24,8 @@ public final class SendMetrics {
         final String hostUrlStr = prop.getProperty("host");
         final URL hostUrl = new URL(hostUrlStr);
         System.out.println("Auth=" + auth_token + " .. host=" + hostUrl);
-        SignalFuseReceiverEndpoint endpoint =
-                new SignalFuseEndpoint(hostUrl.getProtocol(),
+        SignalFxReceiverEndpoint endpoint =
+                new SignalFxEndpoint(hostUrl.getProtocol(),
                                       hostUrl.getHost(),
                                       hostUrl.getPort());
         AggregateMetricSender mf =
@@ -47,13 +47,13 @@ public final class SendMetrics {
 //                i.setCumulativeCounter("cumulativeCounter", count);
 //                i.setGauge("testgauge2", System.currentTimeMillis());
                 i.setDatapoint(
-                        SignalFuseProtocolBuffers.DataPoint.newBuilder()
+                        SignalFxProtocolBuffers.DataPoint.newBuilder()
                                 .setMetric("curtime")
                                 .setValue(
-                                        SignalFuseProtocolBuffers.Datum.newBuilder()
+                                        SignalFxProtocolBuffers.Datum.newBuilder()
                                                 .setIntValue(System.currentTimeMillis()))
                                 .addDimensions(
-                                        SignalFuseProtocolBuffers.Dimension.newBuilder()
+                                        SignalFxProtocolBuffers.Dimension.newBuilder()
                                                 .setKey("source")
                                                 .setValue("java"))
                                 .build());

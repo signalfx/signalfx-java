@@ -4,16 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 public interface DataPointReceiver {
-    void addDataPoints(String auth, List<SignalFuseProtocolBuffers.DataPoint> dataPoints)
+    void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
             throws SignalfuseMetricsException;
 
     void backfillDataPoints(String auth, String source, String metric,
-                            List<SignalFuseProtocolBuffers.Datum> datumPoints)
+                            List<SignalFxProtocolBuffers.Datum> datumPoints)
             throws SignalfuseMetricsException;
 
-    Map<String, Boolean> registerMetrics(String auth, Map<String, SignalFuseProtocolBuffers.MetricType> metricTypes)
+    Map<String, Boolean> registerMetrics(String auth, Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
             throws SignalfuseMetricsException;
 }

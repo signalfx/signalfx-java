@@ -24,9 +24,9 @@ import com.signalfuse.codahale.metrics.MetricBuilder;
  * </p>
  * <p>
  * A {@link com.codahale.metrics.Counter} assumes metric type
- * {@link com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.MetricType#CUMULATIVE_COUNTER},
+ * {@link com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER},
  * while this class assumes metric type
- * {@link com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers.MetricType#COUNTER}
+ * {@link com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers.MetricType#COUNTER}
  */
 public class IncrementalCounter extends Counter {
     /**

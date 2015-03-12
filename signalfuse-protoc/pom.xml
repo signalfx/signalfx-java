@@ -10,12 +10,12 @@
   </parent>
 
   <artifactId>signalfuse-protoc</artifactId>
-  <name>SignalFuse Protocol Buffer definitions</name>
+  <name>SignalFx Protocol Buffer definitions</name>
   <version>0.0.20-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <description>
-    Protocol buffer definitions for sending datapoints to SignalFuse
+    Protocol buffer definitions for sending datapoints to SignalFx
   </description>
 
   <url>http://www.signalfuse.com</url>
@@ -40,7 +40,7 @@
       <id>jack</id>
       <name>Jack Lindamood</name>
       <email>jack@signalfuse.com</email>
-      <organization>SignalFuse</organization>
+      <organization>SignalFx</organization>
       <organizationUrl>http://www.signalfuse.com</organizationUrl>
     </developer>
   </developers>

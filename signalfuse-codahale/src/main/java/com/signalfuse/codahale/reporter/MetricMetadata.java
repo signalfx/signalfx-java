@@ -5,7 +5,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.signalfuse.codahale.metrics.MetricBuilder;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Allows users to modify a metric with different source or metric parts than the default we pick
@@ -15,7 +15,7 @@ public interface MetricMetadata {
     public static final String SOURCE = "source";
     public static final String METRIC = "metric";
     public Map<String, String> getTags(Metric metric);
-    public Optional<SignalFuseProtocolBuffers.MetricType> getMetricType(Metric metric);
+    public Optional<SignalFxProtocolBuffers.MetricType> getMetricType(Metric metric);
 
     /**
      * Create an object to tag a metric with data.  Registering two different metrics with the same
@@ -51,7 +51,7 @@ public interface MetricMetadata {
         /**
          * Changes the metric name of this metric from the default (which is the codahale metric
          * name), to another string
-         * @param metricName    The new name in SignalFuse of this metric
+         * @param metricName    The new name in SignalFx of this metric
          * @return this
          */
         T withMetricName(String metricName);
@@ -65,11 +65,11 @@ public interface MetricMetadata {
         T withDimension(String key, String value);
 
         /**
-         * Changes the default metric type of this metric to the SignalFuse metric type passed in
+         * Changes the default metric type of this metric to the SignalFx metric type passed in
          * @param metricType    The new metric type of this metric
          * @return this
          */
-        T withMetricType(SignalFuseProtocolBuffers.MetricType metricType);
+        T withMetricType(SignalFxProtocolBuffers.MetricType metricType);
     }
 
     public interface Tagger<M extends Metric> extends TaggerBase<M, Tagger<M>> {

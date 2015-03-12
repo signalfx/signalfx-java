@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 
 public abstract class AbstractHttpReceiverConnection {
 
@@ -32,7 +32,7 @@ public abstract class AbstractHttpReceiverConnection {
     protected final RequestConfig requestConfig;
 
     protected AbstractHttpReceiverConnection(
-            SignalFuseReceiverEndpoint endpoint,
+            SignalFxReceiverEndpoint endpoint,
             int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)

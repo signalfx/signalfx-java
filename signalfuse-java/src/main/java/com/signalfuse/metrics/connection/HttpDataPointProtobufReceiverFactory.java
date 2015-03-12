@@ -3,20 +3,20 @@ package com.signalfuse.metrics.connection;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 import com.signalfuse.metrics.SignalfuseMetricsException;
 
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
     public static final int DEFAULT_VERSION = 2;
 
-    private final SignalFuseReceiverEndpoint endpoint;
+    private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager =
             new BasicHttpClientConnectionManager();
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
 
-    public HttpDataPointProtobufReceiverFactory(SignalFuseReceiverEndpoint endpoint) {
+    public HttpDataPointProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
     }
 

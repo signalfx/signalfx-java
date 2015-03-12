@@ -13,22 +13,22 @@ import org.apache.http.entity.InputStreamEntity;
 
 import com.signalfuse.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfuse.connection.AbstractHttpReceiverConnection;
-import com.signalfuse.endpoint.SignalFuseReceiverEndpoint;
+import com.signalfuse.endpoint.SignalFxReceiverEndpoint;
 import com.signalfuse.metrics.SignalfuseMetricsException;
-import com.signalfuse.metrics.protobuf.SignalFuseProtocolBuffers;
+import com.signalfuse.metrics.protobuf.SignalFxProtocolBuffers;
 
 public abstract class AbstractHttpDataPointProtobufReceiverConnection extends AbstractHttpReceiverConnection implements DataPointReceiver {
 
     protected static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
 
     public AbstractHttpDataPointProtobufReceiverConnection(
-            SignalFuseReceiverEndpoint endpoint,
+            SignalFxReceiverEndpoint endpoint,
             int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
        super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override
-    public void addDataPoints(String auth, List<SignalFuseProtocolBuffers.DataPoint> dataPoints)
+    public void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
             throws SignalfuseMetricsException {
         if (dataPoints.isEmpty()) {
             return;
@@ -64,11 +64,11 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
     protected abstract String getEndpointForAddDatapoints();
 
     protected abstract HttpEntity getEntityForVersion(
-            List<SignalFuseProtocolBuffers.DataPoint> dataPoints);
+            List<SignalFxProtocolBuffers.DataPoint> dataPoints);
 
     @Override
     public void backfillDataPoints(String auth, String source, String metric,
-                                   List<SignalFuseProtocolBuffers.Datum> datumPoints)
+                                   List<SignalFxProtocolBuffers.Datum> datumPoints)
             throws SignalfuseMetricsException {
         if (datumPoints.isEmpty()) {
             return;
@@ -78,7 +78,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
             try {
                 resp = postToEndpoint(auth,
                         new InputStreamEntity(
-                                new ProtocolBufferStreamingInputStream<SignalFuseProtocolBuffers.Datum>(
+                                new ProtocolBufferStreamingInputStream<SignalFxProtocolBuffers.Datum>(
                                         datumPoints.iterator()), PROTO_TYPE)
                         , "/v1/backfill");
                 if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {

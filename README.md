@@ -1,9 +1,9 @@
-# SignalFuse client libraries [![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
+# SignalFx client libraries [![Build Status](https://travis-ci.org/signalfx/signalfuse-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfuse-java)
 
 This repository contains libraries for instrumenting applications in a
-variety of languages and reporting these metrics to SignalFuse. You will
-need a SignalFuse account and organization API token to use those. For
-more information on SignalFuse and to create an account, go to
+variety of languages and reporting these metrics to SignalFx. You will
+need a SignalFx account and organization API token to use those. For
+more information on SignalFx and to create an account, go to
 http://www.signalfuse.com.
 
 The recommended way to send metrics with java is to use codahale metrics.
@@ -43,11 +43,11 @@ $ mvn install
 ...
 ...
 ...
-[INFO] SignalFuse parent .................................. SUCCESS [  2.483 s]
-[INFO] SignalFuse Protocol Buffer definitions ............. SUCCESS [  5.503 s]
-[INFO] SignalFuse Protobuf Utilities ...................... SUCCESS [  2.269 s]
-[INFO] SignalFuse java libraries .......................... SUCCESS [  3.728 s]
-[INFO] Codahale to SignalFuse ............................. SUCCESS [  2.910 s]
+[INFO] SignalFx parent .................................. SUCCESS [  2.483 s]
+[INFO] SignalFx Protocol Buffer definitions ............. SUCCESS [  5.503 s]
+[INFO] SignalFx Protobuf Utilities ...................... SUCCESS [  2.269 s]
+[INFO] SignalFx java libraries .......................... SUCCESS [  3.728 s]
+[INFO] Codahale to SignalFx ............................. SUCCESS [  2.910 s]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
@@ -59,7 +59,7 @@ $ mvn install
 
 ### Codahale
 
-Codahale metrics are the recommended way of integrating your java code with SignalFuse.
+Codahale metrics are the recommended way of integrating your java code with SignalFx.
 More information on the Codahale Metrics library can be found on the
 [Codahale Metrics website](https://dropwizard.github.io/metrics/).
 
@@ -67,7 +67,7 @@ More information on the Codahale Metrics library can be found on the
 
 ```java
 final MetricRegistry metricRegistery = new MetricRegistry();
-final SignalFuseReporter signalfuseReporter = new SignalFuseReporter.Builder(
+final SignalFxReporter signalfuseReporter = new SignalFxReporter.Builder(
     metricRegistery,
     "SIGNALFUSE_AUTH_TOKEN"
 ).build();
@@ -86,9 +86,9 @@ final MetricMetadata metricMetadata = signalfuseReporter.getMetricMetadata();
         });
 ```
 
-#### Adding Dimensions and SignalFuse metadata to Codahale metrics
+#### Adding Dimensions and SignalFx metadata to Codahale metrics
 
-You can add SignalFuse specific metadata to codahale metrics by using
+You can add SignalFx specific metadata to codahale metrics by using
 the MetricMetadata of the reporter.  When you use MetricMetadata, rather
 than register your metric directly with the metricRegistry, you should
 call the .register() method you get from the call forMetric().  This will
@@ -138,9 +138,9 @@ use code like this.
 
 #### After setting up Codahale
 
-After setting up a SignalFuseReporter, you can use codahale metrics as
+After setting up a SignalFxReporter, you can use codahale metrics as
 you normally would, reported at the frequency configured to the
-`SignalFuseReporter`.
+`SignalFxReporter`.
 
 ## Sending metrics without using codahale (not recommended)
 
@@ -158,13 +158,13 @@ You can also interact with our java library directly if you do not want to use
                                           Collections.<OnSendErrorHandler>emptyList());
       try (AggregateMetricSender.Session i = mf.createSession()) {
           i.setDatapoint(
-             SignalFuseProtocolBuffers.DataPoint.newBuilder()
+             SignalFxProtocolBuffers.DataPoint.newBuilder()
                .setMetric("curtime")
                .setValue(
-                 SignalFuseProtocolBuffers.Datum.newBuilder()
+                 SignalFxProtocolBuffers.Datum.newBuilder()
                  .setIntValue(System.currentTimeMillis()))
                .addDimensions(
-                 SignalFuseProtocolBuffers.Dimension.newBuilder()
+                 SignalFxProtocolBuffers.Dimension.newBuilder()
                    .setKey("source")
                    .setValue("java"))
                .build());
