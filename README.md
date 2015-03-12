@@ -69,7 +69,7 @@ More information on the Codahale Metrics library can be found on the
 final MetricRegistry metricRegistery = new MetricRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistery,
-    "SIGNALFUSE_AUTH_TOKEN"
+    "SIGNALFX_AUTH_TOKEN"
 ).build();
 signalfxReporter.start(1, TimeUnit.SECONDS);
 final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();

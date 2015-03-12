@@ -50,17 +50,17 @@ public class SignalFxEndpoint implements SignalFxReceiverEndpoint {
     }
 
     private static String getDefaultScheme() {
-        return getPropertyOrEnv("com.signalfx.api.scheme", "SIGNALFUSE_API_SCHEME", DEFAULT_SCHEME);
+        return getPropertyOrEnv("com.signalfx.api.scheme", "SIGNALFX_API_SCHEME", DEFAULT_SCHEME);
     }
 
     private static String getDefaultHostname() {
         return getPropertyOrEnv("com.signalfx.api.hostname",
-                                "SIGNALFUSE_API_HOSTNAME", DEFAULT_HOSTNAME);
+                                "SIGNALFX_API_HOSTNAME", DEFAULT_HOSTNAME);
     }
 
     private static int getDefaultPort() throws NumberFormatException {
         final String foundPort = getPropertyOrEnv("com.signalfx.api.port",
-                                    "SIGNALFUSE_API_PORT", Integer.toString(DEFAULT_PORT));
+                                    "SIGNALFX_API_PORT", Integer.toString(DEFAULT_PORT));
         try {
             return Integer.parseInt(foundPort);
         } catch (NumberFormatException e) {

@@ -16,7 +16,7 @@ public final class SourceNameHelper {
         if (sourceName != null && !sourceName.isEmpty()) {
             return sourceName;
         }
-        sourceName = System.getenv("SIGNALFUSE_SOURCE_NAME");
+        sourceName = System.getenv("SIGNALFX_SOURCE_NAME");
         if (sourceName != null && !sourceName.isEmpty()) {
             return sourceName;
         }
