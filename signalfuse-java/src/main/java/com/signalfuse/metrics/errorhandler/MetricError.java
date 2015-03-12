@@ -1,6 +1,6 @@
 package com.signalfx.metrics.errorhandler;
 
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 
 /**
  * An error that happened trying to send a metric.
@@ -22,5 +22,5 @@ public interface MetricError {
      * An exception, if any, that triggered this error.  Can be null!
      * @return  The exception that triggered this error, or null if no exception caused this error.
      */
-    SignalfuseMetricsException getException();
+    SignalFxMetricsException getException();
 }

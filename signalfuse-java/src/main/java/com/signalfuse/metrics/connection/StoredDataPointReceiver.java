@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.Dimension;
 
@@ -35,9 +35,9 @@ public class StoredDataPointReceiver implements DataPointReceiver {
 
     @Override
     public void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
-            throws SignalfuseMetricsException {
+            throws SignalFxMetricsException {
         if (throwOnAdd) {
-            throw new SignalfuseMetricsException("Flag set to true");
+            throw new SignalFxMetricsException("Flag set to true");
         }
         addDataPoints.addAll(dataPoints);
         for (SignalFxProtocolBuffers.DataPoint dp: dataPoints) {
@@ -66,12 +66,12 @@ public class StoredDataPointReceiver implements DataPointReceiver {
     @Override
     public void backfillDataPoints(String auth, String source, String metric,
                                    List<SignalFxProtocolBuffers.Datum> datumPoints)
-            throws SignalfuseMetricsException {}
+            throws SignalFxMetricsException {}
 
     @Override
     public Map<String, Boolean> registerMetrics(String auth,
                                 Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
-            throws SignalfuseMetricsException {
+            throws SignalFxMetricsException {
         registeredMetrics.putAll(metricTypes);
         Map<String, Boolean> ret = new HashMap<String, Boolean>();
         for (Map.Entry<String, SignalFxProtocolBuffers.MetricType> i: metricTypes.entrySet()) {

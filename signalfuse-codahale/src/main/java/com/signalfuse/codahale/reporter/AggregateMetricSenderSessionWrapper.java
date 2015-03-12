@@ -11,7 +11,7 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
@@ -52,7 +52,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         try {
             metricSenderSession.close();
         } catch (Exception e) {
-            throw new SignalfuseMetricsException("Unable to close session and send metrics", e);
+            throw new SignalFxMetricsException("Unable to close session and send metrics", e);
         }
     }
 

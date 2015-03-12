@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableSet;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
- * Utility functions that make common Signalfuse operations easier to do.
+ * Utility functions that make common SignalFx operations easier to do.
  */
 public class SfUtil {
     private SfUtil(){}
@@ -21,12 +21,12 @@ public class SfUtil {
      * type metric who's value is returned from a callback.  The metric is internally stored as the
      * {@link com.codahale.metrics.Gauge} type inside the {@link com.codahale.metrics.MetricRegistry},
      * but the callback is expected to behave like a cumulative counter and the value is sent to
-     * Signalfuse as a cumulative counter.
+     * SignalFx as a cumulative counter.
      * </p>
      * <p>
      *     This is useful when you can query for an absolute number of events, but cannot register
      *     a callback per event.  Rather than behaving like a Gauge, it will signal a rate of events
-     *     to Signalfuse.
+     *     to SignalFx.
      * </p>
      * @param metricRegistry    Where the counter lives
      * @param name              Name of the counter

@@ -7,12 +7,12 @@ import com.signalfx.codahale.metrics.MetricBuilder;
 /**
  * <p>
  * An {@link com.signalfx.codahale.reporter.IncrementalCounter} is a counter that reports
- * incremental values to Signalfuse rather than absolute counts.  For example,
+ * incremental values to SignalFx rather than absolute counts.  For example,
  * a regular {@link com.codahale.metrics.Counter} reports a monotonically increasing series of
  * values (1, 2, 3, 4, ...) while this class reports a series of increments (+1, +1, +1, +1), but
  * both represent the same rate of 1 unit per reporting interval. A
  * {@link com.codahale.metrics.Counter} created the regular Codahale way is the preferred way
- * to report incremental values to Signalfuse when possible.
+ * to report incremental values to SignalFx when possible.
  * </p>
  * <p>
  * An example use case of this class would be if you wanted to count the number of requests to a webpage,

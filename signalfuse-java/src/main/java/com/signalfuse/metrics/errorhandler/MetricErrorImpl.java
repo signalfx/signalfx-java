@@ -1,13 +1,13 @@
 package com.signalfx.metrics.errorhandler;
 
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 
 public class MetricErrorImpl implements MetricError {
     private final String message;
     private final MetricErrorType code;
-    private final SignalfuseMetricsException signalfxMetricsException;
+    private final SignalFxMetricsException signalfxMetricsException;
 
-    public MetricErrorImpl(String message, MetricErrorType code, SignalfuseMetricsException signalfxMetricsException) {
+    public MetricErrorImpl(String message, MetricErrorType code, SignalFxMetricsException signalfxMetricsException) {
         this.message = message;
         this.code = code;
         this.signalfxMetricsException = signalfxMetricsException;
@@ -21,7 +21,7 @@ public class MetricErrorImpl implements MetricError {
         return this.message;
     }
 
-    @Override public SignalfuseMetricsException getException() {
+    @Override public SignalFxMetricsException getException() {
         return this.signalfxMetricsException;
     }
 }

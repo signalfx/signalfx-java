@@ -4,7 +4,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
@@ -37,7 +37,7 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
 
     @Override
     public DataPointReceiver createDataPointReceiver() throws
-            SignalfuseMetricsException {
+            SignalFxMetricsException {
         if (version == 1) {
             return new HttpDataPointProtobufReceiverConnection(endpoint, this.timeoutMs, httpClientConnectionManager);
         } else {

@@ -9,7 +9,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionV2
@@ -35,7 +35,7 @@ public class HttpDataPointProtobufReceiverConnectionV2
     @Override
     public Map<String, Boolean> registerMetrics(String auth,
                                                 Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
-            throws SignalfuseMetricsException {
+            throws SignalFxMetricsException {
         Map<String, Boolean> res = new HashMap<String, Boolean>();
         for (Map.Entry<String, SignalFxProtocolBuffers.MetricType> i : metricTypes.entrySet()) {
             res.put(i.getKey(), true);

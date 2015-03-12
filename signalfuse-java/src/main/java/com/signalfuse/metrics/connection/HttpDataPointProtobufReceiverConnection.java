@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnection
@@ -46,7 +46,7 @@ public class HttpDataPointProtobufReceiverConnection
     @Override
     public Map<String, Boolean> registerMetrics(String auth,
                                                 Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
-            throws SignalfuseMetricsException {
+            throws SignalFxMetricsException {
         Map<String, Boolean> res = new HashMap<String, Boolean>();
         for (Map.Entry<String, SignalFxProtocolBuffers.MetricType> i : metricTypes.entrySet()) {
             res.put(i.getKey(), false);
@@ -67,7 +67,7 @@ public class HttpDataPointProtobufReceiverConnection
         try {
             map_as_json = MAPPER.writeValueAsBytes(postBodyList);
         } catch (JsonProcessingException e) {
-            throw new SignalfuseMetricsException("Unable to write protocol buffer", e);
+            throw new SignalFxMetricsException("Unable to write protocol buffer", e);
         }
         String body = "";
         try {
@@ -78,11 +78,11 @@ public class HttpDataPointProtobufReceiverConnection
                 try {
                     body = IOUtils.toString(resp.getEntity().getContent());
                 } catch (IOException e) {
-                    throw new SignalfuseMetricsException("Unable to get reponse content",
+                    throw new SignalFxMetricsException("Unable to get reponse content",
                             e);
                 }
                 if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new SignalfuseMetricsException("Invalid status code "
+                    throw new SignalFxMetricsException("Invalid status code "
                             + resp.getStatusLine().getStatusCode() + ": " + body);
                 }
                 List<Map<String, String>> respObject =
@@ -90,7 +90,7 @@ public class HttpDataPointProtobufReceiverConnection
                                 new TypeReference<List<Map<String, String>>>() {
                                 });
                 if (respObject.size() != metricTypes.size()) {
-                    throw new SignalfuseMetricsException(
+                    throw new SignalFxMetricsException(
                             String.format("json map mismatch: post_body=%s, resp=%s",
                                     new String(map_as_json), body));
                 }
@@ -106,7 +106,7 @@ public class HttpDataPointProtobufReceiverConnection
                 }
             }
         } catch (IOException e) {
-            throw new SignalfuseMetricsException(
+            throw new SignalFxMetricsException(
                     String.format("post_body=%s, resp=%s", new String(map_as_json), body), e);
         }
         return res;

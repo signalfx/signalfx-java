@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.NoAuthTokenException;
 import com.signalfx.metrics.connection.DataPointReceiver;
@@ -65,7 +65,7 @@ public class AggregateMetricSender {
     }
 
     private void communicateError(String message, MetricErrorType code,
-                                  SignalfuseMetricsException signalfxMetricsException) {
+                                  SignalFxMetricsException signalfxMetricsException) {
         for (OnSendErrorHandler onSendErrorHandler : onSendErrorHandlerCollection) {
             onSendErrorHandler
                     .handleError(new MetricErrorImpl(message, code, signalfxMetricsException));
@@ -188,7 +188,7 @@ public class AggregateMetricSender {
                             registeredMetricPairs.add(i.getKey());
                         }
                     }
-                } catch (SignalfuseMetricsException e) {
+                } catch (SignalFxMetricsException e) {
                     communicateError("Unable to register metrics",
                             MetricErrorType.REGISTRATION_ERROR,
                             e);
@@ -207,7 +207,7 @@ public class AggregateMetricSender {
             if (!pointsToFlush.isEmpty()) {
                 try {
                     dataPointReceiver.addDataPoints(authTokenStr, pointsToFlush);
-                } catch (SignalfuseMetricsException e) {
+                } catch (SignalFxMetricsException e) {
                     communicateError("Unable to send datapoints",
                             MetricErrorType.DATAPOINT_SEND_ERROR,
                             e);

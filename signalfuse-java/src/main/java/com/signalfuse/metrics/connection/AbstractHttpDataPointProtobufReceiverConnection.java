@@ -14,7 +14,7 @@ import org.apache.http.entity.InputStreamEntity;
 import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfx.connection.AbstractHttpReceiverConnection;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import com.signalfx.metrics.SignalfuseMetricsException;
+import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public abstract class AbstractHttpDataPointProtobufReceiverConnection extends AbstractHttpReceiverConnection implements DataPointReceiver {
@@ -29,7 +29,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
 
     @Override
     public void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
-            throws SignalfuseMetricsException {
+            throws SignalFxMetricsException {
         if (dataPoints.isEmpty()) {
             return;
         }
@@ -42,14 +42,14 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 try {
                     body = IOUtils.toString(resp.getEntity().getContent());
                 } catch (IOException e) {
-                    throw new SignalfuseMetricsException("Unable to get reponse content", e);
+                    throw new SignalFxMetricsException("Unable to get reponse content", e);
                 }
                 if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new SignalfuseMetricsException("Invalid status code "
+                    throw new SignalFxMetricsException("Invalid status code "
                             + resp.getStatusLine().getStatusCode() + ": " + body);
                 }
                 if (!"\"OK\"".equals(body)) {
-                    throw new SignalfuseMetricsException("Invalid response body: " + body);
+                    throw new SignalFxMetricsException("Invalid response body: " + body);
                 }
             } finally {
                 if (resp != null) {
@@ -57,7 +57,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 }
             }
         } catch (IOException e) {
-            throw new SignalfuseMetricsException("Exception posting to addDataPoints", e);
+            throw new SignalFxMetricsException("Exception posting to addDataPoints", e);
         }
     }
 
@@ -69,7 +69,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
     @Override
     public void backfillDataPoints(String auth, String source, String metric,
                                    List<SignalFxProtocolBuffers.Datum> datumPoints)
-            throws SignalfuseMetricsException {
+            throws SignalFxMetricsException {
         if (datumPoints.isEmpty()) {
             return;
         }
@@ -82,7 +82,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                                         datumPoints.iterator()), PROTO_TYPE)
                         , "/v1/backfill");
                 if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new SignalfuseMetricsException(
+                    throw new SignalFxMetricsException(
                             "Invalid status coded " + resp.getStatusLine().getStatusCode());
                 }
             } finally {
@@ -91,7 +91,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 }
             }
         } catch (IOException e) {
-            throw new SignalfuseMetricsException("Exception posting to addDataPoints", e);
+            throw new SignalFxMetricsException("Exception posting to addDataPoints", e);
         }
     }
 }

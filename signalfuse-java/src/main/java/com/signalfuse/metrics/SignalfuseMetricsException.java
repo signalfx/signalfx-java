@@ -1,20 +1,20 @@
 package com.signalfx.metrics;
 
-public class SignalfuseMetricsException extends RuntimeException {
+public class SignalFxMetricsException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public SignalfuseMetricsException() {
+    public SignalFxMetricsException() {
     }
 
-    public SignalfuseMetricsException(String message) {
+    public SignalFxMetricsException(String message) {
         super(message);
     }
 
-    public SignalfuseMetricsException(String message, Throwable cause) {
+    public SignalFxMetricsException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public SignalfuseMetricsException(Throwable cause) {
+    public SignalFxMetricsException(Throwable cause) {
         super(cause);
     }
 }
