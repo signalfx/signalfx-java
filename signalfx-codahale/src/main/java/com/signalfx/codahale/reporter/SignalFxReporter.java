@@ -68,8 +68,17 @@ public class SignalFxReporter extends ScheduledReporter {
                 aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime);
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
-                session.addMetric(entry.getValue(), entry.getKey(),
-                        SignalFxProtocolBuffers.MetricType.GAUGE, entry.getValue().getValue());
+                Gauge gauge = entry.getValue();
+                if (gauge instanceof SettableGauge) {
+                    SettableGauge settableGauge = (SettableGauge) gauge;
+                    if (!settableGauge.hasChanged()) {
+                        continue;
+                    }
+                    settableGauge.markReported();
+                }
+
+                session.addMetric(gauge, entry.getKey(),
+                        SignalFxProtocolBuffers.MetricType.GAUGE, gauge.getValue());
             }
             for (Map.Entry<String, Counter> entry : counters.entrySet()) {
                 if (entry.getValue() instanceof IncrementalCounter) {

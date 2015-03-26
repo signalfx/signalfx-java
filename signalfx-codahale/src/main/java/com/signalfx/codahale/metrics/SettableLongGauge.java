@@ -1,7 +1,7 @@
 package com.signalfx.codahale.metrics;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
+import com.signalfx.codahale.reporter.SettableGauge;
 
 /**
  * <p>
@@ -9,19 +9,19 @@ import com.codahale.metrics.Metric;
  * is set when needed.  This can be somewhat convienent, but direct use of a Gauge is likely better
  * </p>
  * <p>
- *     Usage example:
- *     <pre>{@code
- *       MetricRegister metricRegistry;
- *       SettableLongGauge settable = metricRegistry.register("metric.name", new SettableLongGauge());
- *       // ...
- *       settable.setValue(100);
- *       // ...
- *       settable.setValue(200);
- *     }
- *
- *     </pre>
+ * Usage example:
+ * </p>
+ * <pre>{@code
+ *   MetricRegister metricRegistry;
+ *   SettableLongGauge settable = metricRegistry.register("metric.name", new SettableLongGauge());
+ *   // ...
+ *   settable.setValue(100);
+ *   // ...
+ *   settable.setValue(200);
+ * }
+ * </pre>
  */
-public class SettableLongGauge implements Metric, Gauge<Long> {
+public class SettableLongGauge extends SettableGauge<Long> {
     /**
      * Current value.  Assignment will be atomic.  <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7">See 17.7</a>
      */
@@ -34,6 +34,7 @@ public class SettableLongGauge implements Metric, Gauge<Long> {
      */
     public SettableLongGauge setValue(long value) {
         this.value = value;
+        markSet();
         return this;
     }
 
