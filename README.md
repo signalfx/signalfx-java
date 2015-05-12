@@ -136,6 +136,18 @@ use code like this.
 
 ```
 
+#### Changing the default source
+
+The default source name for metrics is discovered by [SourceNameHelper]( signalfx-java/src/main/java/com/signalfx/metrics/SourceNameHelper.java).  If you want to override the default behavior, you can pass a third parameter to your Builder and that String is then used as the source.  If you are using AWS, we provide a helper to extract your AWS instance ID and use that as the source.  For example:
+
+```
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+    metricRegistery,
+    "SIGNALFX_AUTH_TOKEN",
+    SourceNameHelper.getAwsInstanceId()
+).build();
+```
+
 #### After setting up Codahale
 
 After setting up a SignalFxReporter, you can use codahale metrics as
