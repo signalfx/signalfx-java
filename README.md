@@ -167,6 +167,13 @@ You can also interact with our java library directly if you do not want to use
                                                   dataPointEndpoint)
                                                   .setVersion(2),
                                           new StaticAuthToken(auth_token),
+                                          Collections.<OnSendErrorHandler>singleton(new OnSendErrorHandler() {
+                                            @Override
+                                            public void handleError(MetricError metricError) {
+                                              System.out.println("Unable to POST metrics: " + metricError.getMessage());
+                                            }
+                                          }));
+
                                           Collections.<OnSendErrorHandler>emptyList());
       try (AggregateMetricSender.Session i = mf.createSession()) {
           i.setDatapoint(
