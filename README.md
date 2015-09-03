@@ -18,10 +18,20 @@ signalfx-java will support this.
 
 ### With Maven
 
+```Codahale 3.0.x
 ```xml
 <dependency>
   <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-codahale</artifactId>
+  <version>0.0.21</version>
+</dependency>
+```
+
+```Yammer Metrics 2.0.x
+```xml
+<dependency>
+<groupId>com.signalfx.public</groupId>
+  <artifactId>signalfx-yammer</artifactId>
   <version>0.0.21</version>
 </dependency>
 ```
@@ -77,8 +87,11 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 
 #### Sending a metric with Codahale
 
+```Codahale 3.0.x
 ```java
-// This will send the current time in ms to signalfx as a gauge
+
+        // This will send the current time in ms to signalfx as a gauge
+
         metricRegistery.register("gauge", new Gauge<Long>() {
             public Long getValue() {
                 return System.currentTimeMillis;
@@ -86,7 +99,22 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
         });
 ```
 
+```Yammer Metrics 2.0.x
+```java
+
+        // This will send the current time in ms to signalfx as a gauge
+
+        MetricName gaugeName = new MetricName("group", "type", "gauge");
+        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
+            @Override
+            public Integer value() {
+                return System.currentTimeMillis;
+            }
+        });
+
 #### Adding Dimensions and SignalFx metadata to Codahale metrics
+
+```Codahale 3.0.x
 
 You can add SignalFx specific metadata to codahale metrics by using
 the MetricMetadata of the reporter.  When you use MetricMetadata, rather
@@ -95,8 +123,10 @@ call the .register() method you get from the call forMetric().  This will
 construct a unique codahale string for your metric.
 
 ```java
-// This will send the size of a queue as a gauge, tagging the queue
-// with a dimension to describe it
+        
+        // This will send the size of a queue as a gauge, tagging the queue
+        // with a dimension to describe it
+        
         final Queue customerQueue = new ArrayBlockingQueue(100);
         metricMetadata.forMetric(new Gauge<Long>() {
             @Override
@@ -107,7 +137,27 @@ construct a unique codahale string for your metric.
                 .register(metricRegistery);
 ```
 
+```Yammer Metrics 2.0.x
+
+You can add SignalFx specific metadata to yammer metrics by using
+the MetricMetadata of the reporter.
+
+        final Queue customerQueue = new ArrayBlockingQueue(100);
+
+        MetricName gaugeName = new MetricName("group", "type", "gauge");
+        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
+            @Override
+            public Integer value() {
+                return System.currentTimeMillis;
+            }
+        });
+
+        metricMetadata.forMetric(gauge).withDimension("queue_name", "customer_backlog");
+
+
 #### Adding Dimensions without knowing if they already exist
+
+```Codahale 3.0.x
 
 It is recommended to create your Codahale object as a counter
 or gauge as a field of your class then use that field to increment
@@ -135,6 +185,11 @@ use code like this.
 //        }
 
 ```
+
+```Yammer Metrics 2.0.x
+
+NOT SUPPORTED;
+
 
 #### Changing the default source
 

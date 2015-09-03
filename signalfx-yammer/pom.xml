@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.signalfx.public</groupId>
+    <artifactId>clients-parent</artifactId>
+    <version>0.0.22-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>signalfx-yammer</artifactId>
+  <name>Yammer to SignalFx</name>
+  <version>0.0.22-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <description>
+    Codahale yammer metrics plugin for signalfx / yammer metrics lib v2.0
+  </description>
+
+  <url>http://www.signalfx.com</url>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:signalfx/signalfx-clients.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfx-clients.git</developerConnection>
+    <url>git@github.com:signalfx/signalfx-clients.git</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>SignalFx</id>
+      <name>SignalFx</name>
+      <email>info@signalfx.com</email>
+      <organization>SignalFx</organization>
+      <organizationUrl>http://www.signalfx.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-protoc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.yammer.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
