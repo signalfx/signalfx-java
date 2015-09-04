@@ -62,6 +62,12 @@ public class SignalFxReporter extends CustomScheduledReporter {
         this.metricMetadata = metricMetadata;
     }
 
+    /**
+     * 
+     * Reports all given metrics here
+     * 
+     */
+    
     @Override
     public void report(	SortedMap<MetricName, Gauge> gauges, 
     					SortedMap<MetricName, Counter> counters,

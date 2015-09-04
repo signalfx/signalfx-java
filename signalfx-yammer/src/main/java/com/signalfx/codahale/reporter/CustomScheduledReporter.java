@@ -74,6 +74,14 @@ public abstract class CustomScheduledReporter {
         this.executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory(name));
     }
     
+    /**
+     * get Metrics by class and predicate
+     * 
+     * @param klass
+     * @param filter
+     * @return
+     */
+    
     @SuppressWarnings("unchecked")
     private <T extends Metric> SortedMap<MetricName, T> getMetrics(Class<T> klass, MetricPredicate filter) {
     	
@@ -90,22 +98,51 @@ public abstract class CustomScheduledReporter {
 		return Collections.unmodifiableSortedMap(timers);
     }
 
+    /**
+     * get all Gauge metrics
+     * @param filter
+     * @return
+     */
 
     private SortedMap<MetricName, Gauge> getGauges(MetricPredicate filter) {
     	return getMetrics(Gauge.class, filter);
     }
     
+    /**
+     * get all Counter metrics
+     * @param filter
+     * @return
+     */
+    
     private SortedMap<MetricName, Counter> getCounters(MetricPredicate filter) {
     	return getMetrics(Counter.class, filter);
     }
+    
+    /**
+     * get all Histogram metrics
+     * @param filter
+     * @return
+     */
     
     private SortedMap<MetricName, Histogram> getHistograms(MetricPredicate filter) {
     	return getMetrics(Histogram.class, filter);
     }
     
+    /**
+     * get all Meters metrics
+     * @param filter
+     * @return
+     */
+    
     private SortedMap<MetricName, Meter> getMeters(MetricPredicate filter) {
     	return getMetrics(Meter.class, filter);
     }
+    
+    /**
+     * get all Timers metrics
+     * @param filter
+     * @return
+     */
     
     private SortedMap<MetricName, Timer> getTimers(MetricPredicate filter) {
     	return getMetrics(Timer.class, filter);

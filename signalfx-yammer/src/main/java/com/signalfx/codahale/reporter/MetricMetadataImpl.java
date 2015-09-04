@@ -8,6 +8,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
+/**
+ * 
+ * Implementation of MetricMetadata
+ *
+ */
+
 public class MetricMetadataImpl implements MetricMetadata {
     private final Map<Metric, Metadata> metaDataCollection;
 
