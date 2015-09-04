@@ -18,6 +18,13 @@ import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
+/**
+ * 
+ * class to Aggregate and Send metrics
+ * used by SignalFxReporter in report() method
+ * 
+ */
+
 class AggregateMetricSenderSessionWrapper implements Closeable {
     private final AggregateMetricSender.Session metricSenderSession;
     private final Set<SignalFxReporter.MetricDetails> detailsToAdd;
@@ -55,6 +62,12 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         addMetered(key, value);
         addSampling(key, value);
     }
+    
+    /**
+     * Add Histogram metric
+     * @param baseName
+     * @param histogram
+     */
 
     void addHistogram(MetricName baseName,
                       Histogram histogram) {
@@ -64,6 +77,12 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         addSampling(baseName, histogram);
     }
 
+    /**
+     * Add Metered metric 
+     * @param baseName
+     * @param metered
+     */
+    
     void addMetered(MetricName baseName, Metered metered) {
         addMetric(metered, baseName,
                 SignalFxReporter.MetricDetails.COUNT,
@@ -83,6 +102,12 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 SignalFxProtocolBuffers.MetricType.GAUGE, metered.meanRate());
     }
 
+    /**
+     * Add sampling
+     * @param baseName
+     * @param sampling
+     */
+    
     private void addSampling(MetricName baseName, Sampling sampling) {
         Metric metric = (Metric)sampling;
         final Snapshot snapshot = sampling.getSnapshot();
@@ -125,6 +150,14 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         }
     }
 
+    /**
+     * Add metric
+     * @param metric
+     * @param codahaleName
+     * @param defaultMetricType
+     * @param originalValue
+     */
+    
     void addMetric(Metric metric, MetricName codahaleName,
                              SignalFxProtocolBuffers.MetricType defaultMetricType,
                              Object originalValue) {
@@ -132,6 +165,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 defaultMetricType, originalValue);
     }
 
+    /**
+     * Add metric 
+     * @param metric
+     * @param codahaleName
+     * @param metricDetails
+     * @param defaultMetricType
+     * @param originalValue
+     */
+    
     private void addMetric(Metric metric, MetricName codahaleName, SignalFxReporter.MetricDetails metricDetails,
                           SignalFxProtocolBuffers.MetricType defaultMetricType,
                           Object originalValue) {
@@ -139,6 +181,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 defaultMetricType, originalValue);
 
     }
+    
+    /**
+     * Add metric 
+     * @param metric
+     * @param codahaleName
+     * @param metricDetails
+     * @param defaultMetricType
+     * @param originalValue
+     */
 
     void addMetric(Metric metric, MetricName codahaleName,
                    Optional<SignalFxReporter.MetricDetails> metricDetails,
@@ -210,31 +261,49 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     
     //--- Aditional Methods
     
-    private double getMax(Snapshot shapshot) {
-    	double[] values = shapshot.getValues();
+    /**
+     * calculate Max value for snapshot
+     * @param shapshot
+     * @return
+     */
+    
+    private double getMax(Snapshot snapshot) {
+    	double[] values = snapshot.getValues();
     	if (values.length == 0) {
     		return 0;
     	}
     	return values[values.length - 1];
     }
+    
+    /**
+     * calculate Min value for snapshot
+     * @param shapshot
+     * @return
+     */
 
-    private double getMin(Snapshot shapshot) {
-    	double[] values = shapshot.getValues();
+    private double getMin(Snapshot snapshot) {
+    	double[] values = snapshot.getValues();
     	if (values.length == 0) {
     		return 0;
     	}
     	return values[0];
     }
     
-    private double getStdDev(Snapshot shapshot) {
+    /**
+     * calculate standard deviation for snapshot
+     * @param shapshot
+     * @return
+     */
+    
+    private double getStdDev(Snapshot snapshot) {
         // two-pass algorithm for variance, avoids numeric overflow
-    	double[] values = shapshot.getValues();
+    	double[] values = snapshot.getValues();
 
         if (values.length <= 1) {
             return 0;
         }
 
-        final double mean = getMean(shapshot);
+        final double mean = getMean(snapshot);
         double sum = 0;
 
         for (double value : values) {
@@ -245,6 +314,12 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         final double variance = sum / (values.length - 1);
         return Math.sqrt(variance);
     }
+    
+    /**
+     * calculate Mean value for snapshot
+     * @param shapshot
+     * @return
+     */
     
     private double getMean(Snapshot shapshot) {
     	
