@@ -139,6 +139,7 @@ construct a unique codahale string for your metric.
 
 You can add SignalFx specific metadata to yammer metrics by using
 the MetricMetadata of the reporter.
+
 ```java
         final Queue customerQueue = new ArrayBlockingQueue(100);
 
@@ -146,7 +147,7 @@ the MetricMetadata of the reporter.
         Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
             @Override
             public Integer value() {
-                return System.currentTimeMillis;
+                return customerQueue.size();
             }
         });
 
