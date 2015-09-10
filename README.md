@@ -32,7 +32,7 @@ signalfx-java will support this.
 <dependency>
 <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-yammer</artifactId>
-  <version>0.0.21</version>
+  <version>0.0.23</version>
 </dependency>
 ```
 
@@ -93,7 +93,7 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 
         metricRegistery.register("gauge", new Gauge<Long>() {
             public Long getValue() {
-                return System.currentTimeMillis;
+                return System.currentTimeMillis();
             }
         });
 ```
@@ -103,10 +103,10 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
         // This will send the current time in ms to signalfx as a gauge
 
         MetricName gaugeName = new MetricName("group", "type", "gauge");
-        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
+        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Long>() {
             @Override
-            public Integer value() {
-                return System.currentTimeMillis;
+            public Long value() {
+                return System.currentTimeMillis();
             }
         });
 ```
@@ -146,7 +146,7 @@ the MetricMetadata of the reporter.
         Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
             @Override
             public Integer value() {
-                return System.currentTimeMillis;
+                return customerQueue.size();
             }
         });
 
@@ -206,6 +206,29 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 After setting up a SignalFxReporter, you can use codahale metrics as
 you normally would, reported at the frequency configured to the
 `SignalFxReporter`.
+
+## Example Project
+
+You can find full-stack example project called "signalfx-yammer-example" in the repo.
+To run it do the following steps...
+
+* 1. create "auth" file in the "signalfx-yammer-example" which containes:
+
+```
+    auth=<signalfx API Token>
+    host=https://ingest.signalfx.com
+```
+* 2. from terminal run:
+
+```
+    cd <signalfx-yammer-example path>
+    mvn install
+    mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
+```
+
+make sure you have Maven installed
+
+* 3. Go to signalfx.com and verify you are getting data
 
 ## Sending metrics without using codahale (not recommended)
 

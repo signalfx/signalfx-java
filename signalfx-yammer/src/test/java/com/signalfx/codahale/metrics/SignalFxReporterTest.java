@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Gauge;
-import com.yammer.metrics.core.Metric;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.core.MetricPredicate;
@@ -116,8 +115,7 @@ public class SignalFxReporterTest {
         MetricName counterCallbackName = new MetricName("group1", "type1", "cumulative_counter_callback");
         metricMetadata.forMetric(rawCounter)
                 .withMetricType(SignalFxProtocolBuffers.MetricType.COUNTER);
-        SfUtil.cumulativeCounter(metricRegistery, counterCallbackName,
-                metricMetadata, new Gauge<Long>() {
+        SfUtil.cumulativeCounter(metricRegistery, counterCallbackName, metricMetadata, new Gauge<Long>() {
             private long i = 0;
 
             @Override public Long value() {
