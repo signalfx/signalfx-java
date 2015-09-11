@@ -6,12 +6,12 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.23-SNAPSHOT</version>
+    <version>0.0.23</version>
   </parent>
 
   <artifactId>signalfx-java</artifactId>
   <name>SignalFx java libraries</name>
-  <version>0.0.23-SNAPSHOT</version>
+  <version>0.0.23</version>
   <packaging>jar</packaging>
   <description>
     Bare minimum core library needed to sending metrics to SignalFx from Java clients
