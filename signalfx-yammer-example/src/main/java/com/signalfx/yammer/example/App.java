@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Properties;
 import java.lang.Math;
+import java.util.concurrent.TimeUnit;
 
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
@@ -18,6 +19,8 @@ import com.google.common.collect.ImmutableSet;
 
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Gauge;
+import com.yammer.metrics.core.Timer;
+import com.yammer.metrics.core.TimerContext;
 import com.yammer.metrics.core.Metric;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsRegistry;
@@ -112,13 +115,29 @@ public class App {
 				.withDimension("Test-Dimension", "_Gauge")
 				.withMetricType(SignalFxProtocolBuffers.MetricType.GAUGE);
 		
+		// Timer
+		
+		MetricName timerName = new MetricName("group1", "type1", "timer");
+		Timer timer = metricRegistery.newTimer(timerName, TimeUnit.SECONDS, TimeUnit.SECONDS);
+		
+		metricMetadata.forMetric(timer)
+				.withMetricName("Test-Metric") // To see metric for the timer you should look for
+											   // Test-Metric.max / Test-Metric.min
+				.withSourceName("Test-Source")
+				.withDimension("Test-Dimension", "_Timer")
+				.withMetricType(SignalFxProtocolBuffers.MetricType.GAUGE);
 
 		while (true) {
+			
+			TimerContext timerContext = timer.time(); // Start timer
+			
 			System.out.println("Sending data...");
 			Thread.sleep(500);
-
 			counter.inc();
-			reporter.report();
+			
+			timerContext.stop(); // Stop timer
+			
+			reporter.report(); // Report all metrics 
 		}
 	
 	}
