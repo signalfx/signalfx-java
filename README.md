@@ -247,20 +247,20 @@ Run it as follows:
 1. Download the code and create an "auth" file in the "signalfx-yammer-example"
    directory. The auth file should contain the following:
 
-```
-auth=<signalfx API Token>
-host=https://ingest.signalfx.com
-```
+    ```
+    auth=<signalfx API Token>
+    host=https://ingest.signalfx.com
+    ```
 
 2. Run the following commands in your terminal to install and run the example
    project, replacing `path/to/signalfx-yammer-example` with the location of the
    example project code in your environment. You must have Maven installed.
 
-```
-cd path/to/signalfx-yammer-example
-mvn install
-mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
-```
+    ```
+    cd path/to/signalfx-yammer-example
+    mvn install
+    mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
+    ```
 
 New metrics from the example project should appear in SignalFx.
 
