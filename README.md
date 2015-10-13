@@ -231,8 +231,7 @@ we provide a helper to extract your AWS instance ID and use that as the source.
 
 For example:
 
-```
-final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+```final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistery,
     "SIGNALFX_AUTH_TOKEN",
     SourceNameHelper.getAwsInstanceId()
@@ -246,20 +245,20 @@ the repo.
 
 Run it as follows:
 
-1. Download the code and create an "auth" file in the
-"signalfx-yammer-example" directory. The auth file should contain the following:
+1. Download the code and create an "auth" file in the "signalfx-yammer-example"
+directory. The auth file should contain the following:
 
-``` auth=<signalfx API Token>
-    host=https://ingest.signalfx.com
+```auth=<signalfx API Token>
+  host=https://ingest.signalfx.com
 ```
 
 2. Run the following commands in your terminal to install and run the example
 project, replacing `path/to/signalfx-yammer-example` with the location of the
 example project code in your environment. You must have Maven installed.
 
-``` cd <signalfx-yammer-example path>
-    mvn install
-    mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
+```cd <signalfx-yammer-example path>
+  mvn install
+  mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
 ```
 
 New metrics from the example project should appear in SignalFx.
