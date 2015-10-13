@@ -5,10 +5,10 @@ need a SignalFx account and organization API token to use them. For
 more information on SignalFx and to create an account, go to
 http://www.signalfx.com.
 
-The recommended way to send metrics with Java is to use Codahale Metrics version 3.0+. You can also use Yammer Metrics 2.0.x (an earlier version of Codahale Metrics). More information on the Codahale Metrics library can be found on the
+We recommend sending metrics with Java using Codahale Metrics version 3.0+. You can also use Yammer Metrics 2.0.x (an earlier version of Codahale Metrics). More information on the Codahale Metrics library can be found on the
 [Codahale Metrics website](https://dropwizard.github.io/metrics/).
 
-Use the module `signalfx-java` to send metrics directly to SignalFx using protocol buffers, without using Codahale or Yammer metrics. 
+You can also use the module `signalfx-java` to send metrics directly to SignalFx using protocol buffers, without using Codahale or Yammer metrics. 
 
 ## Supported languages
 
@@ -102,9 +102,7 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 
 You can add SignalFx specific metadata to Codahale metrics by first gathering available metadata using `getMetricMetadata()`, then attaching the MetricMetadata to the metric.  
 
-When you use MetricMetadata, call the .register() method you get from the call forMetric() rather
-than registering your metric directly with the metricRegistry.  This will
-construct a unique Codahale string for your metric.
+When you use MetricMetadata, call the .register() method you get from the call forMetric() rather than registering your metric directly with the metricRegistry.  This will construct a unique Codahale string for your metric.
 
 ```java
         // This will send the size of a queue as a gauge, and attach
@@ -122,12 +120,9 @@ construct a unique Codahale string for your metric.
 
 #### 4. (optional) Add dimensions without knowing if they already exist
 
-We recommend creating your Codahale object as a counter
-or gauge as a field of your class, then using that field to increment
-values. If you don't want to maintain this for code cleanliness,
-you can create it on the fly with our builders.  For example, if you
-wanted a timer with the dimension of the store it is from, you could
-use code like this.
+We recommend creating your Codahale object as a field of your class, as a counter or gauge, then using that field to increment values. If you don't want to maintain this for reasons of code cleanliness, you can create it on the fly with our builders.  
+
+For example, if you wanted a timer that included a dimension indicating which store it is from, you could use code like this.
 
 ```java
         Timer t = metricMetadata.forBuilder(MetricBuilder.TIMERS)
@@ -148,6 +143,12 @@ use code like this.
 //        }
 
 ```
+
+#### After setting up Codahale
+
+After setting up a SignalFxReporter, you can use Codahale metrics as
+you normally would, reported at the frequency configured by the
+`SignalFxReporter`.
 
 ### Yammer Metrics
 
@@ -197,7 +198,7 @@ Use the MetricMetadata of the reporter as shown.
         metricMetadata.forMetric(gauge).withDimension("queue_name", "customer_backlog");
 ```
 
-#### Adding Dimensions without knowing if they already exist
+#### 4. Adding Dimensions without knowing if they already exist
 
 This is not supported in Yammer Metrics 2.0.x.
 
@@ -212,12 +213,6 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     SourceNameHelper.getAwsInstanceId()
 ).build();
 ```
-
-#### After setting up Codahale
-
-After setting up a SignalFxReporter, you can use codahale metrics as
-you normally would, reported at the frequency configured by the
-`SignalFxReporter`.
 
 ## Example Project
 
