@@ -1,14 +1,14 @@
 # SignalFx client libraries [![Build Status](https://travis-ci.org/signalfx/signalfx-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfx-java)
 
-This repository contains libraries for instrumenting applications in a
-variety of languages and reporting these metrics to SignalFx. You will
-need a SignalFx account and organization API token to use those. For
+This repository contains libraries for instrumenting Java applications and reporting metrics to SignalFx. You will
+need a SignalFx account and organization API token to use them. For
 more information on SignalFx and to create an account, go to
 http://www.signalfx.com.
 
-The recommended way to send metrics with java is to use codahale metrics.
-If you want to send metrics without integrating with codahale, the module
-signalfx-java will support this.
+The recommended way to send metrics with Java is to use Codahale Metrics version 3.0+. You can also use Yammer Metrics 2.0.x (an earlier version of Codahale Metrics). More information on the Codahale Metrics library can be found on the
+[Codahale Metrics website](https://dropwizard.github.io/metrics/).
+
+Use the module `signalfx-java` to send metrics directly to SignalFx using protocol buffers, without using Codahale or Yammer metrics. 
 
 ## Supported languages
 
@@ -16,7 +16,7 @@ signalfx-java will support this.
 
 ## Installation
 
-### With Maven
+Install this library using Maven, by adding the following to your project's `pom.xml` file. 
 
 * Codahale 3.0.x
 ```xml
@@ -36,7 +36,13 @@ signalfx-java will support this.
 </dependency>
 ```
 
-### From source (Not recommended)
+To install this library in Scala, add the following to your project's `build.sbt` file. 
+
+```
+libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.23"
+```
+
+You can also install this library from source by cloning the repo and using `mvn install` as follows. However, we strongly recommend using the automated mechanisms described above. 
 
 ```
 $ git clone https://github.com/signalfx/signalfx-java.git
@@ -67,13 +73,9 @@ $ mvn install
 
 ## Sending metrics
 
-### Codahale
+### Codahale Metrics 3.0.x
 
-Codahale metrics are the recommended way of integrating your java code with SignalFx.
-More information on the Codahale Metrics library can be found on the
-[Codahale Metrics website](https://dropwizard.github.io/metrics/).
-
-#### Setting up Codahale
+#### 1. Set up the Codahale reporter
 
 ```java
 final MetricRegistry metricRegistery = new MetricRegistry();
@@ -84,10 +86,8 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 signalfxReporter.start(1, TimeUnit.SECONDS);
 final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 ```
+#### 2. Send a metric
 
-#### Sending a metric with Codahale
-
-* Codahale 3.0.x
 ```java
         // This will send the current time in ms to signalfx as a gauge
 
@@ -98,32 +98,17 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
         });
 ```
 
-* Yammer Metrics 2.0.x
-```java
-        // This will send the current time in ms to signalfx as a gauge
+#### 3. Add existing dimensions and metadata to metrics
 
-        MetricName gaugeName = new MetricName("group", "type", "gauge");
-        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Long>() {
-            @Override
-            public Long value() {
-                return System.currentTimeMillis();
-            }
-        });
-```
+You can add SignalFx specific metadata to Codahale metrics by first gathering available metadata using `getMetricMetadata()`, then attaching the MetricMetadata to the metric.  
 
-#### Adding Dimensions and SignalFx metadata to Codahale metrics
-
-* Codahale 3.0.x
-
-You can add SignalFx specific metadata to codahale metrics by using
-the MetricMetadata of the reporter.  When you use MetricMetadata, rather
-than register your metric directly with the metricRegistry, you should
-call the .register() method you get from the call forMetric().  This will
-construct a unique codahale string for your metric.
+When you use MetricMetadata, call the .register() method you get from the call forMetric() rather
+than registering your metric directly with the metricRegistry.  This will
+construct a unique Codahale string for your metric.
 
 ```java
-        // This will send the size of a queue as a gauge, tagging the queue
-        // with a dimension to describe it
+        // This will send the size of a queue as a gauge, and attach
+        // dimension 'queue_name' to the gauge
         
         final Queue customerQueue = new ArrayBlockingQueue(100);
         metricMetadata.forMetric(new Gauge<Long>() {
@@ -135,34 +120,13 @@ construct a unique codahale string for your metric.
                 .register(metricRegistery);
 ```
 
-* Yammer Metrics 2.0.x
+#### 4. (optional) Add dimensions without knowing if they already exist
 
-You can add SignalFx specific metadata to yammer metrics by using
-the MetricMetadata of the reporter.
-
-```java
-        final Queue customerQueue = new ArrayBlockingQueue(100);
-
-        MetricName gaugeName = new MetricName("group", "type", "gauge");
-        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
-            @Override
-            public Integer value() {
-                return customerQueue.size();
-            }
-        });
-
-        metricMetadata.forMetric(gauge).withDimension("queue_name", "customer_backlog");
-```
-
-#### Adding Dimensions without knowing if they already exist
-
-* Codahale 3.0.x
-
-It is recommended to create your Codahale object as a counter
-or gauge as a field of your class then use that field to increment
-values, but if you don't want to maintain this for code cleanliness
+We recommend creating your Codahale object as a counter
+or gauge as a field of your class, then using that field to increment
+values. If you don't want to maintain this for code cleanliness,
 you can create it on the fly with our builders.  For example, if you
-wanted a timer with the dimension of the store it is from you could
+wanted a timer with the dimension of the store it is from, you could
 use code like this.
 
 ```java
@@ -185,12 +149,59 @@ use code like this.
 
 ```
 
-* Yammer Metrics 2.0.x
+### Yammer Metrics
 
-NOT SUPPORTED;
+You can also use this library with Yammer metrics 2.0.x as shown in the following examples.
 
+#### 1. Set up Yammer metrics
 
-#### Changing the default source
+```java
+final MetricRegistry metricRegistery = new MetricRegistry();
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+    metricRegistery,
+    "SIGNALFX_AUTH_TOKEN"
+).build();
+signalfxReporter.start(1, TimeUnit.SECONDS);
+final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
+```
+
+#### 2. Send a metric with Yammer metrics
+
+```java
+        // This will send the current time in ms to signalfx as a gauge
+
+        MetricName gaugeName = new MetricName("group", "type", "gauge");
+        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Long>() {
+            @Override
+            public Long value() {
+                return System.currentTimeMillis();
+            }
+        });
+```
+
+#### 3. Add Dimensions and SignalFx metadata to Yammer metrics
+
+Use the MetricMetadata of the reporter as shown.
+
+```java
+        final Queue customerQueue = new ArrayBlockingQueue(100);
+
+        MetricName gaugeName = new MetricName("group", "type", "gauge");
+        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>() {
+            @Override
+            public Integer value() {
+                return customerQueue.size();
+            }
+        });
+
+        metricMetadata.forMetric(gauge).withDimension("queue_name", "customer_backlog");
+```
+
+#### Adding Dimensions without knowing if they already exist
+
+This is not supported in Yammer Metrics 2.0.x.
+
+### Changing the default source
 
 The default source name for metrics is discovered by [SourceNameHelper]( signalfx-java/src/main/java/com/signalfx/metrics/SourceNameHelper.java).  If you want to override the default behavior, you can pass a third parameter to your Builder and that String is then used as the source.  If you are using AWS, we provide a helper to extract your AWS instance ID and use that as the source.  For example:
 
@@ -205,21 +216,22 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 #### After setting up Codahale
 
 After setting up a SignalFxReporter, you can use codahale metrics as
-you normally would, reported at the frequency configured to the
+you normally would, reported at the frequency configured by the
 `SignalFxReporter`.
 
 ## Example Project
 
-You can find full-stack example project called "signalfx-yammer-example" in the repo.
-To run it do the following steps...
+You can find a full-stack example project called "signalfx-yammer-example" in the repo.
 
-* 1. create "auth" file in the "signalfx-yammer-example" which containes:
+Run it as follows:
+
+* 1. Download the code and create an "auth" file in the "signalfx-yammer-example" directory. The auth file should contain the following:
 
 ```
     auth=<signalfx API Token>
     host=https://ingest.signalfx.com
 ```
-* 2. from terminal run:
+* 2. Run the following commands in your terminal to install and run the example project, replacing `path/to/signalfx-yammer-example` with the location of the example project code in your environment. You must have Maven installed. 
 
 ```
     cd <signalfx-yammer-example path>
@@ -227,15 +239,13 @@ To run it do the following steps...
     mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
 ```
 
-make sure you have Maven installed
+New metrics from the example should appear in SignalFx. 
 
-* 3. Go to signalfx.com and verify you are getting data
+## Sending metrics without using Codahale
 
-## Sending metrics without using codahale (not recommended)
+We recommend sending metrics using Codahale as shown above. You can also interact with our Java library directly if you do not want to use
+ Codahale. To do this, you will need to build the metric manually using protocol buffers as shown in the following example.
 
-You can also interact with our java library directly if you do not want to use
- Codahale.  To do this, you will need to build the metric to send to
- signalfx manually using protocol buffers.
 ```java
         DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
         AggregateMetricSender mf =
