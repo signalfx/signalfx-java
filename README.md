@@ -85,9 +85,9 @@ $ mvn install
 #### 1. Set up the Codahale reporter
 
 ```java
-final MetricRegistry metricRegistery = new MetricRegistry();
+final MetricRegistry metricRegistry = new MetricRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
-    metricRegistery,
+    metricRegistry,
     "SIGNALFX_AUTH_TOKEN"
 ).build();
 signalfxReporter.start(1, TimeUnit.SECONDS);
@@ -97,13 +97,12 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 #### 2. Send a metric
 
 ```java
-        // This will send the current time in ms to signalfx as a gauge
-
-        metricRegistery.register("gauge", new Gauge<Long>() {
-            public Long getValue() {
-                return System.currentTimeMillis();
-            }
-        });
+// This will send the current time in ms to SignalFx as a gauge
+metricRegistry.register("gauge", new Gauge<Long>() {
+    public Long getValue() {
+        return System.currentTimeMillis();
+    }
+});
 ```
 
 #### 3. Add existing dimensions and metadata to metrics
@@ -117,16 +116,18 @@ forMetric() rather than registering your metric directly with the
 metricRegistry.  This will construct a unique Codahale string for your metric.
 
 ```java
-        // This will send the size of a queue as a gauge, and attach
-        // dimension 'queue_name' to the gauge
-        final Queue customerQueue = new ArrayBlockingQueue(100);
-        metricMetadata.forMetric(new Gauge<Long>() {
-            @Override
-            public Long getValue() {
-                return customerQueue.size();
-            }
-        }).withDimension("queue_name", "customer_backlog")
-                .register(metricRegistery);
+/*
+ * This will send the size of a queue as a gauge, and attach dimension
+ * 'queue_name' to the gauge.
+ */
+final Queue customerQueue = new ArrayBlockingQueue(100);
+metricMetadata.forMetric(new Gauge<Long>() {
+    @Override
+    public Long getValue() {
+        return customerQueue.size();
+    }
+}).withDimension("queue_name", "customer_backlog")
+  .register(metricRegistry);
 ```
 
 #### 4. (optional) Add dimensions without knowing if they already exist
@@ -140,23 +141,26 @@ For example, if you wanted a timer that included a dimension indicating which
 store it is from, you could use code like this.
 
 ```java
-        Timer t = metricMetadata.forBuilder(MetricBuilder.TIMERS)
-                .withMetricName("request_time")
-                .withDimension("storename", "electronics")
-                .createOrGet(metricRegistery);
+Timer t = metricMetadata
+    .forBuilder(MetricBuilder.TIMERS)
+    .withMetricName("request_time")
+    .withDimension("storename", "electronics")
+    .createOrGet(metricRegistery);
 
-        Timer.Context c = t.time();
-        try {
-            System.out.println("Doing store things");
-        } finally {
-            c.close();
-        }
+Timer.Context c = t.time();
+try {
+    System.out.println("Doing store things");
+} finally {
+    c.close();
+}
 
-        // Java 7 alternative:
-//        try (Timer.Context ignored = t.time()) {
-//            System.out.println("Doing store things");
-//        }
-
+/*
+ * Java 7 alternative:
+ *
+ * try (Timer.Context ignored = t.time()) {
+ *     System.out.println("Doing store things");
+ * }
+ */
 ```
 
 #### After setting up Codahale
@@ -172,7 +176,7 @@ following examples.
 #### 1. Set up Yammer metrics
 
 ```java
-final MetricRegistry metricRegistery = new MetricRegistry();
+final MetricRegistry metricRegistry = new MetricRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistery,
     "SIGNALFX_AUTH_TOKEN"
@@ -184,15 +188,14 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 #### 2. Send a metric with Yammer metrics
 
 ```java
-        // This will send the current time in ms to signalfx as a gauge
-
-        MetricName gaugeName = new MetricName("group", "type", "gauge");
-        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Long>() {
-            @Override
-            public Long value() {
-                return System.currentTimeMillis();
-            }
-        });
+// This will send the current time in ms to SignalFx as a gauge
+MetricName gaugeName = new MetricName("group", "type", "gauge");
+Metric gauge = metricRegistry.newGauge(gaugeName, new Gauge<Long>() {
+    @Override
+    public Long value() {
+        return System.currentTimeMillis();
+    }
+});
 ```
 
 #### 3. Add Dimensions and SignalFx metadata to Yammer metrics
@@ -200,19 +203,18 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 Use the MetricMetadata of the reporter as shown.
 
 ```java
-        final Queue customerQueue = new ArrayBlockingQueue(100);
+final Queue customerQueue = new ArrayBlockingQueue(100);
 
-        MetricName gaugeName = new MetricName("group", "type", "gauge");
-        Metric gauge = metricRegistery.newGauge(gaugeName, new Gauge<Integer>()
-        {
-            @Override
-            public Integer value() {
-                return customerQueue.size();
-            }
-        });
+MetricName gaugeName = new MetricName("group", "type", "gauge");
+Metric gauge = metricRegistry.newGauge(gaugeName, new Gauge<Integer>() {
+    @Override
+    public Integer value() {
+        return customerQueue.size();
+    }
+});
 
-        metricMetadata.forMetric(gauge).withDimension("queue_name",
-          "customer_backlog");
+metricMetadata.forMetric(gauge)
+    .withDimension("queue_name", "customer_backlog");
 ```
 
 #### 4. Adding Dimensions without knowing if they already exist
@@ -231,7 +233,7 @@ For example:
 
 ```
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
-    metricRegistery,
+    metricRegistry,
     "SIGNALFX_AUTH_TOKEN",
     SourceNameHelper.getAwsInstanceId()
 ).build();
@@ -272,33 +274,28 @@ do this, you will need to build the metric manually using protocol buffers as
 shown in the following example.
 
 ```java
-        DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
-        AggregateMetricSender mf =
-                new AggregateMetricSender("test.SendMetrics",
-                                          new HttpDataPointProtobufReceiverFactory(
-                                                  dataPointEndpoint)
-                                                  .setVersion(2),
-                                          new StaticAuthToken(auth_token),
-                                          Collections.<OnSendErrorHandler>singleton(new OnSendErrorHandler() {
-                                            @Override
-                                            public void handleError(MetricError metricError) {
-                                              System.out.println("Unable to POST metrics: " + metricError.getMessage());
-                                            }
-                                          }));
+DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
+AggregateMetricSender mf = new AggregateMetricSender("test.SendMetrics",
+    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint).setVersion(2),
+    new StaticAuthToken(auth_token),
+    Collections.<OnSendErrorHandler> singleton(new OnSendErrorHandler() {
+        @Override
+        public void handleError(MetricError metricError) {
+            System.out.println("Unable to POST metrics: " + metricError.getMessage());
+        }
+    }));
 
-                                          Collections.<OnSendErrorHandler>emptyList());
-      try (AggregateMetricSender.Session i = mf.createSession()) {
-          i.setDatapoint(
-             SignalFxProtocolBuffers.DataPoint.newBuilder()
-               .setMetric("curtime")
-               .setValue(
-                 SignalFxProtocolBuffers.Datum.newBuilder()
-                 .setIntValue(System.currentTimeMillis()))
-               .addDimensions(
-                 SignalFxProtocolBuffers.Dimension.newBuilder()
-                   .setKey("source")
-                   .setValue("java"))
-               .build());
-      }
-
+try (AggregateMetricSender.Session i = mf.createSession()) {
+    i.setDatapoint(
+        SignalFxProtocolBuffers.DataPoint.newBuilder()
+            .setMetric("curtime")
+            .setValue(
+                SignalFxProtocolBuffers.Datum.newBuilder()
+                    .setIntValue(System.currentTimeMillis()))
+            .addDimensions(
+                SignalFxProtocolBuffers.Dimension.newBuilder()
+                    .setKey("source")
+                    .setValue("java"))
+            .build());
+}
 ```
