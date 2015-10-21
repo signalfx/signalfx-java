@@ -3,6 +3,8 @@ package com.signalfx.codahale.reporter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import com.yammer.metrics.core.Metric;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -15,7 +17,7 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
  */
 
 public class MetricMetadataImpl implements MetricMetadata {
-    private final Map<Metric, Metadata> metaDataCollection;
+    private final ConcurrentMap<Metric, Metadata> metaDataCollection;
 
     public MetricMetadataImpl() {
         // This map must be thread safe
@@ -42,19 +44,25 @@ public class MetricMetadataImpl implements MetricMetadata {
     }
 
     @Override
-    public synchronized <M extends Metric> Tagger<M> tagMetric(M metric) {
+    public <M extends Metric> Tagger<M> tagMetric(M metric) {
         return forMetric(metric);
     }
 
     @Override
-    public synchronized <M extends Metric> Tagger<M> forMetric(M metric) {
+    public <M extends Metric> Tagger<M> forMetric(M metric) {
         if (metaDataCollection.containsKey(metric)) {
             return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
         } else {
-            Metadata thisMetricsMetadata = new Metadata();
-            Metadata oldMetaData = metaDataCollection.put(metric, thisMetricsMetadata);
-            Preconditions.checkArgument(oldMetaData == null, "Concurrency issue adding metadat");
-            return new TaggerImpl<M>(metric, thisMetricsMetadata);
+            synchronized (this) {
+                if (metaDataCollection.containsKey(metric)) {
+                    return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
+                }
+                Metadata thisMetricsMetadata = new Metadata();
+                Metadata oldMetaData = metaDataCollection.put(metric, thisMetricsMetadata);
+                Preconditions
+                        .checkArgument(oldMetaData == null, "Concurrency issue adding metadata");
+                return new TaggerImpl<M>(metric, thisMetricsMetadata);
+            }
         }
     }
 
