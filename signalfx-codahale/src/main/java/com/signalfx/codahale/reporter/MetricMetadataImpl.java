@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
@@ -13,7 +15,7 @@ import com.signalfx.codahale.metrics.MetricBuilder;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class MetricMetadataImpl implements MetricMetadata {
-    private final Map<Metric, Metadata> metaDataCollection;
+    private final ConcurrentMap<Metric, Metadata> metaDataCollection;
 
     public MetricMetadataImpl() {
         // This map must be thread safe
@@ -40,19 +42,25 @@ public class MetricMetadataImpl implements MetricMetadata {
     }
 
     @Override
-    public synchronized <M extends Metric> Tagger<M> tagMetric(M metric) {
+    public <M extends Metric> Tagger<M> tagMetric(M metric) {
         return forMetric(metric);
     }
 
     @Override
-    public synchronized <M extends Metric> Tagger<M> forMetric(M metric) {
+    public <M extends Metric> Tagger<M> forMetric(M metric) {
         if (metaDataCollection.containsKey(metric)) {
             return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
         } else {
-            Metadata thisMetricsMetadata = new Metadata();
-            Metadata oldMetaData = metaDataCollection.put(metric, thisMetricsMetadata);
-            Preconditions.checkArgument(oldMetaData == null, "Concurrency issue adding metadat");
-            return new TaggerImpl<M>(metric, thisMetricsMetadata);
+            synchronized (this) {
+                if (metaDataCollection.containsKey(metric)) {
+                    return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
+                }
+                Metadata thisMetricsMetadata = new Metadata();
+                Metadata oldMetaData = metaDataCollection.put(metric, thisMetricsMetadata);
+                Preconditions
+                        .checkArgument(oldMetaData == null, "Concurrency issue adding metadata");
+                return new TaggerImpl<M>(metric, thisMetricsMetadata);
+            }
         }
     }
 
@@ -139,10 +147,10 @@ public class MetricMetadataImpl implements MetricMetadata {
     private class BuilderTaggerImpl<M extends Metric> extends TaggerBaseImpl<M, BuilderTagger<M>>
             implements BuilderTagger<M> {
         private final MetricBuilder metricBuilder;
-        private final Map<Metric, Metadata> metaDataCollection;
+        private final ConcurrentMap<Metric, Metadata> metaDataCollection;
 
         public <M extends Metric> BuilderTaggerImpl(MetricBuilder<M> metricBuilder,
-                                                    Map<Metric, Metadata> metaDataCollection,
+                                                    ConcurrentMap<Metric, Metadata> metaDataCollection,
                                                     Metadata thisMetricsMetadata) {
             super(thisMetricsMetadata);
             this.metricBuilder = metricBuilder;
@@ -152,22 +160,15 @@ public class MetricMetadataImpl implements MetricMetadata {
         @Override
         public M createOrGet(MetricRegistry metricRegistry) {
             String compositeName = createCodahaleName();
+            Metric existingMetric = metricRegistry.getMetrics().get(compositeName);
+            if (existingMetric != null) {
+                return validateMetric(existingMetric, compositeName);
+            }
             // Lock on an object that is shared by the metadata tagger, not *this* which is not.
             synchronized (metaDataCollection) {
-                Metric existingMetric = metricRegistry.getMetrics().get(compositeName);
+                existingMetric = metricRegistry.getMetrics().get(compositeName);
                 if (existingMetric != null) {
-                    if (!metricBuilder.isInstance(existingMetric)) {
-                        throw new IllegalArgumentException(
-                                String.format("The metric %s is not of the correct type",
-                                        compositeName));
-                    }
-                    if (!thisMetricsMetadata.equals(metaDataCollection.get(existingMetric))) {
-                        throw new IllegalArgumentException(String.format(
-                                "Existing metric has different tags.  Unable to differentiate " +
-                                        "metrics: %s",
-                                compositeName));
-                    }
-                    return (M) existingMetric;
+                    return validateMetric(existingMetric, compositeName);
                 }
                 // This could throw a IllegalArgumentException.  That would only happen if another
                 // metric was made with our name, but not constructed by the metadata tagger.  This
@@ -178,6 +179,21 @@ public class MetricMetadataImpl implements MetricMetadata {
                         null == metaDataCollection.put(newMetric, thisMetricsMetadata));
                 return (M) newMetric;
             }
+        }
+
+        private M validateMetric(Metric existingMetric, String compositeName) {
+            if (!metricBuilder.isInstance(existingMetric)) {
+                throw new IllegalArgumentException(
+                        String.format("The metric %s is not of the correct type",
+                                compositeName));
+            }
+            if (!thisMetricsMetadata.equals(metaDataCollection.get(existingMetric))) {
+                throw new IllegalArgumentException(String.format(
+                        "Existing metric has different tags.  Unable to differentiate " +
+                                "metrics: %s",
+                        compositeName));
+            }
+            return (M) existingMetric;
         }
     }
 
