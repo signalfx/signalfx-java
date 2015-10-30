@@ -3,6 +3,7 @@ package com.signalfx.codahale.reporter;
 import java.io.Closeable;
 import java.util.Map;
 import java.util.Set;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Metered;
 import com.codahale.metrics.Metric;
@@ -11,17 +12,20 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.signalfx.metrics.aws.AWSInstanceInfo;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
+	
     private final AggregateMetricSender.Session metricSenderSession;
     private final Set<SignalFxReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
+    private final AWSInstanceInfo awsInstanceInfo;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -29,7 +33,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension) {
-        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension, false);
+        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension, false, null);
     }
 
     AggregateMetricSenderSessionWrapper(
@@ -38,13 +42,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension,
-            boolean injectCurrentTimestamp) {
+            boolean injectCurrentTimestamp,
+            AWSInstanceInfo awsInstanceInfo) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
+        this.awsInstanceInfo = awsInstanceInfo;
     }
 
     @Override
@@ -192,6 +198,11 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
         }
+        
+    	if(awsInstanceInfo != null){
+    		builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                    .setKey(AWSInstanceInfo.AWS_UNIQUE_ID_DIMENSION_NAME).setValue(awsInstanceInfo.getId()));
+    	}
 
         if (injectCurrentTimestamp) {
             final long currentTimestamp = System.currentTimeMillis();

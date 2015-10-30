@@ -32,3 +32,5 @@ cleanmvn.dot
 .idea
 /analytics/server/log/
 *.versionsBackup
+
+Dockerfile
