@@ -175,6 +175,28 @@ call `addDimension(String key, String value)` or
 `addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder`
 object.
 
+### AWS Integration
+To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
+you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
+a dimension in `MetricMetadata` or add it as a default dimension.
+
+```java
+String instanceInfo = AWSInstanceInfo.get()
+Timer t = metricMetadata
+    .forBuilder(MetricBuilder.TIMERS)
+    .withMetricName("request_time")
+    .withDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo)
+    .createOrGet(metricRegistery);
+
+/**
+ * As default dimension
+ */
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+    metricRegistry,
+    "SIGNALFX_AUTH_TOKEN"
+).addDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
+```
+
 ### Yammer Metrics
 
 You can also use this library with Yammer metrics 2.0.x as shown in the
@@ -252,6 +274,28 @@ on every datapoint that is reported by this library. In order to do this
 call `addDimension(String key, String value)` or
 `addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder` 
 object.
+
+### AWS Integration
+To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
+you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
+a dimension in `MetricMetadata` or add it as a default dimension.
+
+```java
+String instanceInfo = AWSInstanceInfo.get()
+Timer t = metricMetadata
+    .forBuilder(MetricBuilder.TIMERS)
+    .withMetricName("request_time")
+    .withDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo)
+    .createOrGet(metricRegistery);
+
+/**
+ * As default dimension
+ */
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+    metricRegistry,
+    "SIGNALFX_AUTH_TOKEN"
+).addDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
+```
 
 ## Example Project
 
