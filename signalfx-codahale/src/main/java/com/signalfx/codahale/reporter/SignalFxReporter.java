@@ -47,20 +47,20 @@ public class SignalFxReporter extends ScheduledReporter {
                                  Set<MetricDetails> detailsToAdd,
                                  MetricMetadata metricMetadata) {
         this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd,
-                metricMetadata, false, ImmutableMap.<String, String>of());
+                metricMetadata, false, Collections.<String,String>emptyMap());
     }
 
     public SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
                               TimeUnit rateUnit, TimeUnit durationUnit,
                               AggregateMetricSender aggregateMetricSender,
                               Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
-                              boolean useLocalTime, ImmutableMap<String,String> defaultDimensions) {
+                              boolean useLocalTime, Map<String,String> defaultDimensions) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.useLocalTime = useLocalTime;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
-        this.defaultDimensions = defaultDimensions;
+        this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
     }
 
     @Override

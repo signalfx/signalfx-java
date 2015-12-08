@@ -1,6 +1,7 @@
 package com.signalfx.codahale.reporter;
 
 import java.io.Closeable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +19,10 @@ import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
+
+    private static final ImmutableSet<String> ignoredDimensions = ImmutableSet.of(
+            MetricMetadata.SOURCE, MetricMetadata.METRIC);
+
     private final AggregateMetricSender.Session metricSenderSession;
     private final Set<SignalFxReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
@@ -33,7 +38,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension) {
         this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension,
-                false, ImmutableMap.<String, String> of());
+                false, Collections.<String, String>emptyMap());
     }
 
     AggregateMetricSenderSessionWrapper(
@@ -43,14 +48,14 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension,
             boolean injectCurrentTimestamp,
-            ImmutableMap<String,String> defaultDimensions) {
+            Map<String,String> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
-        this.defaultDimensions = defaultDimensions;
+        this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
     }
 
     @Override
@@ -189,20 +194,19 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                     .setKey(sourceDimension).setValue(sourceName));
         }
 
-        ImmutableSet<String> ignoredDimensions = ImmutableSet.of(
-                MetricMetadata.SOURCE, MetricMetadata.METRIC);
-
-        for (Map.Entry<String, String> entry: tags.entrySet()) {
+        // Do this first so that caller can override with tags.
+        for (Map.Entry<String, String> entry : defaultDimensions.entrySet()) {
             if (!ignoredDimensions.contains(entry.getKey())) {
                 builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
         }
 
-        for (Map.Entry<String, String> entry: defaultDimensions.entrySet()) {
-            builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
-                    .setKey(entry.getKey())
-                    .setValue(entry.getValue()));
+        for (Map.Entry<String, String> entry: tags.entrySet()) {
+            if (!ignoredDimensions.contains(entry.getKey())) {
+                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                        .setKey(entry.getKey()).setValue(entry.getValue()));
+            }
         }
 
         if (injectCurrentTimestamp) {
