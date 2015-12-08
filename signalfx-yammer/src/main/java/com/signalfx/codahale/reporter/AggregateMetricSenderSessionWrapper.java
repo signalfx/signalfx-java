@@ -4,25 +4,25 @@ import java.io.Closeable;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.signalfx.metrics.SignalFxMetricsException;
+import com.signalfx.metrics.flush.AggregateMetricSender;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 import com.yammer.metrics.core.Histogram;
 import com.yammer.metrics.core.Metered;
 import com.yammer.metrics.core.Metric;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.Sampling;
-import com.yammer.metrics.stats.Snapshot;
 import com.yammer.metrics.core.Timer;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
-import com.signalfx.metrics.SignalFxMetricsException;
-import com.signalfx.metrics.flush.AggregateMetricSender;
-import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import com.yammer.metrics.stats.Snapshot;
 
 /**
- * 
+ *
  * class to Aggregate and Send metrics
  * used by SignalFxReporter in report() method
- * 
+ *
  */
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
@@ -32,6 +32,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
+    private final ImmutableMap<String,String> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -39,13 +40,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension,
-            boolean injectCurrentTimestamp) {
+            boolean injectCurrentTimestamp,
+            ImmutableMap<String,String> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
+        this.defaultDimensions = defaultDimensions;
     }
 
     @Override
@@ -62,7 +65,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         addMetered(key, value);
         addSampling(key, value);
     }
-    
+
     /**
      * Add Histogram metric
      * @param baseName
@@ -78,11 +81,11 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     }
 
     /**
-     * Add Metered metric 
+     * Add Metered metric
      * @param baseName
      * @param metered
      */
-    
+
     void addMetered(MetricName baseName, Metered metered) {
         addMetric(metered, baseName,
                 SignalFxReporter.MetricDetails.COUNT,
@@ -107,7 +110,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
      * @param baseName
      * @param sampling
      */
-    
+
     private void addSampling(MetricName baseName, Sampling sampling) {
         Metric metric = (Metric)sampling;
         final Snapshot snapshot = sampling.getSnapshot();
@@ -157,7 +160,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
      * @param defaultMetricType
      * @param originalValue
      */
-    
+
     void addMetric(Metric metric, MetricName codahaleName,
                              SignalFxProtocolBuffers.MetricType defaultMetricType,
                              Object originalValue) {
@@ -166,14 +169,14 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     }
 
     /**
-     * Add metric 
+     * Add metric
      * @param metric
      * @param codahaleName
      * @param metricDetails
      * @param defaultMetricType
      * @param originalValue
      */
-    
+
     private void addMetric(Metric metric, MetricName codahaleName, SignalFxReporter.MetricDetails metricDetails,
                           SignalFxProtocolBuffers.MetricType defaultMetricType,
                           Object originalValue) {
@@ -181,9 +184,9 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 defaultMetricType, originalValue);
 
     }
-    
+
     /**
-     * Add metric 
+     * Add metric
      * @param metric
      * @param codahaleName
      * @param metricDetails
@@ -238,6 +241,12 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             }
         }
 
+        for (Map.Entry<String, String> entry: defaultDimensions.entrySet()) {
+            builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                    .setKey(entry.getKey())
+                    .setValue(entry.getValue()));
+        }
+
         if (injectCurrentTimestamp) {
             final long currentTimestamp = System.currentTimeMillis();
             builder.setTimestamp(currentTimestamp);
@@ -258,15 +267,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         System.out.println(builder.build());
         metricSenderSession.setDatapoint(builder.build());
     }
-    
+
     //--- Aditional Methods
-    
+
     /**
      * calculate Max value for snapshot
      * @param shapshot
      * @return
      */
-    
+
     private double getMax(Snapshot snapshot) {
     	double[] values = snapshot.getValues();
     	if (values.length == 0) {
@@ -274,7 +283,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     	}
     	return values[values.length - 1];
     }
-    
+
     /**
      * calculate Min value for snapshot
      * @param shapshot
@@ -288,13 +297,13 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     	}
     	return values[0];
     }
-    
+
     /**
      * calculate standard deviation for snapshot
      * @param shapshot
      * @return
      */
-    
+
     private double getStdDev(Snapshot snapshot) {
         // two-pass algorithm for variance, avoids numeric overflow
     	double[] values = snapshot.getValues();
@@ -314,17 +323,17 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         final double variance = sum / (values.length - 1);
         return Math.sqrt(variance);
     }
-    
+
     /**
      * calculate Mean value for snapshot
      * @param shapshot
      * @return
      */
-    
+
     private double getMean(Snapshot shapshot) {
-    	
+
     	double[] values = shapshot.getValues();
-    	
+
         if (values.length == 0) {
             return 0;
         }
@@ -335,5 +344,5 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         }
         return sum / values.length;
     }
-    
+
 }

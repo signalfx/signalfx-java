@@ -3,6 +3,7 @@ package com.signalfx.codahale.reporter;
 import java.io.Closeable;
 import java.util.Map;
 import java.util.Set;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Metered;
 import com.codahale.metrics.Metric;
@@ -10,6 +11,7 @@ import com.codahale.metrics.Sampling;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
@@ -22,6 +24,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
+    private final ImmutableMap<String,String> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -29,7 +32,8 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension) {
-        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension, false);
+        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension,
+                false, ImmutableMap.<String, String> of());
     }
 
     AggregateMetricSenderSessionWrapper(
@@ -38,13 +42,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension,
-            boolean injectCurrentTimestamp) {
+            boolean injectCurrentTimestamp,
+            ImmutableMap<String,String> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
+        this.defaultDimensions = defaultDimensions;
     }
 
     @Override
@@ -191,6 +197,12 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
+        }
+
+        for (Map.Entry<String, String> entry: defaultDimensions.entrySet()) {
+            builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                    .setKey(entry.getKey())
+                    .setValue(entry.getValue()));
         }
 
         if (injectCurrentTimestamp) {

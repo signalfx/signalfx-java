@@ -8,15 +8,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
-import com.yammer.metrics.core.Counter;
-import com.yammer.metrics.core.Gauge;
-import com.yammer.metrics.core.Histogram;
-import com.yammer.metrics.core.Meter;
-import com.yammer.metrics.core.MetricPredicate;
-import com.yammer.metrics.core.MetricsRegistry;
-import com.yammer.metrics.core.Timer;
-import com.yammer.metrics.core.MetricName;
-
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
@@ -29,8 +21,14 @@ import com.signalfx.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
-
-import com.signalfx.codahale.reporter.CustomScheduledReporter;
+import com.yammer.metrics.core.Counter;
+import com.yammer.metrics.core.Gauge;
+import com.yammer.metrics.core.Histogram;
+import com.yammer.metrics.core.Meter;
+import com.yammer.metrics.core.MetricName;
+import com.yammer.metrics.core.MetricPredicate;
+import com.yammer.metrics.core.MetricsRegistry;
+import com.yammer.metrics.core.Timer;
 
 /**
  * Reporter object for codahale metrics that reports values to com.signalfx.signalfx at some
@@ -41,43 +39,45 @@ public class SignalFxReporter extends CustomScheduledReporter {
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final boolean useLocalTime;
+    private final ImmutableMap<String,String> defaultDimensions;
 
     protected SignalFxReporter(MetricsRegistry registry, String name, MetricPredicate filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
                                  AggregateMetricSender aggregateMetricSender,
                                  Set<MetricDetails> detailsToAdd,
                                  MetricMetadata metricMetadata) {
-        this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd, metricMetadata, false);
+        this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd,
+                metricMetadata, false, ImmutableMap.<String, String>of());
     }
 
     public SignalFxReporter(MetricsRegistry registry, String name, MetricPredicate filter,
                               TimeUnit rateUnit, TimeUnit durationUnit,
                               AggregateMetricSender aggregateMetricSender,
                               Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
-                              boolean useLocalTime) {
+                              boolean useLocalTime,
+                              ImmutableMap<String,String> defaultDimensions) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.useLocalTime = useLocalTime;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
+        this.defaultDimensions = defaultDimensions;
     }
 
     /**
-     * 
+     *
      * Reports all given metrics here
-     * 
+     *
      */
-    
+
     @Override
-    public void report(	SortedMap<MetricName, Gauge> gauges, 
-    					SortedMap<MetricName, Counter> counters,
-    					SortedMap<MetricName, Histogram> histograms, 
-    					SortedMap<MetricName, Meter> meters,
-    					SortedMap<MetricName, Timer> timers) {
-    	
+    public void report(SortedMap<MetricName, Gauge> gauges, SortedMap<MetricName, Counter> counters,
+                       SortedMap<MetricName, Histogram> histograms,
+                       SortedMap<MetricName, Meter> meters, SortedMap<MetricName, Timer> timers) {
+
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
                 aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
-                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime);
+                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime, defaultDimensions);
         try {
             for (Map.Entry<MetricName, Gauge> entry : gauges.entrySet()) {
                 session.addMetric(entry.getValue(), entry.getKey(),
@@ -162,6 +162,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
         private boolean useLocalTime = false;
+        private final ImmutableMap.Builder<String, String> defaultDimensions = new ImmutableMap.Builder<String, String>();
 
         public Builder(MetricsRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
@@ -271,11 +272,44 @@ public class SignalFxReporter extends CustomScheduledReporter {
             return this;
         }
 
+        /**
+         * Adds all dimensions to the default dimensions to be sent with every datapoint from this
+         * reporter.
+         *
+         * @param dimensions non-null map of string value pairs
+         * @return this
+         */
+        public Builder addDimensions(Map<String, String> dimensions) {
+            // loop here to get "null value" protection of addDimension
+            for (Map.Entry<String, String> entry: dimensions.entrySet()) {
+                this.addDimension(entry.getKey(), entry.getValue());
+            }
+            return this;
+        }
+
+        /**
+         * Adds a dimension to the default dimensions to be sent with every datapoint from this
+         * reporter.
+         *
+         * @param name
+         *            Name of the dimension
+         * @param value
+         *            Value of the dimension. If null then the dimension is not added.
+         * @return this
+         */
+        public Builder addDimension(String name, String value) {
+            if (value != null) {
+                this.defaultDimensions.put(name, value);
+            }
+            return this;
+        }
+
         public SignalFxReporter build() {
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
                     defaultSourceName, dataPointReceiverFactory, authToken, onSendErrorHandlerCollection);
             return new SignalFxReporter(registry, name, filter, rateUnit, durationUnit,
-                    aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime);
+                    aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime,
+                    defaultDimensions.build());
         }
     }
 }

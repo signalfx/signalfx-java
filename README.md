@@ -168,6 +168,13 @@ try {
 After setting up a SignalFxReporter, you can use Codahale metrics as you
 normally would, reported at the frequency configured by the `SignalFxReporter`.
 
+### Default Dimensions
+Sometimes there is a desire to set one or more dimension key/value pairs
+on every datapoint that is reported by this library. In order to do this
+call `addDimension(String key, String value)` or
+`addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder`
+object.
+
 ### Yammer Metrics
 
 You can also use this library with Yammer metrics 2.0.x as shown in the
@@ -238,6 +245,13 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     SourceNameHelper.getAwsInstanceId()
 ).build();
 ```
+
+### Default Dimensions
+Sometimes there is a desire to set one or more dimension key/value pairs
+on every datapoint that is reported by this library. In order to do this
+call `addDimension(String key, String value)` or
+`addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder` 
+object.
 
 ## Example Project
 
