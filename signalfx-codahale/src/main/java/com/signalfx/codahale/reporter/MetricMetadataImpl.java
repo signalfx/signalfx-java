@@ -161,7 +161,7 @@ public class MetricMetadataImpl implements MetricMetadata {
         public M createOrGet(MetricRegistry metricRegistry) {
             String compositeName = createCodahaleName();
             Metric existingMetric = metricRegistry.getMetrics().get(compositeName);
-            if (existingMetric != null) {
+            if (existingMetric != null && metaDataCollection.get(existingMetric) != null) {
                 return validateMetric(existingMetric, compositeName);
             }
             // Lock on an object that is shared by the metadata tagger, not *this* which is not.
