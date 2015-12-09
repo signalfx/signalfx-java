@@ -1,7 +1,4 @@
 /**
- * Copyright (C) 2015 SignalFx, Inc.
- */
-/**
 * Copyright (C) 2015 SignalFx, Inc.
 */
 package com.signalfx.metrics.aws;
@@ -19,8 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AWSInstanceInfo {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     public static final String DIMENSION_NAME = "AWSUniqueId";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
 
     private static final String URL = "http://169.254.169.254/latest/dynamic/instance-identity/document";
     private static final Logger log = LoggerFactory.getLogger(AWSInstanceInfo.class);
@@ -29,9 +27,8 @@ public class AWSInstanceInfo {
     private static final String REGION = "region";
     private static final String ACCOUNT_ID = "accountId";
 
-    public static String get() {
-
-        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(1000).build();
+    public static String get(int timeoutInMs) {
+        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeoutInMs).build();
         HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig)
                 .build();
         HttpGet request = new HttpGet(URL);
@@ -48,7 +45,10 @@ public class AWSInstanceInfo {
         }
 
         return null;
+    }
 
+    public static String get() {
+        return get(1000);
     }
 
 }
