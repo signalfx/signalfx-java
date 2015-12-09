@@ -19,7 +19,6 @@ public class AWSInstanceInfo {
     public static final String DIMENSION_NAME = "AWSUniqueId";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-
     private static final String URL = "http://169.254.169.254/latest/dynamic/instance-identity/document";
     private static final Logger log = LoggerFactory.getLogger(AWSInstanceInfo.class);
 
@@ -27,6 +26,13 @@ public class AWSInstanceInfo {
     private static final String REGION = "region";
     private static final String ACCOUNT_ID = "accountId";
 
+    /**
+     * Attempt to get the value for the AWSUniqueId dimension used in SignalFx AWS integrations.
+     *
+     * @param timeoutInMs
+     *            how long to wait in milliseconds for AWS to respond
+     * @return null if the value was not obtained for any reason
+     */
     public static String get(int timeoutInMs) {
         RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeoutInMs).build();
         HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig)
@@ -47,6 +53,12 @@ public class AWSInstanceInfo {
         return null;
     }
 
+    /**
+     * Attempt to get the value for the AWSUniqueId dimension used in SignalFx AWS integrations with
+     * the default timeout of 1 second
+     *
+     * @return null if the value was not obtained for any reason
+     */
     public static String get() {
         return get(1000);
     }
