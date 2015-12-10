@@ -19,6 +19,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.aws.AWSInstanceInfo;
 import com.signalfx.metrics.SourceNameHelper;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.StaticAuthToken;
@@ -38,34 +39,46 @@ public class SignalFxReporter extends ScheduledReporter {
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final boolean useLocalTime;
+    private final boolean enableAwsUniqueId;
+    private boolean hasAwsInstanceInfo;
+    private AWSInstanceInfo awsInstanceInfo;
 
     protected SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
                                  AggregateMetricSender aggregateMetricSender,
                                  Set<MetricDetails> detailsToAdd,
                                  MetricMetadata metricMetadata) {
-        this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd, metricMetadata, false);
+        this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd, metricMetadata, false, false);
     }
 
     public SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
                               TimeUnit rateUnit, TimeUnit durationUnit,
                               AggregateMetricSender aggregateMetricSender,
                               Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
-                              boolean useLocalTime) {
+                              boolean useLocalTime, boolean enableAwsUniqueId) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.useLocalTime = useLocalTime;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
+        this.enableAwsUniqueId = enableAwsUniqueId;
     }
 
     @Override
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
                        SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
+    	
+        // Obtain AWS unique id
+    	// we need hasAwsInstanceInfo because awsInstanceInfo can be null after obtain call()
+    	if(enableAwsUniqueId && !hasAwsInstanceInfo){
+    		awsInstanceInfo = AWSInstanceInfo.obtain();
+    		hasAwsInstanceInfo = true;
+    	}
+    	
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
                 aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
-                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime);
+                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime, awsInstanceInfo);
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
                 session.addMetric(entry.getValue(), entry.getKey(),
@@ -156,6 +169,7 @@ public class SignalFxReporter extends ScheduledReporter {
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
         private boolean useLocalTime = false;
+        private boolean enableAwsUniqueId = false;
 
         public Builder(MetricRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
@@ -264,12 +278,17 @@ public class SignalFxReporter extends ScheduledReporter {
             this.useLocalTime = useLocalTime;
             return this;
         }
+        
+        public Builder enableAwsUniqueId(boolean enableAwsUniqueId){
+        	this.enableAwsUniqueId = enableAwsUniqueId;
+        	return this;
+        }
 
         public SignalFxReporter build() {
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
                     defaultSourceName, dataPointReceiverFactory, authToken, onSendErrorHandlerCollection);
             return new SignalFxReporter(registry, name, filter, rateUnit, durationUnit,
-                    aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime);
+                    aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime, enableAwsUniqueId);
         }
     }
 }

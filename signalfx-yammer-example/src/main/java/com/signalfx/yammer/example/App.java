@@ -51,6 +51,7 @@ public class App {
         SignalFxReporter reporter = new SignalFxReporter.Builder(metricsRegistry,
                 new StaticAuthToken(auth_token),
                 hostUrlStr).setEndpoint(endpoint)
+                .enableAwsUniqueId(true)
                 .setOnSendErrorHandlerCollection(
                         Collections.<OnSendErrorHandler>singleton(new OnSendErrorHandler() {
                             public void handleError(MetricError error) {
@@ -65,11 +66,8 @@ public class App {
         final MetricMetadata metricMetadata = reporter.getMetricMetadata();
 
         Counter counter = getCounter(metricsRegistry, metricMetadata);
-
         Metric cumulativeCounter = getCumulativeCounter(metricsRegistry, metricMetadata);
-
         Gauge gauge1 = getGauge(metricsRegistry, metricMetadata);
-
         Timer timer = getTimer(metricsRegistry, metricMetadata);
 
         // main body generating data and sending it in a loop

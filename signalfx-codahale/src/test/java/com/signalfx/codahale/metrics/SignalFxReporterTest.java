@@ -31,6 +31,7 @@ public class SignalFxReporterTest {
                 .setDataPointReceiverFactory(new StaticDataPointReceiverFactory(dbank))
                 .setDetailsToAdd(ImmutableSet.of(SignalFxReporter.MetricDetails.COUNT,
                         SignalFxReporter.MetricDetails.MIN, SignalFxReporter.MetricDetails.MAX))
+                .enableAwsUniqueId(false)
                 .build();
 
         Metric gauge = metricRegistery.register("gauge", new Gauge<Integer>() {

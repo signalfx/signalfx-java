@@ -11,9 +11,9 @@ import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.Sampling;
 import com.yammer.metrics.stats.Snapshot;
 import com.yammer.metrics.core.Timer;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.signalfx.metrics.aws.AWSInstanceInfo;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
@@ -26,12 +26,14 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
  */
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
+	
     private final AggregateMetricSender.Session metricSenderSession;
     private final Set<SignalFxReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
+    private final AWSInstanceInfo awsInstanceInfo;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -39,13 +41,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension,
-            boolean injectCurrentTimestamp) {
+            boolean injectCurrentTimestam,
+            AWSInstanceInfo awsInstanceInfo) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
-        this.injectCurrentTimestamp = injectCurrentTimestamp;
+        this.injectCurrentTimestamp = injectCurrentTimestam;
+        this.awsInstanceInfo = awsInstanceInfo;
     }
 
     @Override
@@ -203,6 +207,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             // Unsupported type
             return;
         }
+        
         final String metricDetailsMetricNameSuffix;
         if (metricDetails.isPresent()) {
             if (!detailsToAdd.contains(metricDetails.get())) {
@@ -237,6 +242,11 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
         }
+        
+    	if(awsInstanceInfo != null){
+    		builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                    .setKey(AWSInstanceInfo.AWS_UNIQUE_ID_DIMENSION_NAME).setValue(awsInstanceInfo.getId()));
+    	}
 
         if (injectCurrentTimestamp) {
             final long currentTimestamp = System.currentTimeMillis();
