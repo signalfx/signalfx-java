@@ -19,19 +19,21 @@ using protocol buffers, without using Codahale or Yammer metrics.
 
 ## Using this library in your project
 
+### With Maven
+
 If you're using Maven, add the following to your project's `pom.xml` file.
 
-* Codahale 3.0.x
+* To work with Codahale 3.0.x:
 
 ```xml
 <dependency>
   <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-codahale</artifactId>
-  <version>0.0.21</version>
+  <version>0.0.23</version>
 </dependency>
 ```
 
-* Yammer Metrics 2.0.x
+* To work with Yammer Metrics 2.0.x:
 
 ```xml
 <dependency>
@@ -41,11 +43,23 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 </dependency>
 ```
 
+### With SBT
+
 If you're using SBT, add the following to your project's `build.sbt` file.
+
+* To work with Codahale 3.0.x:
 
 ```
 libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.23"
 ```
+
+* To work with Yammer Metrics 2.0.x:
+
+```
+libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.23"
+```
+
+### From source
 
 You can also install this library from source by cloning the repo and using
 `mvn install` as follows. However, we strongly recommend using the automated
