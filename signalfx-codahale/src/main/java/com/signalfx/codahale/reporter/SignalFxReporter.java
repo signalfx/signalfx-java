@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import com.signalfx.metrics.DimensionInclusion;
 import com.signalfx.metrics.SourceNameHelper;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.StaticAuthToken;
@@ -325,7 +324,7 @@ public class SignalFxReporter extends ScheduledReporter {
         public Builder addUniqueDimensions(Map<String, String> dimensions) {
             // loop here to get "null value" protection of addDimension
             for (Map.Entry<String, String> entry: dimensions.entrySet()) {
-                this.addDimension(entry.getKey(), entry.getValue());
+                this.addUniqueDimension(entry.getKey(), entry.getValue());
             }
             return this;
         }

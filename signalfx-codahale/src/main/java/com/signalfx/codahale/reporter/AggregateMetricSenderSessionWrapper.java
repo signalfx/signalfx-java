@@ -17,7 +17,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.signalfx.metrics.DimensionInclusion;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;

@@ -172,12 +172,13 @@ normally would, reported at the frequency configured by the `SignalFxReporter`.
 Sometimes there is a desire to set one or more dimension key/value pairs
 on every datapoint that is reported by this library. In order to do this
 call `addDimension(String key, String value)` or
-`addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder`
+`addDimensions(Map<String,String> dimensions)` on the `SignalFxReport.Builder`
 object. Note that if IncrementalCounter is used to create a distributed
 counter you will want to make sure that none of the dimensions passed
 to addDimension/addDimensions are unique to the reporting source
 (e.g. hostname, AWSUniqueId) as this will make make the counter
-non-distributed. For such dimensions use addUniqueDimensions/addUniqueDimension.
+non-distributed. For such dimensions use `addUniqueDimensions/addUniqueDimension`
+on the `SignalFxReport.Builder` object.
 
 ### AWS Integration
 To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
@@ -276,11 +277,7 @@ Sometimes there is a desire to set one or more dimension key/value pairs
 on every datapoint that is reported by this library. In order to do this
 call `addDimension(String key, String value)` or
 `addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder`
-object. Note that if IncrementalCounter is used to create a distributed
-counter you will want to make sure that none of the dimensions passed
-to addDimension/addDimensions are unique to the reporting source
-(e.g. hostname, AWSUniqueId) as this will make make the counter
-non-distributed. For such dimensions use addUniqueDimensions/addUniqueDimension.
+object.
 
 ### AWS Integration
 To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
@@ -301,7 +298,7 @@ Timer t = metricMetadata
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistry,
     "SIGNALFX_AUTH_TOKEN"
-).addUniqueDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
+).addDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
 ```
 
 ## Example Project

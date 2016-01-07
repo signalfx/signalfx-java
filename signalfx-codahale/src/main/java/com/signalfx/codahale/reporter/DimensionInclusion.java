@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2015 SignalFx, Inc.
  */
-package com.signalfx.metrics;
+package com.signalfx.codahale.reporter;
 
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 

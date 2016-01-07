@@ -7,7 +7,6 @@ import java.util.Set;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.signalfx.metrics.DimensionInclusion;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
@@ -33,7 +32,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
-    private final ImmutableMap<String, DimensionInclusion> defaultDimensions;
+    private final ImmutableMap<String, String> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -42,7 +41,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension,
             boolean injectCurrentTimestamp,
-            ImmutableMap<String, DimensionInclusion> defaultDimensions) {
+            ImmutableMap<String, String> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
@@ -242,15 +241,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             }
         }
 
-        for (Map.Entry<String, DimensionInclusion> entry : defaultDimensions.entrySet()) {
+        for (Map.Entry<String, String> entry : defaultDimensions.entrySet()) {
             String dimName = entry.getKey();
-            DimensionInclusion dimValue = entry.getValue();
-            if (!ignoredDimensions.contains(dimName) && !tags.containsKey(dimName)
-                    && dimValue.shouldInclude(metricType)) {
+            String dimValue = entry.getValue();
+            if (!ignoredDimensions.contains(dimName) && !tags.containsKey(dimName)) {
                 builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder().setKey(dimName)
-                        .setValue(dimValue.getValue()));
+                        .setValue(dimValue));
             }
         }
+
         if (injectCurrentTimestamp) {
             final long currentTimestamp = System.currentTimeMillis();
             builder.setTimestamp(currentTimestamp);
