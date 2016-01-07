@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.DimensionInclusion;
 import com.signalfx.metrics.SourceNameHelper;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.StaticAuthToken;
@@ -39,7 +40,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final boolean useLocalTime;
-    private final ImmutableMap<String,String> defaultDimensions;
+    private final ImmutableMap<String, DimensionInclusion> defaultDimensions;
 
     protected SignalFxReporter(MetricsRegistry registry, String name, MetricPredicate filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
@@ -47,7 +48,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
                                  Set<MetricDetails> detailsToAdd,
                                  MetricMetadata metricMetadata) {
         this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd,
-                metricMetadata, false, Collections.<String,String>emptyMap());
+                metricMetadata, false, Collections.<String, DimensionInclusion> emptyMap());
     }
 
     public SignalFxReporter(MetricsRegistry registry, String name, MetricPredicate filter,
@@ -55,7 +56,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
                               AggregateMetricSender aggregateMetricSender,
                               Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
                               boolean useLocalTime,
-                              Map<String,String> defaultDimensions) {
+                              Map<String, DimensionInclusion> defaultDimensions) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.useLocalTime = useLocalTime;
@@ -162,7 +163,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
         private boolean useLocalTime = false;
-        private final ImmutableMap.Builder<String, String> defaultDimensions = new ImmutableMap.Builder<String, String>();
+        private final ImmutableMap.Builder<String, DimensionInclusion> defaultDimensions = new ImmutableMap.Builder<String, DimensionInclusion>();
 
         public Builder(MetricsRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
@@ -274,9 +275,13 @@ public class SignalFxReporter extends CustomScheduledReporter {
 
         /**
          * Adds all dimensions to the default dimensions to be sent with every datapoint from this
-         * reporter.
+         * reporter. This means they will be added to distributed counters (as opposed to cumulative counters),
+         * which means that if there is any dimension in this map which is unique to the emitter (i.e a hostname)
+         * then the distributed counter will not aggregate as expected. For dimension that are unique to each emitter use
+         * either {@link #addUniqueDimension(String, String)} or {@link #addUniqueDimensions(Map)}
          *
-         * @param dimensions non-null map of string value pairs
+         * @param dimensions
+         *            non-null map of string value pairs
          * @return this
          */
         public Builder addDimensions(Map<String, String> dimensions) {
@@ -289,7 +294,10 @@ public class SignalFxReporter extends CustomScheduledReporter {
 
         /**
          * Adds a dimension to the default dimensions to be sent with every datapoint from this
-         * reporter.
+         * reporter.  This means they will be added to distributed counters (as opposed to cumulative counters),
+         * which means that if the name and value is unique to the emitter (i.e a hostname)
+         * then the distributed counter will not aggregate as expected. For dimension that are unique to each emitter use
+         * {@link #addUniqueDimension(String, String)}
          *
          * @param name
          *            Name of the dimension
@@ -299,7 +307,41 @@ public class SignalFxReporter extends CustomScheduledReporter {
          */
         public Builder addDimension(String name, String value) {
             if (value != null) {
-                this.defaultDimensions.put(name, value);
+                this.defaultDimensions.put(name, DimensionInclusion.shared(value));
+            }
+            return this;
+        }
+
+        /**
+         * Adds all dimensions to the default dimensions to be sent with every datapoint that is not a distributed counter.
+         * This method should be used for adding dimensions which are unique to the emitter (such as host name), for shared
+         * dimensions which can be sent with distributed counters use either {@link #addDimension(String, String)} or {@link #addDimensions(Map)}
+         * @param dimensions
+         *            non-null map of string value pairs
+         * @return this
+         */
+        public Builder addUniqueDimensions(Map<String, String> dimensions) {
+            // loop here to get "null value" protection of addDimension
+            for (Map.Entry<String, String> entry: dimensions.entrySet()) {
+                this.addDimension(entry.getKey(), entry.getValue());
+            }
+            return this;
+        }
+
+        /**
+         * Adds a dimension to the default dimensions to be sent with every datapoint that is not a distributed counter.
+         * This method should be used for adding dimensions which are unique to the emitter (such as host name), for shared
+         * dimensions use {@link #addDimension(String, String)}
+         *
+         * @param name
+         *            Name of the dimension
+         * @param value
+         *            Value of the dimension. If null then the dimension is not added.
+         * @return this
+         */
+        public Builder addUniqueDimension(String name, String value) {
+            if (value != null) {
+                this.defaultDimensions.put(name, DimensionInclusion.unique(value));
             }
             return this;
         }

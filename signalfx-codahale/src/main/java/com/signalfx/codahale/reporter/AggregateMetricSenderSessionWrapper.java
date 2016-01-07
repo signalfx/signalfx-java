@@ -1,3 +1,6 @@
+/**
+* Copyright (C) 2015 SignalFx, Inc.
+*/
 package com.signalfx.codahale.reporter;
 
 import java.io.Closeable;
@@ -14,6 +17,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.signalfx.metrics.DimensionInclusion;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
@@ -29,7 +33,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
-    private final ImmutableMap<String,String> defaultDimensions;
+    private final ImmutableMap<String, DimensionInclusion> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -38,7 +42,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension) {
         this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension,
-                false, Collections.<String, String>emptyMap());
+                false, Collections.<String, DimensionInclusion> emptyMap());
     }
 
     AggregateMetricSenderSessionWrapper(
@@ -48,7 +52,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension,
             boolean injectCurrentTimestamp,
-            Map<String,String> defaultDimensions) {
+            Map<String, DimensionInclusion> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
@@ -194,18 +198,20 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                     .setKey(sourceDimension).setValue(sourceName));
         }
 
-        // Do this first so that caller can override with tags.
-        for (Map.Entry<String, String> entry : defaultDimensions.entrySet()) {
+        for (Map.Entry<String, String> entry: tags.entrySet()) {
             if (!ignoredDimensions.contains(entry.getKey())) {
                 builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
         }
 
-        for (Map.Entry<String, String> entry: tags.entrySet()) {
-            if (!ignoredDimensions.contains(entry.getKey())) {
-                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
-                        .setKey(entry.getKey()).setValue(entry.getValue()));
+        for (Map.Entry<String, DimensionInclusion> entry : defaultDimensions.entrySet()) {
+            String dimName = entry.getKey();
+            DimensionInclusion dimValue = entry.getValue();
+            if (!ignoredDimensions.contains(dimName) && !tags.containsKey(dimName)
+                    && dimValue.shouldInclude(metricType)) {
+                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder().setKey(dimName)
+                        .setValue(dimValue.getValue()));
             }
         }
 

@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 
 import org.apache.commons.io.IOUtils;
 
+import com.signalfx.metrics.aws.AWSInstanceInfo;
+
 public final class SourceNameHelper {
     private SourceNameHelper() {
     }
@@ -41,7 +43,11 @@ public final class SourceNameHelper {
      * @return AWS instance ID
      * @throws IOException If there are any issues reading the local AWS endpoint.  For example,
      *                     if the host is not on AWS.
+     * @deprecated Use {@link AWSInstanceInfo#get()} and set as a dimension on a metric or as an
+     *             unique dimension on a SignalFxReporter
      */
+
+    @Deprecated
     public static String getAwsInstanceId() throws IOException {
         return IOUtils.toString(new URL("http://169.254.169.254/latest/meta-data/instance-id"));
     }
