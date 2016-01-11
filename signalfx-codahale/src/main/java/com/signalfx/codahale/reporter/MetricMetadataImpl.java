@@ -22,6 +22,7 @@ public class MetricMetadataImpl implements MetricMetadata {
         metaDataCollection = new ConcurrentHashMap<Metric, Metadata>();
     }
 
+    @Override
     public Map<String, String> getTags(Metric metric) {
         Metadata existingMetaData = metaDataCollection.get(metric);
         if (existingMetaData == null) {
@@ -84,16 +85,19 @@ public class MetricMetadataImpl implements MetricMetadata {
             this.thisMetricsMetadata = thisMetricsMetadata;
         }
 
+        @Override
         public T withSourceName(String sourceName) {
             thisMetricsMetadata.tags.put(SOURCE, sourceName);
             return (T) this;
         }
 
+        @Override
         public T withMetricName(String metricName) {
             thisMetricsMetadata.tags.put(METRIC, metricName);
             return (T) this;
         }
 
+        @Override
         public T withMetricType(
                 SignalFxProtocolBuffers.MetricType metricType) {
             thisMetricsMetadata.metricType = metricType;
@@ -146,12 +150,12 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     private class BuilderTaggerImpl<M extends Metric> extends TaggerBaseImpl<M, BuilderTagger<M>>
             implements BuilderTagger<M> {
-        private final MetricBuilder metricBuilder;
+        private final MetricBuilder<M> metricBuilder;
         private final ConcurrentMap<Metric, Metadata> metaDataCollection;
 
-        public <M extends Metric> BuilderTaggerImpl(MetricBuilder<M> metricBuilder,
-                                                    ConcurrentMap<Metric, Metadata> metaDataCollection,
-                                                    Metadata thisMetricsMetadata) {
+        public BuilderTaggerImpl(MetricBuilder<M> metricBuilder,
+                                 ConcurrentMap<Metric, Metadata> metaDataCollection,
+                                 Metadata thisMetricsMetadata) {
             super(thisMetricsMetadata);
             this.metricBuilder = metricBuilder;
             this.metaDataCollection = metaDataCollection;

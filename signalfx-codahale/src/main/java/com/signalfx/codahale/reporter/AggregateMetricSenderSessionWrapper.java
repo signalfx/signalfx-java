@@ -1,8 +1,13 @@
+/**
+* Copyright (C) 2015 SignalFx, Inc.
+*/
 package com.signalfx.codahale.reporter;
 
 import java.io.Closeable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Metered;
 import com.codahale.metrics.Metric;
@@ -10,18 +15,24 @@ import com.codahale.metrics.Sampling;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
+
+    private static final ImmutableSet<String> ignoredDimensions = ImmutableSet.of(
+            MetricMetadata.SOURCE, MetricMetadata.METRIC);
+
     private final AggregateMetricSender.Session metricSenderSession;
     private final Set<SignalFxReporter.MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
+    private final ImmutableMap<String, DimensionInclusion> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
@@ -29,7 +40,8 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension) {
-        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension, false);
+        this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension,
+                false, Collections.<String, DimensionInclusion> emptyMap());
     }
 
     AggregateMetricSenderSessionWrapper(
@@ -38,13 +50,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             MetricMetadata metricMetadata,
             String defaultSourceName,
             String sourceDimension,
-            boolean injectCurrentTimestamp) {
+            boolean injectCurrentTimestamp,
+            Map<String, DimensionInclusion> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
+        this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
     }
 
     @Override
@@ -183,13 +197,20 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                     .setKey(sourceDimension).setValue(sourceName));
         }
 
-        ImmutableSet<String> ignoredDimensions = ImmutableSet.of(
-                MetricMetadata.SOURCE, MetricMetadata.METRIC);
-
         for (Map.Entry<String, String> entry: tags.entrySet()) {
             if (!ignoredDimensions.contains(entry.getKey())) {
                 builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
+            }
+        }
+
+        for (Map.Entry<String, DimensionInclusion> entry : defaultDimensions.entrySet()) {
+            String dimName = entry.getKey();
+            DimensionInclusion dimValue = entry.getValue();
+            if (!ignoredDimensions.contains(dimName) && !tags.containsKey(dimName)
+                    && dimValue.shouldInclude(metricType)) {
+                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder().setKey(dimName)
+                        .setValue(dimValue.getValue()));
             }
         }
 

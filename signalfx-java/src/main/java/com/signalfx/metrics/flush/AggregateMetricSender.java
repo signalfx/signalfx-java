@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.NoAuthTokenException;
@@ -88,19 +89,23 @@ public class AggregateMetricSender {
             pointsToFlush = new ArrayList<SignalFxProtocolBuffers.DataPoint>();
         }
 
+        @Override
         public Session setCumulativeCounter(String metric, long value) {
             return setCumulativeCounter(defaultSourceName, metric, value);
         }
 
+        @Override
         public Session setCumulativeCounter(String source, String metric, long value) {
             setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, value);
             return this;
         }
 
+        @Override
         public Session incrementCounter(String metric, long value) {
             return incrementCounter(defaultSourceName, metric, value);
         }
 
+        @Override
         public Session incrementCounter(String source, String metric, long value) {
             setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.COUNTER, value);
             return this;
@@ -141,19 +146,23 @@ public class AggregateMetricSender {
             return this;
         }
 
+        @Override
         public Session setGauge(String metric, long value) {
             return setGauge(defaultSourceName, metric, value);
         }
 
+        @Override
         public Session setGauge(String source, String metric, long value) {
             setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.GAUGE, value);
             return this;
         }
 
+        @Override
         public Session setGauge(String metric, double value) {
             return setGauge(defaultSourceName, metric, value);
         }
 
+        @Override
         public Session setGauge(String source, String metric, double value) {
             setDatapoint(source, metric, SignalFxProtocolBuffers.MetricType.GAUGE, value);
             return this;
@@ -167,6 +176,7 @@ public class AggregateMetricSender {
             }
         }
 
+        @Override
         public void close() {
             final String authTokenStr;
             try {
