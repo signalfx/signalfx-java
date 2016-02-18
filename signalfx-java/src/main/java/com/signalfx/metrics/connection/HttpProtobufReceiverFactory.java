@@ -6,7 +6,7 @@ import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
-public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
+public class HttpProtobufReceiverFactory implements DataPointEventReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
     public static final int DEFAULT_VERSION = 2;
 
@@ -16,16 +16,16 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
 
-    public HttpDataPointProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
+    public HttpProtobufReceiverFactory (SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
     }
 
-    public HttpDataPointProtobufReceiverFactory setTimeoutMs(int timeoutMs) {
+    public HttpProtobufReceiverFactory setTimeoutMs(int timeoutMs) {
         this.timeoutMs = timeoutMs;
         return this;
     }
 
-    public HttpDataPointProtobufReceiverFactory setVersion(int version) {
+    public HttpProtobufReceiverFactory setVersion(int version) {
         this.version = version;
         return this;
     }
@@ -36,12 +36,12 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     }
 
     @Override
-    public DataPointReceiver createDataPointReceiver() throws
+    public DataPointEventReceiver createDataPointEventReceiver() throws
             SignalFxMetricsException {
         if (version == 1) {
-            return new HttpDataPointProtobufReceiverConnection(endpoint, this.timeoutMs, httpClientConnectionManager);
+            return new HttpProtobufReceiverConnection(endpoint, this.timeoutMs, httpClientConnectionManager);
         } else {
-            return new HttpDataPointProtobufReceiverConnectionV2(endpoint, this.timeoutMs, httpClientConnectionManager);
+            return new HttpProtobufReceiverConnectionV2(endpoint, this.timeoutMs, httpClientConnectionManager);
         }
 
     }

@@ -23,24 +23,36 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
-public class HttpDataPointProtobufReceiverConnection
-        extends AbstractHttpDataPointProtobufReceiverConnection {
-    public HttpDataPointProtobufReceiverConnection(
+public class HttpProtobufReceiverConnection
+        extends AbstractHttpProtobufReceiverConnection {
+    public HttpProtobufReceiverConnection (
             SignalFxReceiverEndpoint endpoint, int timeoutMs,
             HttpClientConnectionManager httpClientConnectionManager) {
         super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
     @Override
-    protected HttpEntity getEntityForVersion(List<SignalFxProtocolBuffers.DataPoint> dataPoints) {
+    protected HttpEntity getDataPointsEntityForVersion(List<SignalFxProtocolBuffers.DataPoint> dataPoints) {
         return new InputStreamEntity(
                 new ProtocolBufferStreamingInputStream<SignalFxProtocolBuffers.DataPoint>(
                         dataPoints.iterator()), PROTO_TYPE);
     }
 
     @Override
+    protected HttpEntity getEventsEntityForVersion(List<SignalFxProtocolBuffers.Event> events) {
+        return new InputStreamEntity(
+                new ProtocolBufferStreamingInputStream<SignalFxProtocolBuffers.Event>(
+                        events.iterator()), PROTO_TYPE);
+    }
+
+    @Override
     protected String getEndpointForAddDatapoints() {
         return "/v1/datapoint";
+    }
+
+    @Override
+    protected String getEndpointForAddEvents() {
+        return "/v1/event";
     }
 
     @Override

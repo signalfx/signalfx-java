@@ -12,9 +12,9 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
-public class HttpDataPointProtobufReceiverConnectionV2
-        extends AbstractHttpDataPointProtobufReceiverConnection {
-    public HttpDataPointProtobufReceiverConnectionV2(
+public class HttpProtobufReceiverConnectionV2
+        extends AbstractHttpProtobufReceiverConnection {
+    public HttpProtobufReceiverConnectionV2 (
             SignalFxReceiverEndpoint endpoint, int timeoutMs,
             HttpClientConnectionManager httpClientConnectionManager) {
         super(endpoint, timeoutMs, httpClientConnectionManager);
@@ -23,6 +23,11 @@ public class HttpDataPointProtobufReceiverConnectionV2
     @Override
     protected String getEndpointForAddDatapoints() {
         return "/v2/datapoint";
+    }
+
+    @Override
+    protected String getEndpointForAddEvents() {
+        return "/v2/event";
     }
 
     @Override
