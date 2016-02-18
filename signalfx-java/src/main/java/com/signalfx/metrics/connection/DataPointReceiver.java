@@ -6,7 +6,7 @@ import java.util.Map;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
-public interface DataPointReceiver {
+public interface DataPointEventReceiver {
     void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
             throws SignalFxMetricsException;
 
@@ -15,5 +15,8 @@ public interface DataPointReceiver {
             throws SignalFxMetricsException;
 
     Map<String, Boolean> registerMetrics(String auth, Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
+            throws SignalFxMetricsException;
+
+    void addEvents(String auth, List<SignalFxProtocolBuffers.Event> events)
             throws SignalFxMetricsException;
 }

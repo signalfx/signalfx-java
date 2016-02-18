@@ -5,9 +5,9 @@ package com.signalfx.metrics.connection;
  * 
  * @author jack
  */
-public interface DataPointReceiverFactory {
+public interface DataPointEventReceiverFactory {
     /**
      * Create connection to datapoint.
      */
-    DataPointReceiver createDataPointReceiver();
+    DataPointEventReceiver createDataPointEventReceiver();
 }

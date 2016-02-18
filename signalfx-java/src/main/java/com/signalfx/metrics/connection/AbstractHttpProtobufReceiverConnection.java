@@ -17,11 +17,11 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
-public abstract class AbstractHttpDataPointProtobufReceiverConnection extends AbstractHttpReceiverConnection implements DataPointReceiver {
+public abstract class AbstractHttpProtobufReceiverConnection extends AbstractHttpReceiverConnection implements DataPointEventReceiver {
 
     protected static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
 
-    public AbstractHttpDataPointProtobufReceiverConnection(
+    public AbstractHttpProtobufReceiverConnection (
             SignalFxReceiverEndpoint endpoint,
             int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
        super(endpoint, timeoutMs, httpClientConnectionManager);
@@ -38,19 +38,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
             try {
                 resp = postToEndpoint(auth, getEntityForVersion(dataPoints),
                         getEndpointForAddDatapoints());
-                final String body;
-                try {
-                    body = IOUtils.toString(resp.getEntity().getContent());
-                } catch (IOException e) {
-                    throw new SignalFxMetricsException("Unable to get reponse content", e);
-                }
-                if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new SignalFxMetricsException("Invalid status code "
-                            + resp.getStatusLine().getStatusCode() + ": " + body);
-                }
-                if (!"\"OK\"".equals(body)) {
-                    throw new SignalFxMetricsException("Invalid response body: " + body);
-                }
+                checkHttpResponse(resp);
             } finally {
                 if (resp != null) {
                     resp.close();
@@ -61,10 +49,53 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
         }
     }
 
+    @Override
+    public void addEvents(String auth, List<SignalFxProtocolBuffers.Event> events)
+            throws SignalFxMetricsException {
+        if (events.isEmpty()){
+            return;
+        }
+        try {
+            CloseableHttpResponse resp = null;
+            try {
+                resp = postToEndpoint(auth, getEntityForVersion(events),
+                        getEndpointForAddEvents());
+                checkHttpResponse(resp);
+            } finally {
+                if (resp != null) {
+                    resp.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new SignalFxMetricsException("Exception posting to addDataPoints", e);
+        }
+    }
+
+    public void checkHttpResponse(CloseableHttpResponse resp) throws SignalFxMetricsException {
+        final String body;
+        try {
+            body = IOUtils.toString(resp.getEntity().getContent());
+        } catch (IOException e) {
+            throw new SignalFxMetricsException("Unable to get response content", e);
+        }
+        if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+            throw new SignalFxMetricsException("Invalid status code "
+                    + resp.getStatusLine().getStatusCode() + ": " + body);
+        }
+        if (!"\"OK\"".equals(body)) {
+            throw new SignalFxMetricsException("Invalid response body: " + body);
+        }
+    }
+
     protected abstract String getEndpointForAddDatapoints();
 
-    protected abstract HttpEntity getEntityForVersion(
+    protected abstract String getEndpointForAddEvents();
+
+    protected abstract HttpEntity getDataPointsEntityForVersion(
             List<SignalFxProtocolBuffers.DataPoint> dataPoints);
+
+    protected abstract HttpEntity getEventsEntityForVersion(
+            List<SignalFxProtocolBuffers.Event> events);
 
     @Override
     public void backfillDataPoints(String auth, String source, String metric,
