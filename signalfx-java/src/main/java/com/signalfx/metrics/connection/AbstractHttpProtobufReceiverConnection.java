@@ -67,7 +67,7 @@ public abstract class AbstractHttpProtobufReceiverConnection extends AbstractHtt
                 }
             }
         } catch (IOException e) {
-            throw new SignalFxMetricsException("Exception posting to addDataPoints", e);
+            throw new SignalFxMetricsException("Exception posting to addEvents", e);
         }
     }
 

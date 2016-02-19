@@ -8,7 +8,7 @@ import java.util.Properties;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.auth.StaticAuthToken;
-import com.signalfx.metrics.connection.HttpDataPointProtobufReceiverFactory;
+import com.signalfx.metrics.connection.HttpProtobufReceiverFactory;
 import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
@@ -30,7 +30,7 @@ public final class SendMetrics {
                                       hostUrl.getPort());
         AggregateMetricSender mf =
                 new AggregateMetricSender("test.SendMetrics",
-                                          new HttpDataPointProtobufReceiverFactory(
+                                          new HttpProtobufReceiverFactory(
                                                   endpoint)
                                                   .setVersion(2),
                                           new StaticAuthToken(auth_token),

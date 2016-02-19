@@ -6,5 +6,6 @@ public enum MetricErrorType {
      INTERUPTED,
      AUTH_TOKEN_ERROR,
      QUEUE_FULL,
-     DATAPOINT_SEND_ERROR
+     DATAPOINT_SEND_ERROR,
+     EVENT_SEND_ERROR
 }

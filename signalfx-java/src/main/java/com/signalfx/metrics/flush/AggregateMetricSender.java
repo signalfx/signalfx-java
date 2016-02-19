@@ -12,8 +12,8 @@ import java.util.Set;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.NoAuthTokenException;
-import com.signalfx.metrics.connection.DataPointReceiver;
-import com.signalfx.metrics.connection.DataPointReceiverFactory;
+import com.signalfx.metrics.connection.DataPointEventReceiver;
+import com.signalfx.metrics.connection.DataPointEventReceiverFactory;
 import com.signalfx.metrics.errorhandler.MetricErrorImpl;
 import com.signalfx.metrics.errorhandler.MetricErrorType;
 import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
@@ -46,16 +46,16 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 public class AggregateMetricSender {
     private final String defaultSourceName;
     private final Set<String> registeredMetricPairs;
-    private final DataPointReceiverFactory dataPointReceiverFactory;
+    private final DataPointEventReceiverFactory dataPointEventReceiverFactory;
     private final AuthToken authToken;
     private final Collection<OnSendErrorHandler> onSendErrorHandlerCollection;
 
-    public AggregateMetricSender(String defaultSourceName, DataPointReceiverFactory dataPointReceiverFactory,
+    public AggregateMetricSender(String defaultSourceName, DataPointEventReceiverFactory dataPointEventReceiverFactory,
                                  AuthToken authToken,
                                  Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
         this.defaultSourceName = defaultSourceName;
         registeredMetricPairs = new HashSet<String>();
-        this.dataPointReceiverFactory = dataPointReceiverFactory;
+        this.dataPointEventReceiverFactory = dataPointEventReceiverFactory;
         this.authToken = authToken;
         this.onSendErrorHandlerCollection = onSendErrorHandlerCollection;
     }
@@ -80,12 +80,14 @@ public class AggregateMetricSender {
         private final Map<String, com.signalfx.metrics.protobuf.SignalFxProtocolBuffers
                 .MetricType> toBeRegisteredMetricPairs;
         private final List<SignalFxProtocolBuffers.DataPoint> pointsToFlush;
+        private final List<SignalFxProtocolBuffers.Event> eventsToFlush;
 
         private SessionImpl() {
             toBeRegisteredMetricPairs = new HashMap<String, com.signalfx.metrics.protobuf
                     .SignalFxProtocolBuffers.MetricType>();
 
             pointsToFlush = new ArrayList<SignalFxProtocolBuffers.DataPoint>();
+            eventsToFlush = new ArrayList<SignalFxProtocolBuffers.Event>();
         }
 
         public Session setCumulativeCounter(String metric, long value) {
@@ -141,6 +143,12 @@ public class AggregateMetricSender {
             return this;
         }
 
+        @Override
+        public Session setEvent(SignalFxProtocolBuffers.Event event) {
+            eventsToFlush.add(event);
+            return this;
+        }
+
         public Session setGauge(String metric, long value) {
             return setGauge(defaultSourceName, metric, value);
         }
@@ -177,11 +185,11 @@ public class AggregateMetricSender {
                 return;
             }
 
-            DataPointReceiver dataPointReceiver = dataPointReceiverFactory.createDataPointReceiver();
+            DataPointEventReceiver dataPointEventReceiver = dataPointEventReceiverFactory.createDataPointEventReceiver();
 
             if (!toBeRegisteredMetricPairs.isEmpty()) {
                 try {
-                    Map<String, Boolean> registeredPairs = dataPointReceiver.registerMetrics(authTokenStr,
+                    Map<String, Boolean> registeredPairs = dataPointEventReceiver.registerMetrics(authTokenStr,
                             toBeRegisteredMetricPairs);
                     for (Map.Entry<String, Boolean> i: registeredPairs.entrySet()) {
                         if (i.getValue()) {
@@ -206,10 +214,21 @@ public class AggregateMetricSender {
 
             if (!pointsToFlush.isEmpty()) {
                 try {
-                    dataPointReceiver.addDataPoints(authTokenStr, pointsToFlush);
+                    dataPointEventReceiver.addDataPoints(authTokenStr, pointsToFlush);
                 } catch (SignalFxMetricsException e) {
                     communicateError("Unable to send datapoints",
                             MetricErrorType.DATAPOINT_SEND_ERROR,
+                            e);
+                    return;
+                }
+            }
+
+            if (!eventsToFlush.isEmpty()) {
+                try {
+                    dataPointEventReceiver.addEvents(authTokenStr, eventsToFlush);
+                } catch (SignalFxMetricsException e) {
+                    communicateError("Unable to send events",
+                            MetricErrorType.EVENT_SEND_ERROR,
                             e);
                     return;
                 }
@@ -239,5 +258,7 @@ public class AggregateMetricSender {
         Session setDatapoint(String source, String metric, SignalFxProtocolBuffers.MetricType metricType, double value);
 
         Session setDatapoint(SignalFxProtocolBuffers.DataPoint datapoint);
+
+        Session setEvent(SignalFxProtocolBuffers.Event event);
     }
 }
