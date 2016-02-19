@@ -6,12 +6,12 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.24-SNAPSHOT</version>
+    <version>0.0.25-SNAPSHOT</version>
   </parent>
 
   <artifactId>signalfx-protoc</artifactId>
   <name>SignalFx Protocol Buffer definitions</name>
-  <version>0.0.24-SNAPSHOT</version>
+  <version>0.0.25-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <description>
@@ -49,7 +49,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>2.5.0</version>
     </dependency>
   </dependencies>
 

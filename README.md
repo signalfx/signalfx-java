@@ -182,6 +182,40 @@ try {
 After setting up a SignalFxReporter, you can use Codahale metrics as you
 normally would, reported at the frequency configured by the `SignalFxReporter`.
 
+### Default Dimensions
+Sometimes there is a desire to set one or more dimension key/value pairs
+on every datapoint that is reported by this library. In order to do this
+call `addDimension(String key, String value)` or
+`addDimensions(Map<String,String> dimensions)` on the `SignalFxReport.Builder`
+object. Note that if IncrementalCounter is used to create a distributed
+counter you will want to make sure that none of the dimensions passed
+to addDimension/addDimensions are unique to the reporting source
+(e.g. hostname, AWSUniqueId) as this will make make the counter
+non-distributed. For such dimensions use `addUniqueDimensions/addUniqueDimension`
+on the `SignalFxReport.Builder` object.
+
+### AWS Integration
+To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
+you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
+a dimension in `MetricMetadata` or add it as a default dimension.
+
+```java
+String instanceInfo = AWSInstanceInfo.get()
+Timer t = metricMetadata
+    .forBuilder(MetricBuilder.TIMERS)
+    .withMetricName("request_time")
+    .withDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo)
+    .createOrGet(metricRegistery);
+
+/**
+ * As default dimension
+ */
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+    metricRegistry,
+    "SIGNALFX_AUTH_TOKEN"
+).addUniqueDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
+```
+
 ### Yammer Metrics
 
 You can also use this library with Yammer metrics 2.0.x as shown in the
@@ -240,8 +274,7 @@ This is not supported in Yammer Metrics 2.0.x.
 The default source name for metrics is discovered by [SourceNameHelper]
 (signalfx-java/src/main/java/com/signalfx/metrics/SourceNameHelper.java).
 If you want to override the default behavior, you can pass a third parameter to
-your Builder and that String is then used as the source.  If you are using AWS,
-we provide a helper to extract your AWS instance ID and use that as the source.
+your Builder and that String is then used as the source.
 
 For example:
 
@@ -249,8 +282,37 @@ For example:
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistry,
     "SIGNALFX_AUTH_TOKEN",
-    SourceNameHelper.getAwsInstanceId()
+    "MYHOST1"
 ).build();
+```
+
+## Default Dimensions
+Sometimes there is a desire to set one or more dimension key/value pairs
+on every datapoint that is reported by this library. In order to do this
+call `addDimension(String key, String value)` or
+`addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder`
+object.
+
+### AWS Integration
+To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
+you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
+a dimension in `MetricMetadata` or add it as a default dimension.
+
+```java
+String instanceInfo = AWSInstanceInfo.get()
+Timer t = metricMetadata
+    .forBuilder(MetricBuilder.TIMERS)
+    .withMetricName("request_time")
+    .withDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo)
+    .createOrGet(metricRegistery);
+
+/**
+ * As default dimension
+ */
+final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
+    metricRegistry,
+    "SIGNALFX_AUTH_TOKEN"
+).addDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
 ```
 
 ## Example Project
