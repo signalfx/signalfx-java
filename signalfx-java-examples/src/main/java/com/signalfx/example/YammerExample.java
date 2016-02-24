@@ -1,4 +1,4 @@
-package com.signalfx.yammer.example;
+package com.signalfx.example;
 
 import java.io.FileInputStream;
 import java.lang.String;
@@ -28,7 +28,7 @@ import com.yammer.metrics.core.TimerContext;
     An example class for Yammer 2.x metrics.  For more information see
     http://metrics.dropwizard.io/2.2.0/getting-started/
  */
-public class App {
+public class YammerExample {
 
     public static final String SIGNAL_FX = "SignalFx";
     public static final String LIBRARY_VERSION = "library-version";
@@ -89,7 +89,7 @@ public class App {
 
     private static Counter getCounter(MetricsRegistry metricsRegistry,
                                       MetricMetadata metricMetadata) {
-        Counter counter = metricsRegistry.newCounter(App.class, "yammer.test.counter");
+        Counter counter = metricsRegistry.newCounter(YammerExample.class, "yammer.test.counter");
         metricMetadata.forMetric(counter)
                 .withSourceName("signalFx")
                 .withDimension(LIBRARY_VERSION, YAMMER);
@@ -104,7 +104,7 @@ public class App {
      */
     private static Timer getTimer(MetricsRegistry metricsRegistry, MetricMetadata metricMetadata) {
         Timer timer = metricsRegistry
-                .newTimer(App.class, "yammer.test.timer", TimeUnit.MILLISECONDS, TimeUnit.SECONDS);
+                .newTimer(YammerExample.class, "yammer.test.timer", TimeUnit.MILLISECONDS, TimeUnit.SECONDS);
         metricMetadata.forMetric(timer)
                 .withSourceName(SIGNAL_FX)
                 .withDimension(LIBRARY_VERSION, YAMMER);
@@ -112,7 +112,7 @@ public class App {
     }
 
     private static Gauge getGauge(MetricsRegistry metricsRegistry, MetricMetadata metricMetadata) {
-        Gauge gauge = metricsRegistry.newGauge(App.class, "yammer.test.gauge",
+        Gauge gauge = metricsRegistry.newGauge(YammerExample.class, "yammer.test.gauge",
                 new Gauge<Double>() {
                     @Override
                     public Double value() {
@@ -128,7 +128,7 @@ public class App {
 
     private static Metric getCumulativeCounter(MetricsRegistry metricsRegistry,
                                                MetricMetadata metricMetadata) {
-        MetricName counterCallbackName = new MetricName(App.class, "yammer.test.cumulativeCounter");
+        MetricName counterCallbackName = new MetricName(YammerExample.class, "yammer.test.cumulativeCounter");
         Metric cumulativeCounter = SfUtil.cumulativeCounter(
                 metricsRegistry,
                 counterCallbackName,

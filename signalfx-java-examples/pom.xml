@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.signalfx.yammer.example</groupId>
-  <artifactId>signalfx.yammer.example</artifactId>
+  <groupId>com.signalfx.example</groupId>
+  <artifactId>signalfx.example</artifactId>
   <version>0.0.25-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>signalfx.yammer.example</name>
+  <name>signalfx.example</name>
   <url>http://maven.apache.org</url>
 
   <properties>

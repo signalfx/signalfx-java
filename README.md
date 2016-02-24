@@ -317,12 +317,12 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 
 ## Example Project
 
-You can find a full-stack example project called "signalfx-yammer-example" in
+You can find a full-stack example project called "signalfx-java-examples" in
 the repo.
 
 Run it as follows:
 
-1. Download the code and create an "auth" file in the "signalfx-yammer-example"
+1. Download the code and create an "auth" file in the "signalfx-java-examples"
    directory. The auth file should contain the following:
 
     ```
@@ -331,28 +331,32 @@ Run it as follows:
     ```
 
 2. Run the following commands in your terminal to install and run the example
-   project, replacing `path/to/signalfx-yammer-example` with the location of the
+   project, replacing `path/to/signalfx-java-examples` with the location of the
    example project code in your environment. You must have Maven installed.
 
     ```
-    cd path/to/signalfx-yammer-example
+    cd path/to/signalfx-java-examples
     mvn install
-    mvn exec:java -Dexec.mainClass="com.signalfx.yammer.example.App"
+    # an example for Yammer 2.x metrics
+    mvn exec:java -Dexec.mainClass="com.signalfx.example.YammerExample"
+    # an example for sending datapoints and events using protocol buffers
+    mvn exec:java -Dexec.mainClass="com.signalfx.example.ProtobufExample"
     ```
-
-New metrics from the example project should appear in SignalFx.
+New metrics and events from the example project should appear in SignalFx.
 
 ## Sending metrics without using Codahale
 
 We recommend sending metrics using Codahale as shown above. You can also
 interact with our Java library directly if you do not want to use Codahale. To
 do this, you will need to build the metric manually using protocol buffers as
-shown in the following example.
+shown in the following example. Sending both datapoints and events are now supported using
+protocol buffers.
 
 ```java
-DataPointReceiverEndpoint dataPointEndpoint = new DataPointEndpoint();
+SignalFxReceiverEndpoint signalFxEndpoint = new SignalFxEndpoint();
 AggregateMetricSender mf = new AggregateMetricSender("test.SendMetrics",
-    new HttpDataPointProtobufReceiverFactory(dataPointEndpoint).setVersion(2),
+    new HttpDataPointProtobufReceiverFactory(signalFxEndpoint).setVersion(2),
+    new HttpEventProtobufReceiverFactory(signalFxEndpoint),
     new StaticAuthToken(auth_token),
     Collections.<OnSendErrorHandler> singleton(new OnSendErrorHandler() {
         @Override
@@ -365,6 +369,7 @@ try (AggregateMetricSender.Session i = mf.createSession()) {
     i.setDatapoint(
         SignalFxProtocolBuffers.DataPoint.newBuilder()
             .setMetric("curtime")
+            .setMetricType(SignalFxProtocolBuffers.MetricType.GAUGE)
             .setValue(
                 SignalFxProtocolBuffers.Datum.newBuilder()
                     .setIntValue(System.currentTimeMillis()))
@@ -373,5 +378,24 @@ try (AggregateMetricSender.Session i = mf.createSession()) {
                     .setKey("source")
                     .setValue("java"))
             .build());
+
+    i.setEvent(
+            SignalFxProtocolBuffers.Event.newBuilder()
+                  .setEventType("Deployments")
+                  .setCategory(SignalFxProtocolBuffers.EventCategory.USER_DEFINED)
+                  .setTimestamp(System.currentTimeMillis())
+                  .addDimensions(
+                    SignalFxProtocolBuffers.Dimension.newBuilder()
+                                      .setKey("source")
+                                      .setValue("java"))
+                  .addProperties(
+                    SignalFxProtocolBuffers.Property.newBuilder()
+                                    .setKey("version")
+                                    .setValue(
+                                            SignalFxProtocolBuffers.PropertyValue.newBuilder()
+                                                    .setIntValue(2)
+                                                    .build())
+                                    .build())
+                  .build());
 }
 ```
