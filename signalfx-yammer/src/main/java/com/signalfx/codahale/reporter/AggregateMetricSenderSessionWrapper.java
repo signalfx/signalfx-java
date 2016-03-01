@@ -266,8 +266,6 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             builder.setValue(SignalFxProtocolBuffers.Datum.newBuilder()
                     .setDoubleValue(doubleToSend));
         }
-
-        System.out.println(builder.build());
         metricSenderSession.setDatapoint(builder.build());
     }
 
