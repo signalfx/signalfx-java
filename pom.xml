@@ -124,6 +124,11 @@
         <artifactId>signalfx-java</artifactId>
         <version>0.0.25-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>com.signalfx.public</groupId>
+        <artifactId>signalfx-jvm-agent</artifactId>
+        <version>0.0.25-SNAPSHOT</version>
+      </dependency>
 
       <!-- ********************** -->
       <!-- 3rd Party dependencies -->
@@ -313,5 +318,6 @@
     <module>signalfx-commons-protoc-java</module>
     <module>signalfx-codahale</module>
     <module>signalfx-yammer</module>
+    <module>signalfx-jvm-agent</module>
   </modules>
 </project>
