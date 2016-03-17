@@ -15,7 +15,7 @@
   <version>0.0.25-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
-    Codahale yammer metrics plugin for signalfx
+    Dropwizard Codahale metrics plugin for signalfx
   </description>
 
   <url>http://www.signalfx.com</url>
@@ -63,7 +63,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.codahale.metrics</groupId>
+      <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
     </dependency>
     <dependency>
