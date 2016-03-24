@@ -7,12 +7,12 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.26-SNAPSHOT</version>
+    <version>0.0.26</version>
   </parent>
 
   <artifactId>signalfx-yammer</artifactId>
   <name>Yammer to SignalFx</name>
-  <version>0.0.26-SNAPSHOT</version>
+  <version>0.0.26</version>
   <packaging>jar</packaging>
   <description>
     Codahale yammer metrics plugin for signalfx / yammer metrics lib v2.0

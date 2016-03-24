@@ -6,12 +6,12 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.26-SNAPSHOT</version>
+    <version>0.0.26</version>
   </parent>
 
   <artifactId>signalfx-protoc</artifactId>
   <name>SignalFx Protocol Buffer definitions</name>
-  <version>0.0.26-SNAPSHOT</version>
+  <version>0.0.26</version>
   <packaging>jar</packaging>
 
   <description>
