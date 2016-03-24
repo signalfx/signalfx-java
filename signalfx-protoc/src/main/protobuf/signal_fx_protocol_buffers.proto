@@ -38,6 +38,7 @@ message DataPoint {
     optional Datum value = 4;
     optional MetricType metricType = 5;
     repeated Dimension dimensions = 6;
+    repeated Property properties = 7;
 }
 
 message DataPointUploadMessage {
