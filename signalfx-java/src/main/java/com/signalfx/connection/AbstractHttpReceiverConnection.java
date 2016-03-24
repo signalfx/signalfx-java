@@ -2,8 +2,10 @@ package com.signalfx.connection;
 
 import java.io.IOException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
+import com.signalfx.metrics.SignalFxMetricsException;
 
 public abstract class AbstractHttpReceiverConnection {
 
@@ -58,6 +61,23 @@ public abstract class AbstractHttpReceiverConnection {
         } catch (IOException e) {
             log.trace("Exception trying to execute {}, Exception: {} ", http_post, e);
             throw e;
+        }
+    }
+
+    protected void checkHttpResponse(CloseableHttpResponse resp) throws
+            SignalFxMetricsException {
+        final String body;
+        try {
+            body = IOUtils.toString(resp.getEntity().getContent());
+        } catch (IOException e) {
+            throw new SignalFxMetricsException("Unable to get reponse content", e);
+        }
+        if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+            throw new SignalFxMetricsException("Invalid status code "
+                    + resp.getStatusLine().getStatusCode() + ": " + body);
+        }
+        if (!"\"OK\"".equals(body)) {
+            throw new SignalFxMetricsException("Invalid response body: " + body);
         }
     }
 

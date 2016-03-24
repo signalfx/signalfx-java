@@ -3,7 +3,6 @@ package com.signalfx.metrics.connection;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -38,19 +37,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
             try {
                 resp = postToEndpoint(auth, getEntityForVersion(dataPoints),
                         getEndpointForAddDatapoints());
-                final String body;
-                try {
-                    body = IOUtils.toString(resp.getEntity().getContent());
-                } catch (IOException e) {
-                    throw new SignalFxMetricsException("Unable to get reponse content", e);
-                }
-                if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new SignalFxMetricsException("Invalid status code "
-                            + resp.getStatusLine().getStatusCode() + ": " + body);
-                }
-                if (!"\"OK\"".equals(body)) {
-                    throw new SignalFxMetricsException("Invalid response body: " + body);
-                }
+
             } finally {
                 if (resp != null) {
                     resp.close();
