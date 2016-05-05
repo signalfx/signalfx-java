@@ -14,8 +14,8 @@ import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.NoAuthTokenException;
 import com.signalfx.metrics.connection.DataPointReceiver;
-import com.signalfx.metrics.connection.EventReceiver;
 import com.signalfx.metrics.connection.DataPointReceiverFactory;
+import com.signalfx.metrics.connection.EventReceiver;
 import com.signalfx.metrics.connection.EventReceiverFactory;
 import com.signalfx.metrics.errorhandler.MetricErrorImpl;
 import com.signalfx.metrics.errorhandler.MetricErrorType;
@@ -55,23 +55,32 @@ public class AggregateMetricSender {
     private final AuthToken authToken;
     private final Collection<OnSendErrorHandler> onSendErrorHandlerCollection;
 
-    public AggregateMetricSender(String defaultSourceName, DataPointReceiverFactory dataPointReceiverFactory,
+    public AggregateMetricSender(String defaultSourceName,
+                                 DataPointReceiverFactory dataPointReceiverFactory,
                                  AuthToken authToken,
                                  Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
-        this(defaultSourceName, dataPointReceiverFactory, null, authToken, onSendErrorHandlerCollection);
+        this(defaultSourceName, dataPointReceiverFactory, null, authToken,
+                onSendErrorHandlerCollection);
+    }
+
+    public AggregateMetricSender(String defaultSourceName,
+                                 EventReceiverFactory eventReceiverFactory, AuthToken authToken,
+                                 Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
+        this(defaultSourceName, null, eventReceiverFactory, authToken,
+                onSendErrorHandlerCollection);
     }
 
     public AggregateMetricSender(String defaultSourceName,
                                  DataPointReceiverFactory dataPointReceiverFactory,
-                                 EventReceiverFactory eventReceiverFactory,
-                                 AuthToken authToken,
+                                 EventReceiverFactory eventReceiverFactory, AuthToken authToken,
                                  Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
         this.defaultSourceName = defaultSourceName;
-        registeredMetricPairs = new HashSet<String>();
         this.dataPointReceiverFactory = dataPointReceiverFactory;
         this.eventReceiverFactory = eventReceiverFactory;
         this.authToken = authToken;
         this.onSendErrorHandlerCollection = onSendErrorHandlerCollection;
+
+        this.registeredMetricPairs = new HashSet<String>();
     }
 
     public String getDefaultSourceName() {
@@ -203,26 +212,40 @@ public class AggregateMetricSender {
             try {
                 authTokenStr = authToken.getAuthToken();
             } catch (NoAuthTokenException e) {
-                communicateError("Unable to get auth token", MetricErrorType.AUTH_TOKEN_ERROR,
-                        e);
+                communicateError("Unable to get auth token", MetricErrorType.AUTH_TOKEN_ERROR, e);
                 return;
             }
 
-            DataPointReceiver dataPointReceiver = dataPointReceiverFactory.createDataPointReceiver();
+            flushDatapoints(authTokenStr);
+            flushEvents(authTokenStr);
+        }
+
+        private void flushDatapoints(String authTokenStr) {
+            if (pointsToFlush.isEmpty()) {
+                return;
+            }
+
+            if (dataPointReceiverFactory == null) {
+                communicateError("DataPointReceiverFactory object is not set",
+                        MetricErrorType.DATAPOINT_SEND_ERROR, new SignalFxMetricsException());
+                return;
+            }
+
+            DataPointReceiver dataPointReceiver = dataPointReceiverFactory
+                    .createDataPointReceiver();
 
             if (!toBeRegisteredMetricPairs.isEmpty()) {
                 try {
-                    Map<String, Boolean> registeredPairs = dataPointReceiver.registerMetrics(authTokenStr,
-                            toBeRegisteredMetricPairs);
-                    for (Map.Entry<String, Boolean> i: registeredPairs.entrySet()) {
+                    Map<String, Boolean> registeredPairs = dataPointReceiver
+                            .registerMetrics(authTokenStr, toBeRegisteredMetricPairs);
+                    for (Map.Entry<String, Boolean> i : registeredPairs.entrySet()) {
                         if (i.getValue()) {
                             registeredMetricPairs.add(i.getKey());
                         }
                     }
                 } catch (SignalFxMetricsException e) {
                     communicateError("Unable to register metrics",
-                            MetricErrorType.REGISTRATION_ERROR,
-                            e);
+                            MetricErrorType.REGISTRATION_ERROR, e);
                     return;
                 }
             }
@@ -235,30 +258,30 @@ public class AggregateMetricSender {
                 }
             }
 
-            if (!pointsToFlush.isEmpty()) {
-                try {
-                    dataPointReceiver.addDataPoints(authTokenStr, pointsToFlush);
-                } catch (SignalFxMetricsException e) {
-                    communicateError("Unable to send datapoints",
-                            MetricErrorType.DATAPOINT_SEND_ERROR,
-                            e);
-                    return;
-                }
+            try {
+                dataPointReceiver.addDataPoints(authTokenStr, pointsToFlush);
+            } catch (SignalFxMetricsException e) {
+                communicateError("Unable to send datapoints", MetricErrorType.DATAPOINT_SEND_ERROR,
+                        e);
+            }
+        }
+
+        private void flushEvents(String authTokenStr) {
+            if (eventsToFlush.isEmpty()) {
+                return;
             }
 
-            if (!eventsToFlush.isEmpty()) {
-                if(eventReceiverFactory == null) {
-                    communicateError("HttpEventProtobufReceiverFactory object is not set", MetricErrorType.EVENT_SEND_ERROR, new SignalFxMetricsException());
-                }
-                try {
-                    EventReceiver eventReceiver = eventReceiverFactory.createEventReceiver();
-                    eventReceiver.addEvents(authTokenStr, eventsToFlush);
-                } catch (SignalFxMetricsException e) {
-                    communicateError("Unable to send events",
-                            MetricErrorType.EVENT_SEND_ERROR,
-                            e);
-                    return;
-                }
+            if (eventReceiverFactory == null) {
+                communicateError("EventReceiverFactory object is not set",
+                        MetricErrorType.EVENT_SEND_ERROR, new SignalFxMetricsException());
+                return;
+            }
+
+            try {
+                EventReceiver eventReceiver = eventReceiverFactory.createEventReceiver();
+                eventReceiver.addEvents(authTokenStr, eventsToFlush);
+            } catch (SignalFxMetricsException e) {
+                communicateError("Unable to send events", MetricErrorType.EVENT_SEND_ERROR, e);
             }
         }
     }
