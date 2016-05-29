@@ -1,6 +1,7 @@
 package com.signalfx.connection;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -42,8 +43,10 @@ public abstract class AbstractHttpReceiverConnection {
                 .build();
         this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(),
                 endpoint.getScheme());
+
+        final HttpHost proxy = createHttpProxyFromSystemProperties(endpoint.getHostname());
         this.requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs)
-                .setConnectionRequestTimeout(timeoutMs).setConnectTimeout(timeoutMs).build();
+                .setConnectionRequestTimeout(timeoutMs).setConnectTimeout(timeoutMs).setProxy(proxy).build();
     }
 
     protected CloseableHttpResponse postToEndpoint(String auth, HttpEntity httpEntity,
@@ -81,4 +84,57 @@ public abstract class AbstractHttpReceiverConnection {
         }
     }
 
+    /**
+     * method to create a httphost object based on java network proxy system properties
+     *
+     * http.proxyHost: the host name of the proxy server
+     * http.proxyPort: the port number, the default value being 80
+     * http.nonProxyHosts: a list of hosts that should be reached directly, bypassing the proxy.
+     *                     This is a list of patterns separated by '|'.
+     *                     The patterns may start or end with a '*' for wildcards.
+     *                     Any host matching one of these patterns will be reached through a
+     *                     direct connection instead of through a proxy.
+     *
+     * @param endpointHostname  the signalfx endpoint hostname
+     *
+     * @return an instance of HttpHost based on the java system properties
+     *         unless the http proxy host is not configured
+     *         OR if the nonProxyHosts rules include this endpoint
+     *         then null will be returned instead
+     **/
+    protected HttpHost createHttpProxyFromSystemProperties(String endpointHostname) {
+
+        String proxyHost = System.getProperty("http.proxyHost");
+        if ((proxyHost != null) && (proxyHost.trim().length() > 0)) {
+
+            String nonProxyHosts = System.getProperty("http.nonProxyHosts");
+			if (nonProxyHosts != null) {
+
+				// set host strings as regular expressions based on
+				// nonProxyHosts rules
+				nonProxyHosts = nonProxyHosts.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*?");
+
+				// set groups and alternations
+				nonProxyHosts = "(" + nonProxyHosts.replaceAll("\\|", ")|(") + ")";
+
+				final Pattern pattern = Pattern.compile(nonProxyHosts);
+				if (pattern.matcher(endpointHostname).find()) {
+					// http proxy is not configured for this endpoint
+					return null;
+				}
+			}
+
+			String proxyPort = System.getProperty("http.proxyPort");
+			if ((proxyPort == null) || (proxyPort.trim().length() == 0)) {
+				// port 80 is the default in java networking/proxy documentation
+				proxyPort = "80";
+			}
+
+			// return http proxy host
+			return new HttpHost(proxyHost.trim(), Integer.parseInt(proxyPort.trim()), "http");
+		}
+
+		// http proxy is not configured
+		return null;
+    }
 }
