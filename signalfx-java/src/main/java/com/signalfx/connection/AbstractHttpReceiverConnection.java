@@ -108,33 +108,33 @@ public abstract class AbstractHttpReceiverConnection {
         if ((proxyHost != null) && (proxyHost.trim().length() > 0)) {
 
             String nonProxyHosts = System.getProperty("http.nonProxyHosts");
-			if (nonProxyHosts != null) {
+            if (nonProxyHosts != null) {
 
-				// set host strings as regular expressions based on
-				// nonProxyHosts rules
-				nonProxyHosts = nonProxyHosts.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*?");
+                // set host strings as regular expressions based on
+                // nonProxyHosts rules
+                nonProxyHosts = nonProxyHosts.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*?");
 
-				// set groups and alternations
-				nonProxyHosts = "(" + nonProxyHosts.replaceAll("\\|", ")|(") + ")";
+                // set groups and alternations
+                nonProxyHosts = "(" + nonProxyHosts.replaceAll("\\|", ")|(") + ")";
 
-				final Pattern pattern = Pattern.compile(nonProxyHosts);
-				if (pattern.matcher(endpointHostname).find()) {
-					// http proxy is not configured for this endpoint
-					return null;
-				}
-			}
+                final Pattern pattern = Pattern.compile(nonProxyHosts);
+                if (pattern.matcher(endpointHostname).find()) {
+                    // http proxy is not configured for this endpoint
+                    return null;
+                }
+            }
 
-			String proxyPort = System.getProperty("http.proxyPort");
-			if ((proxyPort == null) || (proxyPort.trim().length() == 0)) {
-				// port 80 is the default in java networking/proxy documentation
-				proxyPort = "80";
-			}
+            String proxyPort = System.getProperty("http.proxyPort");
+            if ((proxyPort == null) || (proxyPort.trim().length() == 0)) {
+                // port 80 is the default in java networking/proxy documentation
+                proxyPort = "80";
+            }
 
-			// return http proxy host
-			return new HttpHost(proxyHost.trim(), Integer.parseInt(proxyPort.trim()), "http");
-		}
+            // return http proxy host
+            return new HttpHost(proxyHost.trim(), Integer.parseInt(proxyPort.trim()), "http");
+        }
 
-		// http proxy is not configured
-		return null;
+        // http proxy is not configured
+        return null;
     }
 }
