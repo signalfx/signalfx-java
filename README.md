@@ -399,3 +399,22 @@ try (AggregateMetricSender.Session i = mf.createSession()) {
                   .build());
 }
 ```
+
+## Sending metrics through a http proxy
+
+To send metrics through a http proxy one can set the standard java system properties used to control http protocol handling. 
+There are 3 properties you can set to specify the proxy that will be used by the http protocol handler:
+
+* http.proxyHost: the host name of the proxy server
+* http.proxyPort: the port number, the default value being 80.
+* http.nonProxyHosts: a list of hosts that should be reached directly, bypassing the proxy. This is a list of regular expressions separated by '|'. Any host matching one of these regular expressions will be reached through a direct connection instead of through a proxy.
+
+Basic Example
+```
+java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080”
+```
+
+Example with directive to bypass proxy for localhost and host.mydomain.com
+```
+java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080 -Dhttp.noProxyHosts=”localhost|host.mydomain.com”
+```
