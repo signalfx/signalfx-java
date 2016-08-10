@@ -418,3 +418,54 @@ Example with directive to bypass proxy for localhost and host.mydomain.com
 ```
 java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080 -Dhttp.noProxyHosts=”localhost|host.mydomain.com”
 ```
+
+## Executing SignalFlow computations
+
+SignalFlow is SignalFx's real-time analytics computation language. The
+SignalFlow API allows SignalFx users to execute real-time streaming analytics
+computations on the SignalFx platform. For more information, head over to our
+Developers documentation:
+
+* [SignalFlow Overview](https://developers.signalfx.com/docs/signalflow-overview)
+* [Getting started with the SignalFlow API](https://developers.signalfx.com/docs/getting-started-with-the-signalflow-api)
+
+Executing a SignalFlow program is very simple with this client library:
+
+```java
+String program = "data('cpu.utilization').mean().publish()";
+SignalFlowClient flow = new SignalFlowClient("MY_TOKEN");
+try {
+    System.out.println("Executing " + program);
+    Computation computation = flow.execute(program);
+    for (ChannelMessage message : computation) {
+        switch (message.getType()) {
+        case DATA_MESSAGE:
+            DataMessage dataMessage = (DataMessage) message;
+            System.out.println(
+                    dataMessage.getLogicalTimestampMs() + ": " + dataMessage.getData());
+            break;
+
+        case EVENT_MESSAGE:
+            EventMessage eventMessage = (EventMessage) message;
+            System.out.println(
+                    eventMessage.getTimestampMs() + ": " + eventMessage.getProperties());
+            break;
+        }
+    }
+} finally {
+    flow.close();
+}
+```
+
+Metadata about the timeseries is received from the iterable stream, and it
+is also automatically intercepted by the client library and made available through
+the ``Computation`` object returned by ``execute()``:
+
+```java
+case DATA_MESSAGE:
+    DataMessage dataMessage = (DataMessage) message;
+    for (Map<String, Object> datapoint : dataMessage.getData()) {
+        String tsId = (String)datapoint.get("tsId");
+        Map<String,Object> metadata = computation.getMetadata(tsId);
+    }
+```
