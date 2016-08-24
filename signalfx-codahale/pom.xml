@@ -12,7 +12,6 @@
 
   <artifactId>signalfx-codahale</artifactId>
   <name>Codahale to SignalFx</name>
-  <version>0.0.28-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>
     Dropwizard Codahale metrics plugin for signalfx
@@ -36,10 +35,10 @@
 
   <developers>
     <developer>
-      <id>jack</id>
-      <name>Jack Lindamood</name>
-      <email>jack@signalfx.com</email>
-      <organization>SignalFx</organization>
+      <id>signalfx</id>
+      <name>SignalFx</name>
+      <email>support+java@signalfx.com</email>
+      <organization>SignalFx, Inc</organization>
       <organizationUrl>http://www.signalfx.com</organizationUrl>
     </developer>
   </developers>

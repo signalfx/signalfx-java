@@ -42,10 +42,10 @@
 
   <developers>
     <developer>
-      <id>jack</id>
-      <name>Jack Lindamood</name>
-      <email>jack@signalfx.com</email>
-      <organization>SignalFx</organization>
+      <id>signalfx</id>
+      <name>SignalFx</name>
+      <email>support+java@signalfx.com</email>
+      <organization>SignalFx, Inc</organization>
       <organizationUrl>http://www.signalfx.com</organizationUrl>
     </developer>
   </developers>
@@ -86,19 +86,13 @@
               </execution>
             </executions>
           </plugin>
-          
-          
         </plugins>
       </build>
     </profile>
   </profiles>
 
-
   <dependencyManagement>
     <dependencies>
-      <!-- ***** -->
-      <!-- These -->
-      <!-- ***** -->
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-protoc</artifactId>
@@ -304,13 +298,7 @@
           </execution>
         </executions>
       </plugin>
-      
-
-      
     </plugins>
-    
-    
-    
   </build>
 
   <modules>

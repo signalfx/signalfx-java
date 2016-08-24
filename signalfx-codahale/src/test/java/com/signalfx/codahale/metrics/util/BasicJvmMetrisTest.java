@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 SignalFx, Inc.
+ * Copyright (C) 2014-2016 SignalFx, Inc. All rights reserved.
  */
 package com.signalfx.codahale.metrics.util;
 
@@ -25,26 +25,24 @@ public class BasicJvmMetrisTest {
     @Test
     public void testPointsSent() throws Exception {
         MetricRegistry registry = new MetricRegistry();
+        new BasicJvmMetrics(registry);
 
-
-        ScheduledReporter reporter = new ScheduledReporter(registry, "test", MetricFilter.ALL, TimeUnit.SECONDS, TimeUnit.MILLISECONDS) {
+        ScheduledReporter reporter = new ScheduledReporter(registry, "test", MetricFilter.ALL,
+                TimeUnit.SECONDS, TimeUnit.MILLISECONDS) {
 
             @Override
             public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
-                               SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters,
-                               SortedMap<String, Timer> timers) {
-               Assert.assertFalse(gauges.isEmpty());
-               Assert.assertNotNull(gauges.get("jvm.uptime"));
-               for (Map.Entry<String, Gauge> entry: gauges.entrySet()) {
-                   Assert.assertNotNull(entry.getValue().getValue());
-               }
+                               SortedMap<String, Histogram> histograms,
+                               SortedMap<String, Meter> meters, SortedMap<String, Timer> timers) {
+                Assert.assertFalse(gauges.isEmpty());
+                Assert.assertNotNull(gauges.get("jvm.uptime"));
+                for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
+                    Assert.assertNotNull(entry.getValue().getValue());
+                }
             }
         };
 
-        BasicJvmMetrics metrics = new BasicJvmMetrics(registry);
-
         reporter.report();
-
-
+        reporter.close();
     }
 }
