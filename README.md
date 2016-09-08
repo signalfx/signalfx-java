@@ -441,14 +441,24 @@ try {
         switch (message.getType()) {
         case DATA_MESSAGE:
             DataMessage dataMessage = (DataMessage) message;
-            System.out.println(
-                    dataMessage.getLogicalTimestampMs() + ": " + dataMessage.getData());
+            System.out.printf("%d: %s%n",
+                    dataMessage.getLogicalTimestampMs(), dataMessage.getData());
             break;
 
         case EVENT_MESSAGE:
             EventMessage eventMessage = (EventMessage) message;
-            System.out.println(
-                    eventMessage.getTimestampMs() + ": " + eventMessage.getProperties());
+            System.out.printf("%d: %s%n",
+                    eventMessage.getTimestampMs(),
+                    eventMessage.getProperties());
+            break;
+
+        case INFO_MESSAGE:
+            Map<String, Object> details = ((InfoMessage) message).getMessage();
+            System.out.printf("%d: [%5s] %s %s%n",
+                    details.get("timestampMs"),
+                    details.get("messageLevel"),
+                    details.get("messageCode"),
+                    details.get("contents"));
             break;
         }
     }
