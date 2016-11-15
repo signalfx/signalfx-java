@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import java.util.concurrent.TimeUnit;
 
 class AggregateMetricSenderSessionWrapper implements Closeable {
 
@@ -33,15 +34,18 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
     private final ImmutableMap<String, DimensionInclusion> defaultDimensions;
+    private final TimeUnit reportingTimeUnit;
+    private final TimeUnit DEFAULT_REPORTING_UNIT = TimeUnit.NANOSECONDS; //Default Time Unit for metric reporting is nanoseconds
 
     AggregateMetricSenderSessionWrapper(
             AggregateMetricSender.Session metricSenderSession,
             Set<SignalFxReporter.MetricDetails> detailsToAdd,
             MetricMetadata metricMetadata,
             String defaultSourceName,
-            String sourceDimension) {
+            String sourceDimension,
+            TimeUnit reportingTimeUnit) {
         this(metricSenderSession, detailsToAdd, metricMetadata, defaultSourceName, sourceDimension,
-                false, Collections.<String, DimensionInclusion> emptyMap());
+                false, Collections.<String, DimensionInclusion> emptyMap(), reportingTimeUnit);
     }
 
     AggregateMetricSenderSessionWrapper(
@@ -51,7 +55,8 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension,
             boolean injectCurrentTimestamp,
-            Map<String, DimensionInclusion> defaultDimensions) {
+            Map<String, DimensionInclusion> defaultDimensions,
+            TimeUnit reportingTimeUnit) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
@@ -59,6 +64,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
         this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
+        this.reportingTimeUnit = reportingTimeUnit;
     }
 
     @Override
@@ -90,58 +96,59 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, metered.getCount());
         addMetric(metered, baseName,
                 SignalFxReporter.MetricDetails.RATE_15_MIN,
-                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getFifteenMinuteRate());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)metered.getFifteenMinuteRate(),DEFAULT_REPORTING_UNIT));
         addMetric(metered, baseName,
                 SignalFxReporter.MetricDetails.RATE_1_MIN,
-                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getOneMinuteRate());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long) metered.getOneMinuteRate(),DEFAULT_REPORTING_UNIT));
         addMetric(metered, baseName,
                 SignalFxReporter.MetricDetails.RATE_5_MIN,
-                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getFiveMinuteRate());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)metered.getFiveMinuteRate(),DEFAULT_REPORTING_UNIT));
 
         addMetric(metered, baseName,
                 SignalFxReporter.MetricDetails.RATE_MEAN,
-                SignalFxProtocolBuffers.MetricType.GAUGE, metered.getMeanRate());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)metered.getMeanRate(),DEFAULT_REPORTING_UNIT));
     }
 
     private void addSampling(String baseName, Sampling sampling) {
         Metric metric = (Metric)sampling;
         final Snapshot snapshot = sampling.getSnapshot();
+        
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.MEDIAN,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMedian());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.getMedian(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.PERCENT_75,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get75thPercentile());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.get75thPercentile(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.PERCENT_95,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get95thPercentile());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.get95thPercentile(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.PERCENT_98,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get98thPercentile());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.get98thPercentile(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.PERCENT_99,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get99thPercentile());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.get99thPercentile(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.PERCENT_999,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.get999thPercentile());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.get999thPercentile(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.MAX,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMax());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.getMax(),DEFAULT_REPORTING_UNIT));
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.MIN,
-                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMin());
+                SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.getMin(),DEFAULT_REPORTING_UNIT));
 
 
         // These are slower to calculate.  Only calculate if we need.
         if (detailsToAdd.contains(SignalFxReporter.MetricDetails.STD_DEV)) {
             addMetric(metric, baseName,
                     SignalFxReporter.MetricDetails.STD_DEV,
-                    SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getStdDev());
+                    SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.getStdDev(),DEFAULT_REPORTING_UNIT));
         }
         if (detailsToAdd.contains(SignalFxReporter.MetricDetails.MEAN)) {
             addMetric(metric, baseName,
                     SignalFxReporter.MetricDetails.MEAN,
-                    SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMean());
+                    SignalFxProtocolBuffers.MetricType.GAUGE, reportingTimeUnit.convert((long)snapshot.getMean(),DEFAULT_REPORTING_UNIT));
         }
     }
 
