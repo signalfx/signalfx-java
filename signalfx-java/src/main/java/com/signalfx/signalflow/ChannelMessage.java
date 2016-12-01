@@ -39,6 +39,7 @@ public abstract class ChannelMessage {
         END_OF_CHANNEL(Kind.CONTROL),
         INFO_MESSAGE(Kind.INFORMATION),
         METADATA_MESSAGE(Kind.METADATA),
+        EXPIRED_TSID_MESSAGE(Kind.EXPIRED_TSID),
         DATA_MESSAGE(Kind.DATA),
         EVENT_MESSAGE(Kind.EVENT),
         ERROR_MESSAGE(Kind.ERROR);
@@ -98,6 +99,10 @@ public abstract class ChannelMessage {
 
             case METADATA:
                 message = mapper.readValue(streamMessage.getData(), MetadataMessage.class);
+                break;
+
+            case EXPIRED_TSID:
+                message = mapper.readValue(streamMessage.getData(), ExpiredTsIdMessage.class);
                 break;
 
             case DATA:
@@ -289,6 +294,28 @@ public abstract class ChannelMessage {
          */
         public Map<String, Object> getProperties() {
             return this.properties;
+        }
+    }
+
+    /**
+     * Message informing us that an output timeseries is no longer
+     * part of the computation and that we may do some cleanup of
+     * whatever internal state we have tied to that output timeseries.
+    */
+    public static class ExpiredTsIdMessage extends ChannelMessage {
+
+        protected String tsId;
+
+        public ExpiredTsIdMessage() {
+            this.channelMessageType = Type.EXPIRED_TSID_MESSAGE;
+        }
+
+        /**
+         * @return The identifier of the timeseries that's no longer interesting
+         *         to the computation.
+         */
+        public String getTsId() {
+            return this.tsId;
         }
     }
 

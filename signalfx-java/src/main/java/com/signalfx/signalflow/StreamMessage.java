@@ -25,7 +25,8 @@ public class StreamMessage {
         EVENT("event",(byte) 3),
         METADATA("metadata",(byte) 4),
         DATA("data",(byte) 5),
-        ERROR("error",(byte) 6);
+        ERROR("error",(byte) 6),
+        EXPIRED_TSID("expired-tsid",(byte) 10);
 
         private final String specName;
         private final byte type;
