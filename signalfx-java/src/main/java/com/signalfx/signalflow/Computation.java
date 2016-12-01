@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 import com.signalfx.signalflow.ChannelMessage.ChannelAbortMessage;
 import com.signalfx.signalflow.ChannelMessage.DataMessage;
 import com.signalfx.signalflow.ChannelMessage.ErrorMessage;
+import com.signalfx.signalflow.ChannelMessage.ExpiredTsIdMessage;
 import com.signalfx.signalflow.ChannelMessage.InfoMessage;
 import com.signalfx.signalflow.ChannelMessage.JobStartMessage;
 import com.signalfx.signalflow.ChannelMessage.MetadataMessage;
@@ -268,10 +269,15 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
 
                 case METADATA_MESSAGE:
                     // Intercept metadata messages to accumulate received metadata.
-                    // TODO(dgriff): this can accumulate metadata without bounds if a computation
-                    // has a high rate of member churn.
                     MetadataMessage metadataMessage = (MetadataMessage) message;
                     metadata.put(metadataMessage.getTsId(), metadataMessage.getProperties());
+                    this.nextMessage = message;
+                    break;
+
+                case EXPIRED_TSID_MESSAGE:
+                    // Intercept expired-tsid messages to clean it up.
+                    ExpiredTsIdMessage expiredTsIdMessage = (ExpiredTsIdMessage) message;
+                    this.metadata.remove(expiredTsIdMessage.getTsId());
                     this.nextMessage = message;
                     break;
 
