@@ -4,7 +4,7 @@
 
   <groupId>com.signalfx.example</groupId>
   <artifactId>signalfx.example</artifactId>
-  <version>0.0.29-SNAPSHOT</version>
+  <version>0.0.29</version>
   <packaging>jar</packaging>
 
   <name>signalfx.example</name>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-yammer</artifactId>
-      <version>0.0.28</version>
+      <version>0.0.29</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
