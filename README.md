@@ -451,19 +451,8 @@ try {
                     eventMessage.getTimestampMs(),
                     eventMessage.getProperties());
             break;
-
-        case INFO_MESSAGE:
-            Map<String, Object> details = ((InfoMessage) message).getMessage();
-            System.out.printf("%d: [%5s] %s %s%n",
-                    details.get("timestampMs"),
-                    details.get("messageLevel"),
-                    details.get("messageCode"),
-                    details.get("contents"));
-            break;
         }
     }
-} finally {
-    flow.close();
 }
 ```
 
@@ -474,8 +463,8 @@ the ``Computation`` object returned by ``execute()``:
 ```java
 case DATA_MESSAGE:
     DataMessage dataMessage = (DataMessage) message;
-    for (Map<String, Object> datapoint : dataMessage.getData()) {
-        String tsId = (String)datapoint.get("tsId");
-        Map<String,Object> metadata = computation.getMetadata(tsId);
+    for (Map<String, Number> datum : dataMessage.getData()) {
+        Map<String,Object> metadata = computation.getMetadata(datum.getKey());
+        // ...
     }
 ```
