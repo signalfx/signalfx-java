@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.signalfx.signalflow.ChannelMessage.DataMessage;
 import com.signalfx.signalflow.ChannelMessage.EventMessage;
+import com.signalfx.signalflow.ChannelMessage.ExpiredTsIdMessage;
 import com.signalfx.signalflow.ChannelMessage.JobProgressMessage;
 import com.signalfx.signalflow.ChannelMessage.JobStartMessage;
 import com.signalfx.signalflow.ChannelMessage.MetadataMessage;
@@ -81,7 +82,15 @@ public abstract class ComputationHandler implements Callable<Computation> {
     protected void onMessage(MetadataMessage message) {}
 
     /**
-     * @return computation start time in milliseconds since midnight, January 1, 1970 UTC
+     * Override to process expired tsId messages
+     *
+     * @param message
+     *            expired tsid message
+     */
+    protected void onMessage(ExpiredTsIdMessage message) {}
+
+    /**
+     * @return Time at which the computation started, in milliseconds since midnight, January 1, 1970 UTC
      */
     public long getStartTimeMs() {
         return startTimeMs;
@@ -143,6 +152,11 @@ public abstract class ComputationHandler implements Callable<Computation> {
                 case METADATA_MESSAGE:
                     MetadataMessage metadataMessage = (MetadataMessage) message;
                     onMessage(metadataMessage);
+                    break;
+
+                case EXPIRED_TSID_MESSAGE:
+                    ExpiredTsIdMessage expiredTsIdMessage = (ExpiredTsIdMessage) message;
+                    onMessage(expiredTsIdMessage);
                     break;
 
                 default:
