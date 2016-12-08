@@ -12,17 +12,16 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfx.signalflow.StreamMessage.Kind;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
 /**
  * Base class for stream messages received from a SignalFlow computation.
- * 
+ *
  * @author dgriff
  */
 public abstract class ChannelMessage {
@@ -73,8 +72,8 @@ public abstract class ChannelMessage {
     }
 
     /**
-     * converts the raw stream message into the proper type of channel message
-     * 
+     * Converts the raw stream message into the proper type of channel message
+     *
      * @param streamMessage
      *            raw stream message
      * @return a channel message instance
@@ -83,7 +82,6 @@ public abstract class ChannelMessage {
      */
     public static ChannelMessage decodeStreamMessage(StreamMessage streamMessage)
             throws SignalFlowException {
-
         try {
             ChannelMessage message = null;
 

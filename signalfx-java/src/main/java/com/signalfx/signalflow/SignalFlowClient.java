@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableMap;
  * Client for SignalFx's SignalFlow real-time analytics API. Allows for the execution of ad-hoc
  * computations, returning its output in real-time as it is produced; to start new background
  * computations; attach, keep alive or stop existing computations.
- * 
+ *
  * @author dgriff
  */
 public class SignalFlowClient {
@@ -24,7 +24,7 @@ public class SignalFlowClient {
 
     /**
      * Client Constructor that uses default transport/settings
-     * 
+     *
      * @param token
      *            user api token
      */
@@ -34,17 +34,17 @@ public class SignalFlowClient {
 
     /**
      * Client Constructor that uses custom transport
-     * 
+     *
      * @param transport
      *            custom created transport
      */
-    public SignalFlowClient(final SignalFlowTransport transport) {
+    public SignalFlowClient(SignalFlowTransport transport) {
         this.transport = transport;
     }
 
     /**
      * Execute the given SignalFlow program and stream the output back.
-     * 
+     *
      * @param program
      *            computation written in signalflow language
      * @return computation instance
@@ -56,7 +56,7 @@ public class SignalFlowClient {
 
     /**
      * Execute the given SignalFlow program with parameters and stream the output back.
-     * 
+     *
      * @param program
      *            computation written in signalflow language
      * @param start
@@ -81,7 +81,7 @@ public class SignalFlowClient {
     /**
      * Start executing the given SignalFlow program without being attached to the output of the
      * computation.
-     * 
+     *
      * @param program
      *            computation written in signalflow language
      */
@@ -92,7 +92,7 @@ public class SignalFlowClient {
     /**
      * Start executing the given SignalFlow program without being attached to the output of the
      * computation.
-     * 
+     *
      * @param program
      *            computation written in signalflow language
      * @param start
@@ -112,7 +112,7 @@ public class SignalFlowClient {
 
     /**
      * Stop a SignalFlow computation
-     * 
+     *
      * @param computation
      *            computation instance
      * @param reason
@@ -125,7 +125,7 @@ public class SignalFlowClient {
 
     /**
      * Stop a SignalFlow computation
-     * 
+     *
      * @param handle
      *            computation id
      * @param reason
@@ -138,7 +138,7 @@ public class SignalFlowClient {
 
     /**
      * Keepalive a SignalFlow computation.
-     * 
+     *
      * @param handle
      *            computation id
      */
@@ -148,7 +148,7 @@ public class SignalFlowClient {
 
     /**
      * Attach to an existing SignalFlow computation.
-     * 
+     *
      * @param handle
      *            computation id
      * @param filters

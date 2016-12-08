@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Exception thrown if the computation is aborted during its execution.
- * 
+ *
  * @author dgriff
  */
 public class ComputationAbortedException extends RuntimeException {
@@ -21,17 +21,10 @@ public class ComputationAbortedException extends RuntimeException {
         this(abortInfo.get("sf_job_abortState"), abortInfo.get("sf_job_abortReason"));
     }
 
-    public ComputationAbortedException(Object state, Object reason) {
-
+    private ComputationAbortedException(String state, String reason) {
         super("Computation " + state + ": " + reason);
-
-        if (state != null) {
-            this.state = state.toString();
-        }
-
-        if (reason != null) {
-            this.reason = reason.toString();
-        }
+        this.state = state;
+        this.reason = reason;
     }
 
     public String getState() {

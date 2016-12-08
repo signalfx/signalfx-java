@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract immutable representation for open channels that receive streaming data from a SignalFlow
  * computation.
- * 
+ *
  * Channel objects bridge the gap between an underlying transport and a higher-level Computation
  * object by providing a transport-agnostic and encoding-agnostic access to the stream of
  * messages.StreamMessage objects that are received for a given computation.
- * 
+ *
  * Channels are iterable that return ChannelMessage instances.
- * 
+ *
  * @author dgriff
  */
 public abstract class Channel implements Iterator<ChannelMessage>, Closeable {

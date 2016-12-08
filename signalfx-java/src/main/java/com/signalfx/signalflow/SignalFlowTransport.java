@@ -7,11 +7,11 @@ import java.util.Map;
 
 /**
  * Interface for transports to the SignalFlow API
- * 
+ *
  * @author dgriff
  */
 public interface SignalFlowTransport {
-    
+
     /**
      * Default host for signalflow
      */
@@ -19,7 +19,7 @@ public interface SignalFlowTransport {
 
     /**
      * Attach to an existing SignalFlow computation.
-     * 
+     *
      * @param handle
      *            computation id
      * @param parameters
@@ -30,7 +30,7 @@ public interface SignalFlowTransport {
 
     /**
      * Execute the given SignalFlow program and stream the output back.
-     * 
+     *
      * @param program
      *            computation written in signalflow language
      * @param parameters
@@ -41,7 +41,7 @@ public interface SignalFlowTransport {
     /**
      * Start executing the given SignalFlow program without being attached to the output of the
      * computation.
-     * 
+     *
      * @param program
      *            computation written in signalflow language
      * @param parameters
@@ -51,7 +51,7 @@ public interface SignalFlowTransport {
 
     /**
      * Stop a SignalFlow computation.
-     * 
+     *
      * @param handle
      *            computation id
      * @param parameters
@@ -61,7 +61,7 @@ public interface SignalFlowTransport {
 
     /**
      * Close this SignalFlow transport.
-     * 
+     *
      * @param code
      *            numeric error id
      * @param reason
@@ -71,7 +71,7 @@ public interface SignalFlowTransport {
 
     /**
      * Keepalive a SignalFlow computation.
-     * 
+     *
      * @param handle
      *            computation id
      */

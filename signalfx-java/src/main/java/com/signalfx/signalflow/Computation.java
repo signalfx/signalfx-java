@@ -23,7 +23,7 @@ import com.signalfx.signalflow.ChannelMessage.MetadataMessage;
 
 /**
  * A live handle to a running SignalFlow computation.
- * 
+ *
  * @author dgriff
  */
 public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMessage> {
@@ -63,12 +63,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
         this.program = program;
         this.params = params;
         this.isAttachedChannel = attach;
-
-        if (isAttachedChannel) {
-            this.channel = attach();
-        } else {
-            this.channel = execute();
-        }
+        this.channel = isAttachedChannel ? attach() : execute();
     }
 
     /**
@@ -89,7 +84,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
      * @return current computation state
      */
     public State getState() {
-        return this.state;
+        return state;
     }
 
     /**
@@ -103,12 +98,9 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
      * @return sorted list of known timeseries ids
      */
     public Collection<String> getKnownTSIDs() {
-        if (metadata != null) {
-            List<String> list = new ArrayList<String>(metadata.keySet());
-            Collections.sort(list);
-            return list;
-        }
-        return null;
+        List<String> list = new ArrayList<String>(metadata.keySet());
+        Collections.sort(list);
+        return list;
     }
 
     /**
@@ -118,10 +110,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
      *         available.
      */
     public Map<String, Object> getMetadata(String tsid) {
-        if (this.metadata != null) {
-            return this.metadata.get(tsid);
-        }
-        return null;
+        return metadata.get(tsid);
     }
 
     /**
@@ -132,9 +121,8 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
     }
 
     @Override
-    public boolean hasNext()
-            throws ComputationAbortedException, ComputationFailedException, SignalFlowException {
-
+    public boolean hasNext() throws ComputationAbortedException,
+           ComputationFailedException, SignalFlowException {
         while ((state != State.STATE_COMPLETED) && (!channel.isClosed) && (nextMessage == null)) {
             parseNext();
         }
@@ -143,24 +131,22 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
     }
 
     /**
-     * Iterate over the messages from the computation's output. Control and metadata messages are
-     * intercepted and interpreted to enhance this Computation's object knowledge of the
-     * computation's context. Data and event messages are yielded back to the caller as a generator.
+     * Iterate over the messages from the computation's output.
+     *
+     * Control and metadata messages are intercepted and interpreted to enhance this Computation's
+     * object knowledge of the computation's context. Data and event messages are yielded back to
+     * the caller as a generator.
      */
     @Override
     public ChannelMessage next() throws ComputationAbortedException, ComputationFailedException,
             SignalFlowException, NoSuchElementException {
-
         while ((state != State.STATE_COMPLETED) && (!channel.isClosed) && (nextMessage == null)) {
             parseNext();
         }
 
         if (nextMessage != null) {
-            ChannelMessage message = this.nextMessage;
-
-            // important to set next message to null here
-            this.nextMessage = null;
-
+            ChannelMessage message = nextMessage;
+            nextMessage = null;
             return message;
         } else {
             // no more messages can come from this channel
@@ -184,78 +170,65 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
 
     /**
      * Create channel for computation
-     * 
+     *
      * @return Channel for computation
      * @throws SignalFlowException
      *             if transport fails to create channel
      */
     private Channel execute() throws SignalFlowException {
-
         HashMap<String, String> params = new HashMap<String, String>(this.params);
         if (lastLogicalTimestampMs != null) {
             params.put("start", Long.toString(lastLogicalTimestampMs));
         }
 
-        return this.transport.execute(program, params);
+        return transport.execute(program, params);
     }
 
     /**
      * Attach to existing channel for computation
-     * 
+     *
      * @return Channel for computation
      * @throws SignalFlowException
      *             if transport fails to attach to channel
      */
     private Channel attach() throws SignalFlowException {
-
-        return this.transport.attach(program, params);
+        return transport.attach(program, params);
     }
 
     /**
      * Process the channel messages to manage computation
-     * 
+     *
      * @throws ComputationAbortedException
      *             on receiving channel message aborted
      * @throws ComputationFailedException
      *             on receiving channel message error
      */
-    private void parseNext()
-            throws ComputationAbortedException, ComputationFailedException, SignalFlowException {
-
-        this.nextMessage = null;
+    private void parseNext() throws ComputationAbortedException,
+            ComputationFailedException, SignalFlowException {
+        nextMessage = null;
         while (state != State.STATE_COMPLETED) {
-
             if (!channel.hasNext()) {
-
                 if (state != State.STATE_COMPLETED) {
-                    this.channel.close();
-                    if (this.isAttachedChannel) {
-                        this.channel = attach();
-                    } else {
-                        this.channel = execute();
-                    }
+                    channel.close();
+                    channel = isAttachedChannel ? attach() : execute();
                     continue;
                 }
-
             } else {
-
                 ChannelMessage message = channel.next();
 
                 switch (message.channelMessageType) {
-
                 case STREAM_START:
                     state = State.STATE_STREAM_STARTED;
                     break;
 
                 case JOB_START:
                     state = State.STATE_COMPUTATION_STARTED;
-                    this.nextMessage = message;
-                    JobStartMessage jobStartMessage = (JobStartMessage) message;
-                    this.id = jobStartMessage.getHandle();
+                    nextMessage = message;
+                    id = ((JobStartMessage) message).getHandle();
                     break;
 
                 case JOB_PROGRESS:
-                    this.nextMessage = message;
+                    nextMessage = message;
                     break;
 
                 case CHANNEL_ABORT:
@@ -271,14 +244,14 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
                     // Intercept metadata messages to accumulate received metadata.
                     MetadataMessage metadataMessage = (MetadataMessage) message;
                     metadata.put(metadataMessage.getTsId(), metadataMessage.getProperties());
-                    this.nextMessage = message;
+                    nextMessage = message;
                     break;
 
                 case EXPIRED_TSID_MESSAGE:
                     // Intercept expired-tsid messages to clean it up.
                     ExpiredTsIdMessage expiredTsIdMessage = (ExpiredTsIdMessage) message;
-                    this.metadata.remove(expiredTsIdMessage.getTsId());
-                    this.nextMessage = message;
+                    metadata.remove(expiredTsIdMessage.getTsId());
+                    nextMessage = message;
                     break;
 
                 case INFO_MESSAGE:
@@ -292,13 +265,10 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
                                 .getMessage().get("contents");
                         this.resolution = (Integer) contents.get("contents");
                     }
-                    this.batchCountDetected = true;
-                    if (this.currentBatchMessage != null) {
-                        DataMessage yieldMessage = this.currentBatchMessage;
-                        this.currentBatchMessage = null;
-                        this.currentBatchCount = 0;
-                        this.lastLogicalTimestampMs = yieldMessage.getLogicalTimestampMs();
-                        this.nextMessage = yieldMessage;
+
+                    batchCountDetected = true;
+                    if (currentBatchMessage != null) {
+                        setNextDataMessageToYield();
                     }
                     break;
 
@@ -306,37 +276,30 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
                     // Accumulate data messages and release them when we have received
                     // all batches for the same logical timestamp.
                     state = State.STATE_DATA_RECEIVED;
-                    if (!this.batchCountDetected) {
-                        this.expectedBatches++;
+                    if (!batchCountDetected) {
+                        expectedBatches++;
                     }
 
                     DataMessage dataMessage = (DataMessage) message;
-                    if (this.currentBatchMessage == null) {
-                        this.currentBatchMessage = dataMessage;
-                        this.currentBatchCount = 1;
+                    if (currentBatchMessage == null) {
+                        currentBatchMessage = dataMessage;
+                        currentBatchCount = 1;
+                    } else if ((dataMessage.getLogicalTimestampMs()
+                            .longValue() == currentBatchMessage.getLogicalTimestampMs().longValue())
+                            && (currentBatchCount < expectedBatches)) {
+                        currentBatchMessage.addData(dataMessage.getData());
+                        currentBatchCount++;
                     } else {
-                        if ((dataMessage.getLogicalTimestampMs()
-                                .longValue() == this.currentBatchMessage.getLogicalTimestampMs()
-                                        .longValue())
-                                && (this.currentBatchCount < this.expectedBatches)) {
-                            this.currentBatchMessage.addData(dataMessage.getData());
-                            this.currentBatchCount++;
-                        } else {
-                            this.batchCountDetected = true;
-                        }
+                        batchCountDetected = true;
                     }
 
-                    if (this.currentBatchMessage != null) {
-                        DataMessage yieldMessage = this.currentBatchMessage;
-                        this.currentBatchMessage = null;
-                        this.currentBatchCount = 0;
-                        this.lastLogicalTimestampMs = yieldMessage.getLogicalTimestampMs();
-                        this.nextMessage = yieldMessage;
+                    if (currentBatchMessage != null) {
+                        setNextDataMessageToYield();
                     }
                     break;
 
                 case EVENT_MESSAGE:
-                    this.nextMessage = message;
+                    nextMessage = message;
                     break;
 
                 case ERROR_MESSAGE:
@@ -345,9 +308,21 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
                 }
             }
 
-            if (this.nextMessage != null) {
+            if (nextMessage != null) {
                 break;
             }
         }
+    }
+
+    /**
+     * Set the next data message that will be returned by the iterator and reset the current batch
+     * message in which we accumulate.
+     */
+    private void setNextDataMessageToYield() {
+        DataMessage yieldMessage = currentBatchMessage;
+        currentBatchMessage = null;
+        currentBatchCount = 0;
+        lastLogicalTimestampMs = yieldMessage.getLogicalTimestampMs();
+        nextMessage = yieldMessage;
     }
 }

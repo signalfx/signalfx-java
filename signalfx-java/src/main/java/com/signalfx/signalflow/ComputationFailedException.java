@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Exception thrown when the computation failed after being started.
- * 
+ *
  * @author dgriff
  */
 public class ComputationFailedException extends RuntimeException {
