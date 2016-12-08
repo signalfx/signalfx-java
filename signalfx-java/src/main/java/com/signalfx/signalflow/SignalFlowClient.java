@@ -71,8 +71,8 @@ public class SignalFlowClient {
      *            Optional persistent setting
      * @return computation instance
      */
-    public Computation execute(String program, Long start, Long stop, Integer resolution,
-                               Integer maxDelay, Boolean persistent) {
+    public Computation execute(String program, long start, long stop, long resolution,
+                               long maxDelay, boolean persistent) {
         Map<String, String> params = buildParams("start", start, "stop", stop, "resolution",
                 resolution, "maxDelay", maxDelay, "persistent", persistent);
         return new Computation(this.transport, program, params, false);
@@ -104,7 +104,7 @@ public class SignalFlowClient {
      * @param maxDelay
      *            Optional desired maximum data delay, in milliseconds
      */
-    public void start(String program, Long start, Long stop, Integer resolution, Integer maxDelay) {
+    public void start(String program, long start, long stop, long resolution, long maxDelay) {
         Map<String, String> params = buildParams("start", start, "stop", stop, "resolution",
                 resolution, "maxDelay", maxDelay);
         this.transport.start(program, params);
@@ -157,7 +157,7 @@ public class SignalFlowClient {
      *            Optional desired data resolution, in milliseconds
      * @return computation instance
      */
-    public Computation attach(String handle, String filters, Integer resolution) {
+    public Computation attach(String handle, String filters, long resolution) {
         return new Computation(this.transport, handle,
                 buildParams("filters", filters, "resolution", resolution), true);
     }

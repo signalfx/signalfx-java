@@ -5,6 +5,7 @@ package com.signalfx.signalflow;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -140,12 +143,12 @@ public abstract class ChannelMessage {
             @JsonSubTypes.Type(value = ChannelMessage.EndOfChannelMessage.class, name = "END_OF_CHANNEL") })
     public static abstract class ControlMessage extends ChannelMessage {
 
-        protected Long timestampMs;
+        protected long timestampMs;
 
         /**
          * @return The wall clock timestamp (millisecond precision) of the message.
          */
-        public Long getTimestampMs() {
+        public long getTimestampMs() {
             return this.timestampMs;
         }
     }
@@ -201,7 +204,7 @@ public abstract class ChannelMessage {
     @JsonTypeName("JOB_PROGRESS")
     public static class JobProgressMessage extends ControlMessage {
 
-        protected Integer progress;
+        protected int progress;
 
         public JobProgressMessage() {
             this.channelMessageType = Type.JOB_PROGRESS;
@@ -210,7 +213,7 @@ public abstract class ChannelMessage {
         /**
          * @return Computation priming progress, as a percentage between 0 and 100.
          */
-        public Integer getProgress() {
+        public int getProgress() {
             return this.progress;
         }
     }
@@ -243,7 +246,7 @@ public abstract class ChannelMessage {
     public static class InfoMessage extends ChannelMessage {
 
         protected LinkedHashMap<String, Object> message;
-        protected Long logicalTimestampMs;
+        protected long logicalTimestampMs;
 
         public InfoMessage() {
             this.channelMessageType = Type.INFO_MESSAGE;
@@ -253,7 +256,7 @@ public abstract class ChannelMessage {
          * @return The logical timestamp (millisecond precision) for which the message has been
          *         emitted.
          */
-        public Long getLogicalTimestampMs() {
+        public long getLogicalTimestampMs() {
             return this.logicalTimestampMs;
         }
 
@@ -322,32 +325,36 @@ public abstract class ChannelMessage {
      */
     public static class DataMessage extends ChannelMessage {
 
-        protected List<Map<String, Object>> data;
-        protected Long logicalTimestampMs;
+        protected Map<String, Number> data;
+        protected long logicalTimestampMs;
 
-        public DataMessage() {
+        @JsonCreator
+        public DataMessage(@JsonProperty("logicalTimestampMs") long logicalTimestampMs,
+                           @JsonProperty("data") List<Map<String, Object>> data) {
             this.channelMessageType = Type.DATA_MESSAGE;
+            this.logicalTimestampMs = logicalTimestampMs;
+            this.data = new HashMap<String, Number>(data.size());
+            for (Map<String, Object> datum : data) {
+                this.data.put((String) datum.get("tsId"), (Number) datum.get("value"));
+            }
         }
 
         /**
          * @return The logical timestamp of the data (millisecond precision).
          */
-        public Long getLogicalTimestampMs() {
+        public long getLogicalTimestampMs() {
             return this.logicalTimestampMs;
         }
 
         /**
-         * @return The data, as a list of maps of timeseries ID to datapoint value.
+         * @return The data, as a map of timeseries ID to datapoint value.
          */
-        public List<Map<String, Object>> getData() {
+        public Map<String, Number> getData() {
             return this.data;
         }
 
-        public void addData(List<Map<String, Object>> data) {
-            if (this.data == null) {
-                this.data = new ArrayList<Map<String, Object>>();
-            }
-            this.data.addAll(data);
+        public void addData(Map<String, Number> data) {
+            this.data.putAll(data);
         }
     }
 
@@ -357,7 +364,7 @@ public abstract class ChannelMessage {
     public static class EventMessage extends ChannelMessage {
 
         protected LinkedHashMap<String, Object> properties;
-        protected Long timestampMs;
+        protected long timestampMs;
         protected String tsId;
 
         public EventMessage() {
@@ -374,7 +381,7 @@ public abstract class ChannelMessage {
         /**
          * @return The timestamp of the event (millisecond precision).
          */
-        public Long getTimestampMs() {
+        public long getTimestampMs() {
             return this.timestampMs;
         }
 

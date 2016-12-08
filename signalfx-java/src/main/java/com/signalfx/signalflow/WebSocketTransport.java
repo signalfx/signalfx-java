@@ -57,8 +57,8 @@ public class WebSocketTransport implements SignalFlowTransport {
     protected WebSocketClient webSocketClient;
     protected TransportConnection transportConnection;
 
-    protected WebSocketTransport(String token, final SignalFxEndpoint endpoint,
-                                 final int apiVersion, final Integer timeout) {
+    protected WebSocketTransport(String token, SignalFxEndpoint endpoint, int apiVersion,
+                                 int timeout) {
         this.token = token;
         this.endpoint = endpoint;
         this.path = "/v" + apiVersion + "/signalflow/connect";

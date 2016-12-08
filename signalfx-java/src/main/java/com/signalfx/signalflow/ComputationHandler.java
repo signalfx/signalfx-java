@@ -27,8 +27,8 @@ public abstract class ComputationHandler implements Callable<Computation> {
 
     protected static final Logger log = LoggerFactory.getLogger(ComputationHandler.class);
     protected Computation computation;
-    private Long startTimeMs;
-    private Long stopTimeMs;
+    private long startTimeMs;
+    private long stopTimeMs;
 
     /**
      * Constructor that sets the computation
@@ -83,15 +83,15 @@ public abstract class ComputationHandler implements Callable<Computation> {
     /**
      * @return computation start time in milliseconds since midnight, January 1, 1970 UTC
      */
-    public Long getStartTimeMs() {
-        return this.startTimeMs;
+    public long getStartTimeMs() {
+        return startTimeMs;
     }
 
     /**
-     * @return computation stop time in milliseconds since midnight, January 1, 1970 UTC
+     * @return Time at which the computation stopped, in milliseconds since midnight, January 1, 1970 UTC
      */
-    public Long getStopTimeMs() {
-        return this.stopTimeMs;
+    public long getStopTimeMs() {
+        return stopTimeMs;
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class ComputationHandler implements Callable<Computation> {
      */
     public Computation process() throws ComputationAbortedException, ComputationFailedException,
             SignalFlowException, IllegalStateException {
-        if (this.computation.getState() == State.STATE_COMPLETED) {
+        if (computation.getState() == State.STATE_COMPLETED) {
             throw new IllegalStateException("computation is completed");
         }
 

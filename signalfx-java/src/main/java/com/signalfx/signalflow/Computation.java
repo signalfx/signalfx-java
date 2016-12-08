@@ -43,19 +43,20 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
     protected SignalFlowTransport transport;
     protected String program;
     protected Map<String, String> params;
-    protected boolean isAttachedChannel = false;
+    protected boolean isAttachedChannel;
 
-    private Channel channel;
-    private ChannelMessage nextMessage = null;
-    private State state = State.STATE_UNKNOWN;
-    private Long lastLogicalTimestampMs;
-    private String id;
     private Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
-    private Integer resolution;
-    private int expectedBatches = 0;
-    private boolean batchCountDetected = false;
-    private int currentBatchCount = 0;
-    private DataMessage currentBatchMessage = null;
+
+    private String id;
+    private Channel channel;
+    private ChannelMessage nextMessage;
+    private State state = State.STATE_UNKNOWN;
+    private long lastLogicalTimestampMs = -1;
+    private long resolution;
+    private int expectedBatches;
+    private boolean batchCountDetected;
+    private int currentBatchCount;
+    private DataMessage currentBatchMessage;
 
     public Computation(SignalFlowTransport transport, String program, Map<String, String> params,
                        boolean attach) {
@@ -76,8 +77,8 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
     /**
      * @return data resolution
      */
-    public Integer getResolution() {
-        return this.resolution;
+    public long getResolution() {
+        return resolution;
     }
 
     /**
@@ -90,8 +91,8 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
     /**
      * @return last message time in milliseconds since midnight, January 1, 1970 UTC
      */
-    public Long getLastLogicalTimestampMs() {
-        return this.lastLogicalTimestampMs;
+    public long getLastLogicalTimestampMs() {
+        return lastLogicalTimestampMs;
     }
 
     /**
@@ -177,7 +178,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
      */
     private Channel execute() throws SignalFlowException {
         HashMap<String, String> params = new HashMap<String, String>(this.params);
-        if (lastLogicalTimestampMs != null) {
+        if (lastLogicalTimestampMs >= 0) {
             params.put("start", Long.toString(lastLogicalTimestampMs));
         }
 
@@ -263,7 +264,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
                         @SuppressWarnings("unchecked")
                         LinkedHashMap<String, Object> contents = (LinkedHashMap<String, Object>) infoMessage
                                 .getMessage().get("contents");
-                        this.resolution = (Integer) contents.get("contents");
+                        resolution = ((Number) contents.get("resolutionMs")).longValue();
                     }
 
                     batchCountDetected = true;
