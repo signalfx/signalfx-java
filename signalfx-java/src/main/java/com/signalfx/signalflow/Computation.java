@@ -285,16 +285,16 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
                     if (currentBatchMessage == null) {
                         currentBatchMessage = dataMessage;
                         currentBatchCount = 1;
-                    } else if ((dataMessage.getLogicalTimestampMs()
-                            .longValue() == currentBatchMessage.getLogicalTimestampMs().longValue())
-                            && (currentBatchCount < expectedBatches)) {
+                    } else if (dataMessage.getLogicalTimestampMs() == currentBatchMessage
+                            .getLogicalTimestampMs()) {
                         currentBatchMessage.addData(dataMessage.getData());
                         currentBatchCount++;
                     } else {
                         batchCountDetected = true;
                     }
 
-                    if (currentBatchMessage != null) {
+                    if (batchCountDetected && currentBatchMessage != null
+                            && currentBatchCount == expectedBatches) {
                         setNextDataMessageToYield();
                     }
                     break;
