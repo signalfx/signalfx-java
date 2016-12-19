@@ -35,12 +35,12 @@ import com.signalfx.endpoint.SignalFxEndpoint;
 
 /**
  * Server-Sent Events transport.
- * 
+ *
  * Implements a transport to the SignalFlow API that uses simple HTTP requests and reads Server-Sent
  * Events streams back from SignalFx. One connection per SignalFlow computation is required when
  * using this transport. This is a good transport for single, ad-hoc computations. For most use
  * cases though, the WebSocket-based transport is more efficient and has lower latency.
- * 
+ *
  * @author dgriff
  */
 public class ServerSentEventsTransport implements SignalFlowTransport {
@@ -62,7 +62,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
     }
 
     public Channel attach(String handle, final Map<String, String> parameters) {
-
         if (log.isDebugEnabled()) {
             log.debug("attach: [ " + handle + " ] with parameters: " + parameters);
         }
@@ -76,7 +75,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
                     null);
 
             return new TransportChannel(connection, response);
-
         } catch (Exception ex) {
             close(response);
             close(connection);
@@ -86,7 +84,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
 
     public Channel execute(String program, final Map<String, String> parameters)
             throws SignalFlowException {
-
         if (log.isDebugEnabled()) {
             log.debug("execute: [ " + program + " ] with parameters: " + parameters);
         }
@@ -99,7 +96,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
             response = connection.post(this.token, this.path + "/execute", parameters, program);
 
             return new TransportChannel(connection, response);
-
         } catch (IOException ioex) {
             close(response);
             close(connection);
@@ -108,7 +104,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
     }
 
     public void start(String program, final Map<String, String> parameters) {
-
         if (log.isDebugEnabled()) {
             log.debug("start: [ " + program + " ] with parameters: " + parameters);
         }
@@ -127,7 +122,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
     }
 
     public void stop(String handle, final Map<String, String> parameters) {
-
         if (log.isDebugEnabled()) {
             log.debug("stop: [ " + handle + " ] with parameters: " + parameters);
         }
@@ -147,7 +141,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
     }
 
     public void keepalive(String handle) {
-
         if (log.isDebugEnabled()) {
             log.debug("keepalive: [ " + handle + " ]");
         }
@@ -266,7 +259,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         public CloseableHttpResponse post(String token, String path,
                                           final Map<String, String> parameters, String body)
                 throws SignalFlowException {
-
             HttpPost httpPost = null;
             try {
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -311,7 +303,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
                 }
 
                 return response;
-
             } catch (IOException ex) {
                 throw new SignalFlowException("failed communication. " + ex.getMessage(), ex);
             } catch (URISyntaxException ex) {
@@ -406,7 +397,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
 
         public boolean hasNext() {
-
             while ((endOfStreamReached == false) && (eventStreamReader != null)
                     && (nextMessage == null)) {
                 parseNext();
@@ -416,7 +406,6 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
 
         public StreamMessage next() {
-
             while ((endOfStreamReached == false) && (eventStreamReader != null)
                     && (nextMessage == null)) {
                 parseNext();

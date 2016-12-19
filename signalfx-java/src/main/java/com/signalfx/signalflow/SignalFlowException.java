@@ -5,7 +5,7 @@ package com.signalfx.signalflow;
 
 /**
  * A generic error encountered when interacting with the SignalFx SignalFlow API.
- * 
+ *
  * @author dgriff
  */
 public class SignalFlowException extends RuntimeException {

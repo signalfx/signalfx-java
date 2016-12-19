@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 
 /**
  * Base class for stream messages received from a SignalFlow computation
- * 
+ *
  * @author dgriff
  */
 public class StreamMessage {
@@ -35,7 +35,7 @@ public class StreamMessage {
             this.specName = specName;
             this.type = type;
         }
-        
+
         public byte getBinaryType() {
             return type;
         }
@@ -58,7 +58,7 @@ public class StreamMessage {
             Preconditions.checkArgument(kind != null);
             return kind;
         }
-        
+
         public static Kind fromBinaryType(int binaryType) {
             Kind kind = BINARYTYPE_KINDS.get(binaryType);
             Preconditions.checkArgument(kind != null);

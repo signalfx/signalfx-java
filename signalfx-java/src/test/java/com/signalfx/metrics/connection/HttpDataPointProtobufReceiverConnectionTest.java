@@ -1,24 +1,27 @@
+/**
+ * Copyright (C) 2016 SignalFx, Inc. All rights reserved.
+ */
 package com.signalfx.metrics.connection;
 
 import java.io.IOException;
 import java.util.Collections;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.signalfx.connection.AbstractHttpReceiverConnection;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
-    private static final Logger log = LoggerFactory
-            .getLogger(HttpDataPointProtobufReceiverConnectionTest.class);
+
     public static final String AUTH_TOKEN = "AUTH_TOKEN";
 
     @Test

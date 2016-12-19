@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.signalfx.signalflow.ChannelMessage.DataMessage;
 import com.signalfx.signalflow.ChannelMessage.EventMessage;
+import com.signalfx.signalflow.ChannelMessage.ExpiredTsIdMessage;
 import com.signalfx.signalflow.ChannelMessage.JobProgressMessage;
 import com.signalfx.signalflow.ChannelMessage.JobStartMessage;
 import com.signalfx.signalflow.ChannelMessage.MetadataMessage;
@@ -17,22 +18,22 @@ import com.signalfx.signalflow.Computation.State;
 
 /**
  * Class provides basic plumbing used by subclasses to processing computation.
- * 
+ *
  * subclass the onMessage methods and invoke the process method to run on current
  * thread or use executor to submit as callable in another thread.
- * 
+ *
  * @author dgriff
  */
 public abstract class ComputationHandler implements Callable<Computation> {
 
     protected static final Logger log = LoggerFactory.getLogger(ComputationHandler.class);
     protected Computation computation;
-    private Long startTimeMs;
-    private Long stopTimeMs;
+    private long startTimeMs;
+    private long stopTimeMs;
 
     /**
      * Constructor that sets the computation
-     * 
+     *
      * @param computation
      *            instance to process
      */
@@ -42,7 +43,7 @@ public abstract class ComputationHandler implements Callable<Computation> {
 
     /**
      * Override to process job start messages
-     * 
+     *
      * @param message
      *            job start
      */
@@ -50,7 +51,7 @@ public abstract class ComputationHandler implements Callable<Computation> {
 
     /**
      * Override to process job progress messages
-     * 
+     *
      * @param message
      *            job progress
      */
@@ -58,7 +59,7 @@ public abstract class ComputationHandler implements Callable<Computation> {
 
     /**
      * Override to process data messages
-     * 
+     *
      * @param message
      *            data
      */
@@ -66,7 +67,7 @@ public abstract class ComputationHandler implements Callable<Computation> {
 
     /**
      * Override to process event messages
-     * 
+     *
      * @param message
      *            event
      */
@@ -74,29 +75,37 @@ public abstract class ComputationHandler implements Callable<Computation> {
 
     /**
      * Override to process metadata messages
-     * 
+     *
      * @param message
      *            metadata
      */
     protected void onMessage(MetadataMessage message) {}
 
     /**
-     * @return computation start time in milliseconds since midnight, January 1, 1970 UTC
+     * Override to process expired tsId messages
+     *
+     * @param message
+     *            expired tsid message
      */
-    public Long getStartTimeMs() {
-        return this.startTimeMs;
+    protected void onMessage(ExpiredTsIdMessage message) {}
+
+    /**
+     * @return Time at which the computation started, in milliseconds since midnight, January 1, 1970 UTC
+     */
+    public long getStartTimeMs() {
+        return startTimeMs;
     }
 
     /**
-     * @return computation stop time in milliseconds since midnight, January 1, 1970 UTC
+     * @return Time at which the computation stopped, in milliseconds since midnight, January 1, 1970 UTC
      */
-    public Long getStopTimeMs() {
-        return this.stopTimeMs;
+    public long getStopTimeMs() {
+        return stopTimeMs;
     }
 
     /**
      * Processes the computation
-     * 
+     *
      * @return computation instance that was processed
      * @throws ComputationAbortedException
      *             Exception thrown if the computation is aborted during its execution
@@ -109,20 +118,17 @@ public abstract class ComputationHandler implements Callable<Computation> {
      */
     public Computation process() throws ComputationAbortedException, ComputationFailedException,
             SignalFlowException, IllegalStateException {
-
-        if (this.computation.getState() == State.STATE_COMPLETED) {
+        if (computation.getState() == State.STATE_COMPLETED) {
             throw new IllegalStateException("computation is completed");
         }
 
-        this.startTimeMs = System.currentTimeMillis();
-        this.stopTimeMs = null;
+        startTimeMs = System.currentTimeMillis();
+        stopTimeMs = -1;
 
         try {
             // iterate computation messages and route to message handling methods
             for (ChannelMessage message : computation) {
-
                 switch (message.getType()) {
-
                 case JOB_START:
                     JobStartMessage jobStartMessage = (JobStartMessage) message;
                     onMessage(jobStartMessage);
@@ -148,23 +154,28 @@ public abstract class ComputationHandler implements Callable<Computation> {
                     onMessage(metadataMessage);
                     break;
 
+                case EXPIRED_TSID_MESSAGE:
+                    ExpiredTsIdMessage expiredTsIdMessage = (ExpiredTsIdMessage) message;
+                    onMessage(expiredTsIdMessage);
+                    break;
+
                 default:
                     break;
                 }
             }
         } finally {
-            this.stopTimeMs = System.currentTimeMillis();
+            stopTimeMs = System.currentTimeMillis();
             close();
         }
 
-        return this.computation;
+        return computation;
     }
 
     /**
      * closes the computation
      */
     public void close() {
-        this.computation.close();
+        computation.close();
     }
 
     /**

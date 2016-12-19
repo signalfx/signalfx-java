@@ -37,18 +37,18 @@ import com.signalfx.signalflow.StreamMessage.Kind;
 
 /**
  * WebSocket based transport.
- * 
+ *
  * Uses the SignalFlow WebSocket connection endpoint to interact with SignalFx's SignalFlow API.
  * Multiple computation streams can be multiplexed through a single, pre-opened WebSocket
  * connection. It also utilizes a more efficient binary encoding for data so it requires less
  * bandwidth and has overall less latency.
- * 
+ *
  * @author dgriff
  */
 public class WebSocketTransport implements SignalFlowTransport {
 
     protected static final Logger log = LoggerFactory.getLogger(WebSocketTransport.class);
-    public static final Integer DEFAULT_TIMEOUT = 1; // 1 second
+    public static final int DEFAULT_TIMEOUT = 1; // 1 second
 
     protected final String token;
     protected final SignalFxEndpoint endpoint;
@@ -57,8 +57,8 @@ public class WebSocketTransport implements SignalFlowTransport {
     protected WebSocketClient webSocketClient;
     protected TransportConnection transportConnection;
 
-    protected WebSocketTransport(String token, final SignalFxEndpoint endpoint,
-                                 final int apiVersion, final Integer timeout) {
+    protected WebSocketTransport(String token, SignalFxEndpoint endpoint, int apiVersion,
+                                 int timeout) {
         this.token = token;
         this.endpoint = endpoint;
         this.path = "/v" + apiVersion + "/signalflow/connect";
@@ -74,17 +74,15 @@ public class WebSocketTransport implements SignalFlowTransport {
                     endpoint.getScheme(), endpoint.getHostname(), endpoint.getPort(), path));
 
             this.transportConnection = new TransportConnection(token);
-
             this.webSocketClient.open(uriBuilder.build(), this.transportConnection, timeout,
                     TimeUnit.SECONDS);
-
         } catch (Exception ex) {
             throw new SignalFlowException("failed to construct websocket transport", ex);
         }
     }
 
     @Override
-    public Channel attach(String handle, final Map<String, String> parameters) {
+    public Channel attach(String handle, Map<String, String> parameters) {
         log.debug("attach: [ {} ] with parameters: {}", handle, parameters);
 
         Channel channel = new TransportChannel(transportConnection);
@@ -99,7 +97,7 @@ public class WebSocketTransport implements SignalFlowTransport {
     }
 
     @Override
-    public Channel execute(String program, final Map<String, String> parameters) {
+    public Channel execute(String program, Map<String, String> parameters) {
         log.debug("execute: [ {} ] with parameters: {}", program, parameters);
 
         Channel channel = new TransportChannel(transportConnection);
@@ -113,7 +111,7 @@ public class WebSocketTransport implements SignalFlowTransport {
     }
 
     @Override
-    public void start(String program, final Map<String, String> parameters) {
+    public void start(String program, Map<String, String> parameters) {
         log.debug("start: [ {} ] with parameters: {}", program, parameters);
 
         HashMap<String, String> request = new HashMap<String, String>(parameters);
@@ -124,7 +122,7 @@ public class WebSocketTransport implements SignalFlowTransport {
     }
 
     @Override
-    public void stop(String handle, final Map<String, String> parameters) {
+    public void stop(String handle, Map<String, String> parameters) {
         log.debug("stop: [ {} ] with parameters: {}", handle, parameters);
 
         HashMap<String, String> request = new HashMap<String, String>(parameters);
