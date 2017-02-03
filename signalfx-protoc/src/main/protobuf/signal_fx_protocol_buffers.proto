@@ -76,7 +76,8 @@ enum EventCategory {
      */
     JOB = 300000;
     /**
-     * Event originated within collectd
+     * @deprecated
+     * Event originated within collectd (deprecated in favor of AGENT)
      */
     COLLECTD = 400000;
     /**
@@ -87,6 +88,10 @@ enum EventCategory {
      * Created by exception appenders to denote exceptional events
      */
     EXCEPTION = 700000;
+    /**
+     * Event originated from an agent
+     */
+     AGENT = 2000000;
 }
 
 message Property {
