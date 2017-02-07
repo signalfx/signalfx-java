@@ -61,9 +61,10 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         this.timeout = timeout;
     }
 
+    @Override
     public Channel attach(String handle, final Map<String, String> parameters) {
         if (log.isDebugEnabled()) {
-            log.debug("attach: [ " + handle + " ] with parameters: " + parameters);
+            log.debug("attach: [ {} ] with parameters: {}", handle, parameters);
         }
 
         TransportConnection connection = null;
@@ -82,10 +83,11 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
     }
 
+    @Override
     public Channel execute(String program, final Map<String, String> parameters)
             throws SignalFlowException {
         if (log.isDebugEnabled()) {
-            log.debug("execute: [ " + program + " ] with parameters: " + parameters);
+            log.debug("execute: [ {} ] with parameters: {}", program, parameters);
         }
 
         TransportConnection connection = null;
@@ -103,9 +105,31 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
     }
 
+    @Override
+    public Channel preflight(String program, final Map<String, String> parameters)
+            throws SignalFlowException {
+        if (log.isDebugEnabled()) {
+            log.debug("preflight: [ {} ] with parameters: {}", program, parameters);
+        }
+
+        TransportConnection connection = null;
+        CloseableHttpResponse response = null;
+        try {
+            connection = new TransportConnection(this.endpoint, timeout);
+
+            response = connection.post(this.token, this.path + "/preflight", parameters, program);
+
+            return new TransportChannel(connection, response);
+        } catch (IOException ioex) {
+            close(response);
+            close(connection);
+            throw new SignalFlowException("failed to create transport channel for execute", ioex);
+        }
+    }
+    @Override
     public void start(String program, final Map<String, String> parameters) {
         if (log.isDebugEnabled()) {
-            log.debug("start: [ " + program + " ] with parameters: " + parameters);
+            log.debug("start: [ {} ] with parameters: {}", program, parameters);
         }
 
         TransportConnection connection = null;
@@ -121,9 +145,10 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
     }
 
+    @Override
     public void stop(String handle, final Map<String, String> parameters) {
         if (log.isDebugEnabled()) {
-            log.debug("stop: [ " + handle + " ] with parameters: " + parameters);
+            log.debug("stop: [ {} ] with parameters: {}", handle, parameters);
         }
 
         TransportConnection connection = null;
@@ -140,9 +165,10 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
     }
 
+    @Override
     public void keepalive(String handle) {
         if (log.isDebugEnabled()) {
-            log.debug("keepalive: [ " + handle + " ]");
+            log.debug("keepalive: [ {} ]", handle);
         }
 
         TransportConnection connection = null;
@@ -159,6 +185,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         }
     }
 
+    @Override
     public void close(int code, String reason) {
         // nothing to close (separate connections are used and closed by the channel using it)
     }
@@ -341,6 +368,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
             log.debug("constructed {} of type {}", this, this.getClass().getName());
         }
 
+        @Override
         public void close() {
             super.close();
 
@@ -396,6 +424,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
             return this.reconnectionTimeoutMs;
         }
 
+        @Override
         public boolean hasNext() {
             while ((endOfStreamReached == false) && (eventStreamReader != null)
                     && (nextMessage == null)) {
@@ -405,6 +434,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
             return nextMessage != null;
         }
 
+        @Override
         public StreamMessage next() {
             while ((endOfStreamReached == false) && (eventStreamReader != null)
                     && (nextMessage == null)) {
@@ -425,10 +455,12 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
             }
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException("remove from stream not supported");
         }
 
+        @Override
         public void close() {
             if (this.eventStreamReader != null) {
                 try {

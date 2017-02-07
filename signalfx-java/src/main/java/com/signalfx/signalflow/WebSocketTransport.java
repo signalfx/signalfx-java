@@ -111,6 +111,20 @@ public class WebSocketTransport implements SignalFlowTransport {
     }
 
     @Override
+    public Channel preflight(String program, Map<String, String> parameters) {
+        log.debug("preflight: [ {} ] with parameters: {}", program, parameters);
+
+        Channel channel = new TransportChannel(transportConnection);
+        HashMap<String, String> request = new HashMap<String, String>(parameters);
+        request.put("type", "preflight");
+        request.put("program", program);
+
+        transportConnection.sendMessage(channel, parameters);
+
+        return channel;
+    }
+
+    @Override
     public void start(String program, Map<String, String> parameters) {
         log.debug("start: [ {} ] with parameters: {}", program, parameters);
 
@@ -486,6 +500,7 @@ public class WebSocketTransport implements SignalFlowTransport {
             return messageQueue.offer(message);
         }
 
+        @Override
         public void close() {
             super.close();
             this.connection.remove(this); // deregister channel with transport connection
