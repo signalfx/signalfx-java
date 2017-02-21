@@ -39,6 +39,16 @@ public interface SignalFlowTransport {
     public Channel execute(String program, Map<String, String> parameters);
 
     /**
+     * Execute a preflight of the given SignalFlow program and stream the output back.
+     *
+       * @param program
+     *            computation written in signalflow language
+     * @param parameters
+     * @return
+     */
+    public Channel preflight(String program, Map<String, String> parameters);
+
+    /**
      * Start executing the given SignalFlow program without being attached to the output of the
      * computation.
      *
