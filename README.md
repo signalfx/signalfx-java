@@ -468,3 +468,7 @@ case DATA_MESSAGE:
         // ...
     }
 ```
+
+## License
+
+Apache Software License v2. Copyright © 2014-2017 SignalFx
