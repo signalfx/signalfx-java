@@ -3,23 +3,27 @@
  */
 package com.signalfx.signalflow;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.websocket.WebSocket;
@@ -29,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfx.endpoint.SignalFxEndpoint;
@@ -53,16 +58,18 @@ public class WebSocketTransport implements SignalFlowTransport {
     protected final String token;
     protected final SignalFxEndpoint endpoint;
     protected final String path;
-    protected Integer timeout = DEFAULT_TIMEOUT;
+    protected final int timeout;
+    protected final boolean compress;
     protected WebSocketClient webSocketClient;
     protected TransportConnection transportConnection;
 
     protected WebSocketTransport(String token, SignalFxEndpoint endpoint, int apiVersion,
-                                 int timeout) {
+                                 int timeout, boolean compress) {
         this.token = token;
         this.endpoint = endpoint;
         this.path = "/v" + apiVersion + "/signalflow/connect";
         this.timeout = timeout;
+        this.compress = compress;
 
         try {
             WebSocketClientFactory factory = new WebSocketClientFactory();
@@ -90,6 +97,7 @@ public class WebSocketTransport implements SignalFlowTransport {
         Map<String, String> request = new HashMap<String, String>(parameters);
         request.put("type", "attach");
         request.put("handle", handle);
+        request.put("compress", Boolean.toString(compress));
 
         transportConnection.sendMessage(channel, request);
 
@@ -104,6 +112,7 @@ public class WebSocketTransport implements SignalFlowTransport {
         HashMap<String, String> request = new HashMap<String, String>(parameters);
         request.put("type", "execute");
         request.put("program", program);
+        request.put("compress", Boolean.toString(compress));
 
         transportConnection.sendMessage(channel, request);
 
@@ -166,8 +175,9 @@ public class WebSocketTransport implements SignalFlowTransport {
         private String protocol = "wss";
         private String host = SignalFlowTransport.DEFAULT_HOST;
         private int port = 443;
-        private int timeout = 1;
+        private int timeout = DEFAULT_TIMEOUT;
         private int version = 2;
+        private boolean compress = true;
 
         public TransportBuilder(String token) {
             this.token = token;
@@ -198,10 +208,15 @@ public class WebSocketTransport implements SignalFlowTransport {
             return this;
         }
 
+        public TransportBuilder useCompression(boolean compress) {
+            this.compress = compress;
+            return this;
+        }
+
         public WebSocketTransport build() {
             SignalFxEndpoint endpoint = new SignalFxEndpoint(this.protocol, this.host, this.port);
             WebSocketTransport transport = new WebSocketTransport(this.token, endpoint,
-                    this.version, this.timeout);
+                    this.version, this.timeout, this.compress);
             return transport;
         }
     }
@@ -224,92 +239,25 @@ public class WebSocketTransport implements SignalFlowTransport {
     }
 
     /**
-     * Value Object that handles binary data message conversion in construction
-     */
-    protected static class TransportDataMessage {
-
-        protected byte version;
-        protected Kind kind;
-        protected String channelName;
-        protected long logicalTimestampMs;
-        protected List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-
-        public TransportDataMessage(byte[] data) {
-            try {
-                ByteBuffer buffer = ByteBuffer.wrap(data);
-
-                this.version = buffer.get(0);
-                this.kind = Kind.fromBinaryType(buffer.get(1));
-                this.channelName = new String(data, 4, 16, "UTF-8");
-
-                if (this.kind == Kind.DATA) {
-                    this.logicalTimestampMs = buffer.getLong(20);
-
-                    byte[] payload = Arrays.copyOfRange(data, 32, data.length);
-                    for (int element = 0; element < (payload.length / 17); element++) {
-
-                        int index = element * 17;
-
-                        byte[] tsIdBytes = Arrays.copyOfRange(payload, index + 1, index + 9);
-                        String encodedTsId = StringUtils
-                                .remove(DatatypeConverter.printBase64Binary(tsIdBytes), "=");
-
-                        Map<String, Object> elementMap = new HashMap<String, Object>(4);
-                        elementMap.put("tsId", encodedTsId);
-
-                        switch (payload[index]) {
-                        case 1: // long value
-                            elementMap.put("value", buffer.getLong(index + 41));
-                            break;
-
-                        case 2: // double value
-                            elementMap.put("value", buffer.getDouble(index + 41));
-                            break;
-
-                        default: // not suppose to happen
-                            log.warn("ignoring data message with unknown value type {}",
-                                    payload[index]);
-                            continue;
-                        }
-
-                        this.data.add(elementMap);
-                    }
-                } else {
-                    log.warn("Unsupported binary message type {}", this.kind);
-                }
-            } catch (Exception ex) {
-                log.error("failed to construct transport data message", ex);
-            }
-        }
-
-        public int getVersion() {
-            return version;
-        }
-
-        public Kind getKind() {
-            return this.kind;
-        }
-
-        public String getChannelName() {
-            return channelName;
-        }
-
-        public List<Map<String, Object>> getData() {
-            return data;
-        }
-
-        public long getLogicalTimestampMs() {
-            return logicalTimestampMs;
-        }
-    }
-
-    /**
      * WebSocket Transport Connection
      */
     protected static class TransportConnection
             implements WebSocket.OnTextMessage, WebSocket.OnBinaryMessage {
 
         protected static final Logger log = LoggerFactory.getLogger(TransportConnection.class);
+
+        private static final Charset ASCII = Charset.forName("US-ASCII");
+        private static final Charset UTF_8 = Charset.forName("UTF-8");
+        private static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>() {};
+
+        private static final int MAX_CHANNEL_NAME_LENGTH = 16;
+        private static final int BINARY_PREAMBLE_LENGTH = 4;
+        private static final int BINARY_HEADER_LENGTH = 20;
+
+        private static final int LONG_TYPE = 0x01;
+        private static final int DOUBLE_TYPE = 0x02;
+        private static final int INT_TYPE = 0x03;
+
         protected String token;
         protected SignalFlowException error;
         protected WebSocket.Connection connection;
@@ -357,35 +305,149 @@ public class WebSocketTransport implements SignalFlowTransport {
 
         @Override
         public void onMessage(byte[] data, int offset, int length) {
+            byte version = data[offset];
+            byte type;
+            byte flags;
+
+            // Decode message type and flags from header
+            switch (version) {
+            case 1:
+                // +--------------+--------------+--------------+--------------+
+                // | Version      | Message type | Flags        | Reserved     |
+                type = data[offset + 1];
+                flags = data[offset + 2];
+                break;
+            case 2:
+                // +--------------+--------------+--------------+--------------+
+                // |           Version           | Message type | Flags        |
+                type = data[offset + 2];
+                flags = data[offset + 3];
+                break;
+            default:
+                log.error("ignoring message with unsupported encoding version {}", version);
+                return;
+            }
+
+            Kind kind;
             try {
-                byte[] messageBytes = Arrays.copyOfRange(data, offset, offset + length);
-                TransportDataMessage dataMessage = new TransportDataMessage(messageBytes);
+                kind = Kind.fromBinaryType(type);
+            } catch (IllegalArgumentException iae) {
+                log.error("ignoring message with unsupported type {}", type);
+                return;
+            }
 
-                if (dataMessage.getKind() == Kind.DATA) {
-                    LinkedHashMap<String, Object> dataMap = new LinkedHashMap<String, Object>();
-                    dataMap.put("logicalTimestampMs", dataMessage.getLogicalTimestampMs());
-                    dataMap.put("data", dataMessage.getData());
+            // Channel name is the 16 bytes following the binary preamble in the header.
+            String channelName = new String(data, offset + BINARY_PREAMBLE_LENGTH,
+                    MAX_CHANNEL_NAME_LENGTH, ASCII);
+            // Everything after that is the body of the message.
+            byte[] body = Arrays.copyOfRange(data, offset + BINARY_HEADER_LENGTH, offset + length);
 
-                    TransportChannel channel = channels.get(dataMessage.getChannelName());
-                    if ((channel != null) && (!channel.isClosed())) {
-                        StreamMessage streamMessage = new StreamMessage("data", null,
-                                objectMapper.writeValueAsString(dataMap));
-                        channel.offer(streamMessage);
-                    } else {
-                        log.debug("ignoring message. channel not found {}",
-                                dataMessage.getChannelName());
+            boolean compressed = (flags & (1 << 0)) != 0;
+            if (compressed) {
+                ByteArrayInputStream bais = new ByteArrayInputStream(body);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try {
+                    GZIPInputStream gzip = new GZIPInputStream(bais);
+                    try {
+                        IOUtils.copy(gzip, baos);
+                    } finally {
+                        IOUtils.closeQuietly(gzip);
                     }
+                    body = baos.toByteArray();
+                } catch (IOException ioe) {
+                    log.error("failed to process message", ioe);
+                    return;
+                } finally {
+                    IOUtils.closeQuietly(baos);
+                    IOUtils.closeQuietly(bais);
                 }
-            } catch (JsonProcessingException ex) {
-                log.error("failed to process messages", ex);
+            }
+
+            boolean json = (flags & (1 << 1)) != 0;
+            if (json) {
+                onMessage(new String(body, UTF_8));
+                return;
+            }
+
+            Map<String, Object> message = null;
+            switch (kind) {
+            case DATA:
+                message = decodeBinaryDataMessage(version, body);
+                break;
+            default:
+                log.error("ignoring message with unsupported binary encoding of kind {}", kind);
+                return;
+            }
+
+            if (message != null) {
+                TransportChannel channel = channels.get(channelName);
+                if (channel != null && !channel.isClosed()) {
+                    try {
+                        StreamMessage streamMessage = new StreamMessage("data", null,
+                                objectMapper.writeValueAsString(message));
+                        channel.offer(streamMessage);
+                    } catch (JsonProcessingException ex) {
+                        log.error("failed to process message", ex);
+                    }
+                } else {
+                    log.debug("ignoring message. channel not found {}", channelName);
+                }
+            }
+        }
+
+        private static Map<String, Object> decodeBinaryDataMessage(byte version, byte[] data) {
+            try {
+                Map<String, Object> message = new HashMap<String, Object>();
+                ByteBuffer buffer = ByteBuffer.wrap(data);
+                switch (version) {
+                case 1:
+                    message.put("logicalTimestampMs", buffer.getLong());
+                    break;
+                case 2:
+                    message.put("logicalTimestampMs", buffer.getLong());
+                    message.put("maxDelayMs", buffer.getLong());
+                    break;
+                }
+
+                int count = buffer.getInt();
+                List<Map<String, Object>> datapoints = new ArrayList<Map<String, Object>>(count);
+                for (int element = 0; element < count; element++) {
+                    Map<String, Object> elementMap = new HashMap<String, Object>(3);
+
+                    byte type = buffer.get();
+                    byte[] tsIdBytes = new byte[8];
+                    buffer.get(tsIdBytes);
+                    elementMap.put("tsId", StringUtils
+                            .remove(DatatypeConverter.printBase64Binary(tsIdBytes), "="));
+
+                    switch (type) {
+                    case LONG_TYPE:
+                    case INT_TYPE: // int or long value
+                        elementMap.put("value", buffer.getLong());
+                        break;
+                    case DOUBLE_TYPE: // double value
+                        elementMap.put("value", buffer.getDouble());
+                        break;
+                    default:
+                        log.warn("ignoring data message with unknown value type {}", type);
+                        return null;
+                    }
+
+                    datapoints.add(elementMap);
+                }
+                message.put("data", datapoints);
+                return message;
+            } catch (Exception ex) {
+                log.error("failed to construct transport data message", ex);
+                return null;
             }
         }
 
         @Override
         public void onMessage(String data) {
             try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> dataMap = objectMapper.readValue(data, Map.class);
+                // Incoming text message is expected to be JSON.
+                Map<String, Object> dataMap = objectMapper.readValue(data, MAP_TYPE_REF);
 
                 // Intercept KEEP_ALIVE messages
                 String event = (String) dataMap.get("event");
