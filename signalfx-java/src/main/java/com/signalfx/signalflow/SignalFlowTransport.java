@@ -24,7 +24,7 @@ public interface SignalFlowTransport {
      *            computation id
      * @param parameters
      *            computation parameters
-     * @return
+     * @return An open channel attached to the given computation.
      */
     public Channel attach(String handle, Map<String, String> parameters);
 
@@ -34,7 +34,8 @@ public interface SignalFlowTransport {
      * @param program
      *            computation written in signalflow language
      * @param parameters
-     * @return
+     *            computation parameters
+     * @return An open channel attached to the newly started computation.
      */
     public Channel execute(String program, Map<String, String> parameters);
 
