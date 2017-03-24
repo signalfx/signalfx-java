@@ -29,7 +29,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 <dependency>
   <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-codahale</artifactId>
-  <version>0.0.28</version>
+  <version>0.0.33</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 <dependency>
 <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-yammer</artifactId>
-  <version>0.0.28</version>
+  <version>0.0.33</version>
 </dependency>
 ```
 
@@ -50,13 +50,13 @@ If you're using SBT, add the following to your project's `build.sbt` file.
 * To work with Codahale 3.0.x:
 
 ```
-libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.28"
+libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.33"
 ```
 
 * To work with Yammer Metrics 2.0.x:
 
 ```
-libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.28"
+libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.33"
 ```
 
 ### From source
@@ -183,6 +183,7 @@ After setting up a SignalFxReporter, you can use Codahale metrics as you
 normally would, reported at the frequency configured by the `SignalFxReporter`.
 
 ### Default Dimensions
+
 Sometimes there is a desire to set one or more dimension key/value pairs
 on every datapoint that is reported by this library. In order to do this
 call `addDimension(String key, String value)` or
@@ -195,6 +196,7 @@ non-distributed. For such dimensions use `addUniqueDimensions/addUniqueDimension
 on the `SignalFxReport.Builder` object.
 
 ### AWS Integration
+
 To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
 you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
 a dimension in `MetricMetadata` or add it as a default dimension.
@@ -287,16 +289,17 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 ```
 
 ## Default Dimensions
-Sometimes there is a desire to set one or more dimension key/value pairs
-on every datapoint that is reported by this library. In order to do this
-call `addDimension(String key, String value)` or
-`addDimensions(Map<String,String> dimensions) on the `SignalFxReport.Builder`
-object.
+
+Sometimes there is a desire to set one or more dimension key/value pairs on
+every datapoint that is reported by this library. In order to do this call
+`addDimension(String key, String value)` or `addDimensions(Map<String,String>
+dimensions)` on the `SignalFxReport.Builder` object.
 
 ### AWS Integration
+
 To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
-you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
-a dimension in `MetricMetadata` or add it as a default dimension.
+you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as a
+dimension in `MetricMetadata` or add it as a default dimension.
 
 ```java
 String instanceInfo = AWSInstanceInfo.get()
@@ -349,8 +352,8 @@ New metrics and events from the example project should appear in SignalFx.
 We recommend sending metrics using Codahale as shown above. You can also
 interact with our Java library directly if you do not want to use Codahale. To
 do this, you will need to build the metric manually using protocol buffers as
-shown in the following example. Sending both datapoints and events are now supported using
-protocol buffers.
+shown in the following example. Sending both datapoints and events are now
+supported using protocol buffers.
 
 ```java
 SignalFxReceiverEndpoint signalFxEndpoint = new SignalFxEndpoint();
@@ -402,21 +405,27 @@ try (AggregateMetricSender.Session i = mf.createSession()) {
 
 ## Sending metrics through a http proxy
 
-To send metrics through a http proxy one can set the standard java system properties used to control http protocol handling. 
-There are 3 properties you can set to specify the proxy that will be used by the http protocol handler:
+To send metrics through a http proxy one can set the standard java system
+properties used to control http protocol handling. There are 3 properties you
+can set to specify the proxy that will be used by the http protocol handler:
 
 * http.proxyHost: the host name of the proxy server
 * http.proxyPort: the port number, the default value being 80.
-* http.nonProxyHosts: a list of hosts that should be reached directly, bypassing the proxy. This is a list of regular expressions separated by '|'. Any host matching one of these regular expressions will be reached through a direct connection instead of through a proxy.
+* http.nonProxyHosts: a list of hosts that should be reached directly, bypassing
+  the proxy. This is a list of regular expressions separated by '|'. Any host
+  matching one of these regular expressions will be reached through a direct
+  connection instead of through a proxy.
 
-Basic Example
+Basic example:
+
 ```
-java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080”
+$ java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080”
 ```
 
-Example with directive to bypass proxy for localhost and host.mydomain.com
+Example with directive to bypass proxy for `localhost` and `host.mydomain.com`:
+
 ```
-java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080 -Dhttp.noProxyHosts=”localhost|host.mydomain.com”
+$ java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080 -Dhttp.noProxyHosts=”localhost|host.mydomain.com”
 ```
 
 ## Executing SignalFlow computations
