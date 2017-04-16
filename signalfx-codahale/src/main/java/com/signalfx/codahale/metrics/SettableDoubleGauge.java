@@ -1,7 +1,7 @@
 package com.signalfx.codahale.metrics;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
+import com.signalfx.codahale.reporter.SettableGauge;
 
 /**
  * <p>
@@ -9,18 +9,19 @@ import com.codahale.metrics.Metric;
  * is set when needed.  This can be somewhat convienent, but direct use of a Gauge is likely better
  * </p>
  * <p>
- *     Usage example:
- *     <pre>{@code
- *       MetricRegister metricRegistry;
- *       SettableDoubleGauge settable = metricRegistry.register("metric.name", new SettableDoubleGauge());
- *       // ...
- *       settable.setValue(1.234);
- *       // ...
- *       settable.setValue(3.156);
- *     }
- *     </pre>
+ * Usage example:
+ * </p>
+ * <pre>{@code
+ *   MetricRegister metricRegistry;
+ *   SettableDoubleGauge settable = metricRegistry.register("metric.name", new SettableDoubleGauge());
+ *   // ...
+ *   settable.setValue(1.234);
+ *   // ...
+ *   settable.setValue(3.156);
+ * }
+ * </pre>
  */
-public class SettableDoubleGauge implements Metric, Gauge<Double> {
+public class SettableDoubleGauge extends SettableGauge<Double> {
     /**
      * Current value.  Assignment will be atomic.  <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7">See 17.7</a>
      */
@@ -33,6 +34,7 @@ public class SettableDoubleGauge implements Metric, Gauge<Double> {
      */
     public SettableDoubleGauge setValue(double value) {
         this.value = value;
+        markSet();
         return this;
     }
 
@@ -43,7 +45,6 @@ public class SettableDoubleGauge implements Metric, Gauge<Double> {
     public Double getValue() {
         return value;
     }
-
 
     public final static class Builder implements MetricBuilder<SettableDoubleGauge> {
         public static final Builder INSTANCE = new Builder();
