@@ -21,10 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketClient;
@@ -36,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.BaseEncoding;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.signalflow.ChannelMessage.Type;
 import com.signalfx.signalflow.StreamMessage.Kind;
@@ -262,6 +260,7 @@ public class WebSocketTransport implements SignalFlowTransport {
 
         private static final Charset ASCII = Charset.forName("US-ASCII");
         private static final Charset UTF_8 = Charset.forName("UTF-8");
+        private static final BaseEncoding base64Encoder = BaseEncoding.base64Url().omitPadding();
         private static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>() {};
 
         private static final int MAX_CHANNEL_NAME_LENGTH = 16;
@@ -278,6 +277,7 @@ public class WebSocketTransport implements SignalFlowTransport {
         protected Map<String, TransportChannel> channels = Collections
                 .synchronizedMap(new HashMap<String, TransportChannel>());
         protected static ObjectMapper objectMapper = new ObjectMapper();
+
         static {
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
@@ -431,8 +431,7 @@ public class WebSocketTransport implements SignalFlowTransport {
                     byte type = buffer.get();
                     byte[] tsIdBytes = new byte[8];
                     buffer.get(tsIdBytes);
-                    elementMap.put("tsId", StringUtils
-                            .remove(DatatypeConverter.printBase64Binary(tsIdBytes), "="));
+                    elementMap.put("tsId", base64Encoder.encode(tsIdBytes));
 
                     switch (type) {
                     case LONG_TYPE:
