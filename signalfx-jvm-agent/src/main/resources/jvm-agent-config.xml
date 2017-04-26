@@ -1,0 +1,78 @@
+<!--
+ ~ Copyright (c) 2010-2013 the original author or authors
+ ~
+ ~ Permission is hereby granted, free of charge, to any person obtaining
+ ~ a copy of this software and associated documentation files (the
+ ~ "Software"), to deal in the Software without restriction, including
+ ~ without limitation the rights to use, copy, modify, merge, publish,
+ ~ distribute, sublicense, and/or sell copies of the Software, and to
+ ~ permit persons to whom the Software is furnished to do so, subject to
+ ~ the following conditions:
+ ~
+ ~ The above copyright notice and this permission notice shall be
+ ~ included in all copies or substantial portions of the Software.
+ ~
+ ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ ~ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ ~ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ ~ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ ~ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ ~ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ ~ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ ~
+-->
+<jmxtrans-agent>
+    <queries>
+        <!-- OS -->
+        <query objectName="java.lang:type=OperatingSystem" attribute="SystemLoadAverage" resultAlias="os.systemLoadAverage"/>
+
+        <!-- JVM -->
+        <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage"
+               resultAlias="jvm.heapMemoryUsage.#key#"/>
+        <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage"
+               resultAlias="jvm.heapMemoryUsage.#key#"/>
+        <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage"
+               resultAlias="jvm.nonHeapMemoryUsage.#key#"/>
+        <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage"
+               resultAlias="jvm.nonHeapMemoryUsage.#key#"/>
+        <query objectName="java.lang:type=ClassLoading" attribute="LoadedClassCount" resultAlias="jvm.loadedClasses"/>
+
+        <query objectName="java.lang:type=MemoryPool,name=PS Eden Space" attribute="Usage"
+               resultAlias="jvm.edenSpaceUsage.#key#"/>
+        <query objectName="java.lang:type=MemoryPool,name=PS Old Gen" attribute="Usage"
+               resultAlias="jvm.oldSpaceUsage.#key#"/>
+        <query objectName="java.lang:type=MemoryPool,name=PS Survivor Space" attribute="Usage"
+               resultAlias="jvm.survivorSpaceUsage.#key#"/>
+        <query objectName="java.lang:type=GarbageCollector,name=PS MarkSweep" attribute="CollectionCount" resultAlias="jvm.gc.PSMarkSweep.collection_count" type="counter"/>
+        <query objectName="java.lang:type=GarbageCollector,name=PS MarkSweep" attribute="CollectionTime" resultAlias="jvm.gc.PSMarkSweep.collection_time"/>
+        <query objectName="java.lang:type=GarbageCollector,name=PS Scavenge" attribute="CollectionCount" resultAlias="jvm.gc.PSScavenge.collection_count" type="counter"/>
+        <query objectName="java.lang:type=GarbageCollector,name=PS Scavenge" attribute="CollectionTime" resultAlias="jvm.gc.PSScavenge.collection_time"/>
+        <query objectName="java.lang:type=ClassLoading" attribute="LoadedClassCount" resultAlias="jvm.loadedClasses" type="gauge"/>
+
+        <query objectName="java.lang:type=Threading" attribute="ThreadCount" resultAlias="jvm.thread"/>
+
+        <!--&lt;!&ndash; TOMCAT &ndash;&gt;-->
+        <!--<query objectName="Catalina:type=GlobalRequestProcessor,name=*" attribute="requestCount"-->
+               <!--resultAlias="tomcat.requestCount"/>-->
+        <!--<query objectName="Catalina:type=GlobalRequestProcessor,name=*" attribute="errorCount"-->
+               <!--resultAlias="tomcat.errorCount"/>-->
+        <!--<query objectName="Catalina:type=GlobalRequestProcessor,name=*" attribute="processingTime"-->
+               <!--resultAlias="tomcat.processingTime"/>-->
+        <!--<query objectName="Catalina:type=GlobalRequestProcessor,name=*" attribute="bytesSent"-->
+               <!--resultAlias="tomcat.bytesSent" type="counter"/>-->
+        <!--<query objectName="Catalina:type=GlobalRequestProcessor,name=*" attribute="bytesReceived"-->
+               <!--resultAlias="tomcat.bytesReceived" type="counter"/>-->
+
+        <query objectName="java.lang:type=OperatingSystem" attribute="SystemLoadAverage" resultAlias="os.systemLoadAverage"/>
+
+        <!-- APPLICATION -->
+        <!--<query objectName="Catalina:type=Manager,context=/,host=localhost" attribute="activeSessions"-->
+               <!--resultAlias="application.activeSessions"/>-->
+    </queries>
+    <outputWriter class="com.signalfx.jvm.agent.SignalFxOutputWriter">
+        <!-- we could also specify these params via  jvm properties -Dcom.signalfx.hostUrl=http://sfproxy-integrations1&#45;&#45aaaa.int.signalfuse.com:28080 -Dcom.signalfx.authToken=OO9aPaftRvx_bJMc7aD8OQ-->
+        <!--<hostUrl>http://sfproxy-integrations1&#45;&#45;aaaa.int.signalfuse.com:28080</hostUrl>-->
+        <!--<authToken>OO9aPaftRvx_bJMc7aD8OQ</authToken>-->
+    </outputWriter>
+    <collectIntervalInSeconds>11</collectIntervalInSeconds>
+</jmxtrans-agent>
