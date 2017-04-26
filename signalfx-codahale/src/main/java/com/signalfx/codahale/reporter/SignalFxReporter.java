@@ -43,6 +43,7 @@ public class SignalFxReporter extends ScheduledReporter {
     private final MetricMetadata metricMetadata;
     private final boolean useLocalTime;
     private final ImmutableMap<String, DimensionInclusion> defaultDimensions;
+    private final TimeUnit reportingTimeUnit;
 
     protected SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
                                  TimeUnit rateUnit, TimeUnit durationUnit,
@@ -64,6 +65,22 @@ public class SignalFxReporter extends ScheduledReporter {
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
         this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
+        this.reportingTimeUnit = TimeUnit.NANOSECONDS; // Default Reporting Unit
+    }
+
+    public SignalFxReporter(MetricRegistry registry, String name, MetricFilter filter,
+                              TimeUnit rateUnit, TimeUnit durationUnit,
+                              AggregateMetricSender aggregateMetricSender,
+                              Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
+                              boolean useLocalTime, Map<String, DimensionInclusion> defaultDimensions,
+                              TimeUnit convertDurationUnit) {
+        super(registry, name, filter, rateUnit, durationUnit);
+        this.aggregateMetricSender = aggregateMetricSender;
+        this.useLocalTime = useLocalTime;
+        this.detailsToAdd = detailsToAdd;
+        this.metricMetadata = metricMetadata;
+        this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
+        this.reportingTimeUnit = convertDurationUnit;
     }
 
     @Override
@@ -72,7 +89,8 @@ public class SignalFxReporter extends ScheduledReporter {
                        SortedMap<String, Timer> timers) {
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
                 aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
-                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime, defaultDimensions);
+                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime, defaultDimensions,
+                reportingTimeUnit);
 
         try {
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
@@ -165,7 +183,8 @@ public class SignalFxReporter extends ScheduledReporter {
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
         private boolean useLocalTime = false;
         private final ImmutableMap.Builder<String, DimensionInclusion> defaultDimensions = new ImmutableMap.Builder<String, DimensionInclusion>();
-
+        private TimeUnit reportingTimeUnit = TimeUnit.NANOSECONDS; // Conversion units defaulting to nanoseconds.
+        
         public Builder(MetricRegistry registry, String authToken) {
             this(registry, new StaticAuthToken(authToken));
         }
@@ -346,6 +365,17 @@ public class SignalFxReporter extends ScheduledReporter {
             }
             return this;
         }
+        
+        /**
+         * Set the TimeUnit to convert Timer metric units into. Could be milliseconds, nanoseconds, etc.
+         * 
+         * @param durationUnit
+         * @return this
+         */
+        public Builder convertDurationsTo(TimeUnit durationUnit){
+            this.reportingTimeUnit = durationUnit;
+            return this;
+        }
 
         public SignalFxReporter build() {
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
@@ -353,7 +383,7 @@ public class SignalFxReporter extends ScheduledReporter {
                     onSendErrorHandlerCollection);
             return new SignalFxReporter(registry, name, filter, rateUnit, durationUnit,
                     aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime,
-                    defaultDimensions.build());
+                    defaultDimensions.build(),reportingTimeUnit);
         }
     }
 }
