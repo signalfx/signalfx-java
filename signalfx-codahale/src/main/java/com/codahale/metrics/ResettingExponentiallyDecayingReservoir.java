@@ -135,8 +135,8 @@ public class ResettingExponentiallyDecayingReservoir implements Reservoir {
      */
     @Override
     public Snapshot getSnapshot() {
-        rescaleIfNeeded();
         lockForRescale();
+        rescaleIfNeeded();
         try {
             Snapshot snapshot = new WeightedSnapshot(values.values());
             values.clear();
