@@ -76,12 +76,16 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         addSampling(key, value);
     }
 
-    void addHistogram(String baseName,
-                      Histogram histogram) {
+    void addHistogram(String baseName, Histogram histogram) {
         addMetric(histogram, baseName,
-                Optional.of(SignalFxReporter.MetricDetails.COUNT),
+                SignalFxReporter.MetricDetails.COUNT,
                 SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, histogram.getCount());
-        addSampling(baseName, histogram);
+        Snapshot snapshot = addSampling(baseName, histogram);
+
+        // Additionally for histograms only, report the number of samples in the snapshot.
+        addMetric(histogram, baseName,
+                SignalFxReporter.MetricDetails.SAMPLES,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.size());
     }
 
     void addMetered(String baseName, Metered metered) {
@@ -103,9 +107,10 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 SignalFxProtocolBuffers.MetricType.GAUGE, metered.getMeanRate());
     }
 
-    private void addSampling(String baseName, Sampling sampling) {
+    private Snapshot addSampling(String baseName, Sampling sampling) {
+        Snapshot snapshot = sampling.getSnapshot();
+
         Metric metric = (Metric)sampling;
-        final Snapshot snapshot = sampling.getSnapshot();
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.MEDIAN,
                 SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMedian());
@@ -131,7 +136,6 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 SignalFxReporter.MetricDetails.MIN,
                 SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMin());
 
-
         // These are slower to calculate.  Only calculate if we need.
         if (detailsToAdd.contains(SignalFxReporter.MetricDetails.STD_DEV)) {
             addMetric(metric, baseName,
@@ -143,11 +147,13 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                     SignalFxReporter.MetricDetails.MEAN,
                     SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMean());
         }
+
+        return snapshot;
     }
 
     void addMetric(Metric metric, String codahaleName,
-                             SignalFxProtocolBuffers.MetricType defaultMetricType,
-                             Object originalValue) {
+                   SignalFxProtocolBuffers.MetricType defaultMetricType,
+                   Object originalValue) {
         addMetric(metric, codahaleName, Optional.<SignalFxReporter.MetricDetails>absent(),
                 defaultMetricType, originalValue);
     }
