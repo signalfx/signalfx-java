@@ -72,12 +72,16 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
      * @param histogram
      */
 
-    void addHistogram(MetricName baseName,
-                      Histogram histogram) {
+    void addHistogram(MetricName baseName, Histogram histogram) {
         addMetric(histogram, baseName,
                 Optional.of(SignalFxReporter.MetricDetails.COUNT),
                 SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER, histogram.count());
-        addSampling(baseName, histogram);
+        Snapshot snapshot = addSampling(baseName, histogram);
+
+        // Additionally for histograms only, report the number of samples in the snapshot.
+        addMetric(histogram, baseName,
+                SignalFxReporter.MetricDetails.SAMPLES,
+                SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.size());
     }
 
     /**
@@ -111,9 +115,10 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
      * @param sampling
      */
 
-    private void addSampling(MetricName baseName, Sampling sampling) {
+    private Snapshot addSampling(MetricName baseName, Sampling sampling) {
+        Snapshot snapshot = sampling.getSnapshot();
+
         Metric metric = (Metric)sampling;
-        final Snapshot snapshot = sampling.getSnapshot();
         addMetric(metric, baseName,
                 SignalFxReporter.MetricDetails.MEDIAN,
                 SignalFxProtocolBuffers.MetricType.GAUGE, snapshot.getMedian());
@@ -151,6 +156,8 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                     SignalFxReporter.MetricDetails.MEAN,
                     SignalFxProtocolBuffers.MetricType.GAUGE, getMean(snapshot));
         }
+
+        return snapshot;
     }
 
     /**
@@ -162,8 +169,8 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
      */
 
     void addMetric(Metric metric, MetricName codahaleName,
-                             SignalFxProtocolBuffers.MetricType defaultMetricType,
-                             Object originalValue) {
+                   SignalFxProtocolBuffers.MetricType defaultMetricType,
+                   Object originalValue) {
         addMetric(metric, codahaleName, Optional.<SignalFxReporter.MetricDetails>absent(),
                 defaultMetricType, originalValue);
     }

@@ -112,6 +112,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
 
     public enum MetricDetails {
         // For {@link com.codahale.metrics.Sampling}
+        SAMPLES("samples"),
         MEDIAN("median"),
         PERCENT_75("75th"),
         PERCENT_95("95th"),
@@ -132,7 +133,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
         RATE_5_MIN("rate.5min"),
         RATE_15_MIN("rate.15min");
         public static final Set<MetricDetails> ALL = Collections.unmodifiableSet(EnumSet.allOf(MetricDetails.class));
-        public static final Set<MetricDetails> DEFAULTS = ImmutableSet.of(COUNT, MIN, MEAN, MAX);
+        public static final Set<MetricDetails> DEFAULTS = ImmutableSet.of(SAMPLES, COUNT, MIN, MEAN, MAX);
 
         private final String description;
 
