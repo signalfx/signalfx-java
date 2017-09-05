@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.metrics.SignalFxMetricsException;
@@ -32,6 +33,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
+    private final boolean sendGroupNameAsDimension;
     private final ImmutableMap<String, String> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
@@ -41,6 +43,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension,
             boolean injectCurrentTimestamp,
+            boolean sendGroupNameAsDimension,
             ImmutableMap<String, String> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
@@ -48,6 +51,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
+        this.sendGroupNameAsDimension = sendGroupNameAsDimension;
         this.defaultDimensions = defaultDimensions;
     }
 
@@ -239,6 +243,11 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
                 builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
                         .setKey(entry.getKey()).setValue(entry.getValue()));
             }
+        }
+
+        if (sendGroupNameAsDimension && !Strings.isNullOrEmpty(codahaleName.getGroup())) {
+            builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                    .setKey("metric_group").setValue(codahaleName.getGroup()));
         }
 
         for (Map.Entry<String, String> entry : defaultDimensions.entrySet()) {
