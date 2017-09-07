@@ -26,7 +26,7 @@ public abstract class AbstractHttpReceiverConnection {
     protected static final Logger log = LoggerFactory.getLogger(AbstractHttpReceiverConnection.class);
 
     // Do not modify this line.  It is auto replaced to a version number.
-    public static final String VERSION_NUMBER = "0.0.36";
+    public static final String VERSION_NUMBER = "0.0.37-SNAPSHOT";
     public static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     protected static final ObjectMapper MAPPER = new ObjectMapper();
     protected static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
