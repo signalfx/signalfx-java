@@ -39,6 +39,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;
     private final boolean useLocalTime;
+    private final boolean sendGroupNameAsDimension;
     private final ImmutableMap<String, String> defaultDimensions;
 
     protected SignalFxReporter(MetricsRegistry registry, String name, MetricPredicate filter,
@@ -47,7 +48,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
                                  Set<MetricDetails> detailsToAdd,
                                  MetricMetadata metricMetadata) {
         this(registry, name, filter, rateUnit, durationUnit, aggregateMetricSender, detailsToAdd,
-                metricMetadata, false, Collections.<String, String> emptyMap());
+                metricMetadata, false, false, Collections.<String, String> emptyMap());
     }
 
     public SignalFxReporter(MetricsRegistry registry, String name, MetricPredicate filter,
@@ -55,12 +56,14 @@ public class SignalFxReporter extends CustomScheduledReporter {
                               AggregateMetricSender aggregateMetricSender,
                               Set<MetricDetails> detailsToAdd, MetricMetadata metricMetadata,
                               boolean useLocalTime,
+                              boolean sendGroupNameAsDimension,
                               Map<String, String> defaultDimensions) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.aggregateMetricSender = aggregateMetricSender;
         this.useLocalTime = useLocalTime;
         this.detailsToAdd = detailsToAdd;
         this.metricMetadata = metricMetadata;
+        this.sendGroupNameAsDimension = sendGroupNameAsDimension;
         this.defaultDimensions = ImmutableMap.copyOf(defaultDimensions);
     }
 
@@ -77,7 +80,8 @@ public class SignalFxReporter extends CustomScheduledReporter {
 
         AggregateMetricSenderSessionWrapper session = new AggregateMetricSenderSessionWrapper(
                 aggregateMetricSender.createSession(), Collections.unmodifiableSet(detailsToAdd), metricMetadata,
-                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime, defaultDimensions);
+                aggregateMetricSender.getDefaultSourceName(), "sf_source", useLocalTime, sendGroupNameAsDimension,
+                defaultDimensions);
         try {
             for (Map.Entry<MetricName, Gauge> entry : gauges.entrySet()) {
                 session.addMetric(entry.getValue(), entry.getKey(),
@@ -162,6 +166,7 @@ public class SignalFxReporter extends CustomScheduledReporter {
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
         private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
         private boolean useLocalTime = false;
+        private boolean sendGroupNameAsDimension = false;
         private final ImmutableMap.Builder<String, String> defaultDimensions = new ImmutableMap.Builder<String, String>();
 
         public Builder(MetricsRegistry registry, String authToken) {
@@ -305,12 +310,23 @@ public class SignalFxReporter extends CustomScheduledReporter {
             return this;
         }
 
+        /**
+         * If set to true, will send the metric group name as a dimension
+         * called "metric_group" for all metrics which have a group set.
+         *
+         * @return this
+         */
+        public Builder sendGroupNameAsDimension(boolean sendGroupNameAsDimension) {
+            this.sendGroupNameAsDimension = sendGroupNameAsDimension;
+            return this;
+        }
+
         public SignalFxReporter build() {
             AggregateMetricSender aggregateMetricSender = new AggregateMetricSender(
                     defaultSourceName, dataPointReceiverFactory, authToken, onSendErrorHandlerCollection);
             return new SignalFxReporter(registry, name, filter, rateUnit, durationUnit,
                     aggregateMetricSender, detailsToAdd, metricMetadata, useLocalTime,
-                    defaultDimensions.build());
+                    sendGroupNameAsDimension, defaultDimensions.build());
         }
     }
 }
