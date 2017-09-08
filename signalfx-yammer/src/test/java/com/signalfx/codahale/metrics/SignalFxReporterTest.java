@@ -44,7 +44,7 @@ public class SignalFxReporterTest {
                 )
                 .setName("testReporter")
                 .useLocalTime(false)
-                .sendGroupNameAsDimension(true)
+                .sendExtraMetricDimensions(true)
                 .setOnSendErrorHandlerCollection(
                 		Collections.<OnSendErrorHandler>singleton(new OnSendErrorHandler(){
                         	public void handleError(MetricError error){
@@ -108,6 +108,7 @@ public class SignalFxReporterTest {
         assertEquals(2, dbank.lastValueFor("newsource", "newname").getIntValue());
         assertEquals("metric_group", dbank.addDataPoints.get(2).getDimensions(2).getKey());
         assertEquals("group1", dbank.addDataPoints.get(2).getDimensions(2).getValue());
+        assertEquals("type1", dbank.addDataPoints.get(2).getDimensions(3).getValue());
 
         assertNotNull(dbank.lastValueFor("myserver", "atimer.count"));
 

@@ -33,7 +33,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
     private final String defaultSourceName;
     private final String sourceDimension;
     private final boolean injectCurrentTimestamp;
-    private final boolean sendGroupNameAsDimension;
+    private final boolean sendExtraMetricDimensions;
     private final ImmutableMap<String, String> defaultDimensions;
 
     AggregateMetricSenderSessionWrapper(
@@ -43,7 +43,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             String defaultSourceName,
             String sourceDimension,
             boolean injectCurrentTimestamp,
-            boolean sendGroupNameAsDimension,
+            boolean sendExtraMetricDimensions,
             ImmutableMap<String, String> defaultDimensions) {
         this.metricSenderSession = metricSenderSession;
         this.detailsToAdd = detailsToAdd;
@@ -51,7 +51,7 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
         this.defaultSourceName = defaultSourceName;
         this.sourceDimension = sourceDimension;
         this.injectCurrentTimestamp = injectCurrentTimestamp;
-        this.sendGroupNameAsDimension = sendGroupNameAsDimension;
+        this.sendExtraMetricDimensions = sendExtraMetricDimensions;
         this.defaultDimensions = defaultDimensions;
     }
 
@@ -245,9 +245,15 @@ class AggregateMetricSenderSessionWrapper implements Closeable {
             }
         }
 
-        if (sendGroupNameAsDimension && !Strings.isNullOrEmpty(codahaleName.getGroup())) {
-            builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
-                    .setKey("metric_group").setValue(codahaleName.getGroup()));
+        if (sendExtraMetricDimensions) {
+            if (!Strings.isNullOrEmpty(codahaleName.getGroup())) {
+                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                        .setKey("metric_group").setValue(codahaleName.getGroup()));
+            }
+            if (!Strings.isNullOrEmpty(codahaleName.getType())) {
+                builder.addDimensions(SignalFxProtocolBuffers.Dimension.newBuilder()
+                        .setKey("metric_type").setValue(codahaleName.getType()));
+            }
         }
 
         for (Map.Entry<String, String> entry : defaultDimensions.entrySet()) {
