@@ -12,7 +12,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.signalfx.codahale.metrics.MetricBuilder;
-import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType;
 
 public class MetricMetadataImpl implements MetricMetadata {
     private final ConcurrentMap<Metric, Metadata> metaDataCollection;
@@ -33,7 +33,7 @@ public class MetricMetadataImpl implements MetricMetadata {
     }
 
     @Override
-    public Optional<SignalFxProtocolBuffers.MetricType> getMetricType(Metric metric) {
+    public Optional<MetricType> getMetricType(Metric metric) {
         Metadata existingMetaData = metaDataCollection.get(metric);
         if (existingMetaData == null || existingMetaData.metricType == null) {
             return Optional.absent();
@@ -49,26 +49,35 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     @Override
     public <M extends Metric> Tagger<M> forMetric(M metric) {
-        if (metaDataCollection.containsKey(metric)) {
-            return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
-        } else {
+        Metadata metadata = metaDataCollection.get(metric);
+        if (metadata == null) {
             synchronized (this) {
-                if (metaDataCollection.containsKey(metric)) {
-                    return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
+                metadata = metaDataCollection.get(metric);
+                if (metadata == null) {
+                    metadata = new Metadata();
+                    Metadata oldMetaData = metaDataCollection.put(metric, metadata);
+                    Preconditions.checkArgument(oldMetaData == null,
+                            "Concurrency issue adding metadata");
                 }
-                Metadata thisMetricsMetadata = new Metadata();
-                Metadata oldMetaData = metaDataCollection.put(metric, thisMetricsMetadata);
-                Preconditions
-                        .checkArgument(oldMetaData == null, "Concurrency issue adding metadata");
-                return new TaggerImpl<M>(metric, thisMetricsMetadata);
             }
         }
+        return new TaggerImpl<M>(metric, metadata);
     }
 
     @Override
     public <M extends Metric> BuilderTagger<M> forBuilder(
             MetricBuilder<M> metricBuilder) {
         return new BuilderTaggerImpl<M>(metricBuilder, metaDataCollection, new Metadata());
+    }
+
+    @Override
+    public <M extends Metric> boolean removeMetric(M metric, MetricRegistry metricRegistry) {
+        Metadata metadata = metaDataCollection.remove(metric);
+        if (metadata == null) {
+            return false;
+        }
+        metricRegistry.remove(metadata.getCodahaleName());
+        return true;
     }
 
     private static abstract class TaggerBaseImpl<M extends Metric, T extends TaggerBase<M, T>>
@@ -98,33 +107,13 @@ public class MetricMetadataImpl implements MetricMetadata {
         }
 
         @Override
-        public T withMetricType(
-                SignalFxProtocolBuffers.MetricType metricType) {
+        public T withMetricType(MetricType metricType) {
             thisMetricsMetadata.metricType = metricType;
             return (T) this;
         }
 
         protected String createCodahaleName() {
-            final String existingMetricName =
-                    Preconditions.checkNotNull(thisMetricsMetadata.tags.get(MetricMetadata.METRIC),
-                            "The register helper needs a base metric name to build a readable " +
-                                    "metric.  use withMetricName or codahale directly");
-
-            //  The names should be unique so we sort each parameter by the tag key.
-            SortedMap<String, String> extraParameters = new TreeMap<String, String>();
-            for (Map.Entry<String, String> entry: thisMetricsMetadata.tags.entrySet()) {
-                // Don't readd the metric name
-                if (!MetricMetadata.METRIC.equals(entry.getKey())) {
-                    extraParameters.put(entry.getKey(), entry.getValue());
-                }
-            }
-            StringBuilder compositeName = new StringBuilder();
-            // Add each entry in sorted order
-            for (Map.Entry<String, String> entry: extraParameters.entrySet()) {
-                compositeName.append(entry.getValue()).append('.');
-            }
-            compositeName.append(existingMetricName);
-            return compositeName.toString();
+            return thisMetricsMetadata.getCodahaleName();
         }
     }
 
@@ -177,8 +166,8 @@ public class MetricMetadataImpl implements MetricMetadata {
                 // This could throw a IllegalArgumentException.  That would only happen if another
                 // metric was made with our name, but not constructed by the metadata tagger.  This
                 // is super strange and deserves an exception.
-                Metric newMetric = metricRegistry
-                        .register(compositeName, metricBuilder.newMetric());
+                Metric newMetric = metricRegistry.register(compositeName,
+                        metricBuilder.newMetric());
                 Preconditions.checkArgument(
                         null == metaDataCollection.put(newMetric, thisMetricsMetadata));
                 return (M) newMetric;
@@ -203,10 +192,33 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     private static final class Metadata {
         private final Map<String, String> tags;
-        private SignalFxProtocolBuffers.MetricType metricType;
+        private MetricType metricType;
 
         private Metadata() {
             tags = new ConcurrentHashMap<String, String>(6);
+        }
+
+        public String getCodahaleName() {
+            final String existingMetricName = Preconditions.checkNotNull(
+                    tags.get(MetricMetadata.METRIC),
+                    "The register helper needs a base metric name to build a readable "
+                            + "metric.  use withMetricName or codahale directly");
+
+            // The names should be unique so we sort each parameter by the tag key.
+            SortedMap<String, String> extraParameters = new TreeMap<String, String>();
+            for (Map.Entry<String, String> entry : tags.entrySet()) {
+                // Don't re-add the metric name
+                if (!MetricMetadata.METRIC.equals(entry.getKey())) {
+                    extraParameters.put(entry.getKey(), entry.getValue());
+                }
+            }
+            StringBuilder compositeName = new StringBuilder();
+            // Add each entry in sorted order
+            for (Map.Entry<String, String> entry : extraParameters.entrySet()) {
+                compositeName.append(entry.getValue()).append('.');
+            }
+            compositeName.append(existingMetricName);
+            return compositeName.toString();
         }
 
         @Override
