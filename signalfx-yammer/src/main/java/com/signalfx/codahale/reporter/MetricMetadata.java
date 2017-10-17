@@ -2,7 +2,6 @@ package com.signalfx.codahale.reporter;
 
 import java.util.Map;
 import com.yammer.metrics.core.Metric;
-import com.yammer.metrics.core.MetricsRegistry;
 import com.google.common.base.Optional;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
@@ -28,6 +27,13 @@ public interface MetricMetadata {
     @Deprecated
     public <M extends Metric> Tagger<M> tagMetric(M metric);
 
+    /**
+     * Removes the specified metric from the metric metadata.
+     * @param metric           The metric to remove, cannot be null.
+     * @return True if the metric was found and removed, false otherwise
+     */
+    public <M extends Metric> boolean removeMetric(M metric);
+
     public interface TaggerBase<M extends Metric, T extends TaggerBase<M, ?>> {
         /**
          *  Tag the metric with a sf_source
@@ -36,6 +42,7 @@ public interface MetricMetadata {
          * @deprecated The use of the build in source parameter is deprecated and discouraged.  Use
          *             {@link #withDimension(String, String)} instead.
          */
+        @Deprecated
         T withSourceName(String sourceName);
 
         /**

@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
- * 
+ *
  * Implementation of MetricMetadata
  *
  */
@@ -24,6 +24,7 @@ public class MetricMetadataImpl implements MetricMetadata {
         metaDataCollection = new ConcurrentHashMap<Metric, Metadata>();
     }
 
+    @Override
     public Map<String, String> getTags(Metric metric) {
         Metadata existingMetaData = metaDataCollection.get(metric);
         if (existingMetaData == null) {
@@ -50,20 +51,23 @@ public class MetricMetadataImpl implements MetricMetadata {
 
     @Override
     public <M extends Metric> Tagger<M> forMetric(M metric) {
-        if (metaDataCollection.containsKey(metric)) {
-            return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
-        } else {
+        Metadata metadata = metaDataCollection.get(metric);
+        if (metadata == null) {
             synchronized (this) {
-                if (metaDataCollection.containsKey(metric)) {
-                    return new TaggerImpl<M>(metric, metaDataCollection.get(metric));
+                if (metadata == null) {
+                    metadata = new Metadata();
+                    Metadata oldMetaData = metaDataCollection.put(metric, metadata);
+                    Preconditions.checkArgument(oldMetaData == null,
+                            "Concurrency issue adding metadata");
                 }
-                Metadata thisMetricsMetadata = new Metadata();
-                Metadata oldMetaData = metaDataCollection.put(metric, thisMetricsMetadata);
-                Preconditions
-                        .checkArgument(oldMetaData == null, "Concurrency issue adding metadata");
-                return new TaggerImpl<M>(metric, thisMetricsMetadata);
             }
         }
+        return new TaggerImpl<M>(metric, metadata);
+    }
+
+    @Override
+    public <M extends Metric> boolean removeMetric(M metric) {
+        return metaDataCollection.remove(metric) != null;
     }
 
     private static abstract class TaggerBaseImpl<M extends Metric, T extends TaggerBase<M, T>>
@@ -80,16 +84,19 @@ public class MetricMetadataImpl implements MetricMetadata {
             this.thisMetricsMetadata = thisMetricsMetadata;
         }
 
+        @Override
         public T withSourceName(String sourceName) {
             thisMetricsMetadata.tags.put(SOURCE, sourceName);
             return (T) this;
         }
 
+        @Override
         public T withMetricName(String metricName) {
             thisMetricsMetadata.tags.put(METRIC, metricName);
             return (T) this;
         }
 
+        @Override
         public T withMetricType(
                 SignalFxProtocolBuffers.MetricType metricType) {
             thisMetricsMetadata.metricType = metricType;
@@ -111,7 +118,7 @@ public class MetricMetadataImpl implements MetricMetadata {
             return metric;
         }
     }
-    
+
     private static final class Metadata {
         private final Map<String, String> tags;
         private SignalFxProtocolBuffers.MetricType metricType;

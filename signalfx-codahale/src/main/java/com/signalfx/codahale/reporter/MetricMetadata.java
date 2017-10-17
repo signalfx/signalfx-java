@@ -38,6 +38,14 @@ public interface MetricMetadata {
      */
     public <M extends Metric> BuilderTagger<M> forBuilder(MetricBuilder<M> metricBuilder);
 
+    /**
+     * Removes the specified metric from the metric metadata and registry.
+     * @param metric           The metric to remove, cannot be null.
+     * @param metricRegistry   Registry to remove the metric from 
+     * @return True if the metric was found and removed, false otherwise
+     */
+    public <M extends Metric> boolean removeMetric(M metric, MetricRegistry metricRegistry);
+
     public interface TaggerBase<M extends Metric, T extends TaggerBase<M, ?>> {
         /**
          *  Tag the metric with a sf_source
@@ -46,6 +54,7 @@ public interface MetricMetadata {
          * @deprecated The use of the build in source parameter is deprecated and discouraged.  Use
          *             {@link #withDimension(String, String)} instead.
          */
+        @Deprecated
         T withSourceName(String sourceName);
 
         /**
