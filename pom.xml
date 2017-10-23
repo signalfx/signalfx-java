@@ -21,6 +21,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <protobuf.version>3.4.0</protobuf.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
@@ -210,7 +211,7 @@
       <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
-        <version>2.5.0</version>
+        <version>${protobuf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>

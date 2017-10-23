@@ -54,11 +54,16 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.comoyo.maven.plugins</groupId>
-        <artifactId>protoc-bundled-plugin</artifactId>
-        <version>1.4.46</version>
+        <groupId>com.github.os72</groupId>
+        <artifactId>protoc-jar-maven-plugin</artifactId>
+        <version>3.4.0.1</version>
         <executions>
           <execution>
+            <configuration>
+              <protocVersion>${protobuf.version}</protocVersion>
+              <includeStdTypes>true</includeStdTypes>
+            </configuration>
+            <phase>generate-sources</phase>
             <goals>
               <goal>run</goal>
             </goals>
