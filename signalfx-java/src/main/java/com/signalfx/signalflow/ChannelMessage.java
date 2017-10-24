@@ -363,6 +363,7 @@ public abstract class ChannelMessage {
      */
     public static class EventMessage extends ChannelMessage {
 
+        protected LinkedHashMap<String, Object> metadata;
         protected LinkedHashMap<String, Object> properties;
         protected long timestampMs;
         protected String tsId;
@@ -383,6 +384,14 @@ public abstract class ChannelMessage {
          */
         public long getTimestampMs() {
             return this.timestampMs;
+        }
+
+        /**
+         * @return The metadata of the EventTimeSeries this event belongs to. May be empty if the
+         * event was created by the SignalFlow computation itself.
+         */
+        public Map<String, Object> getMetadata() {
+            return this.metadata;
         }
 
         /**
