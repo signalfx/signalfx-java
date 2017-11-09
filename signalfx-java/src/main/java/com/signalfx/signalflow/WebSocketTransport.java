@@ -52,6 +52,7 @@ public class WebSocketTransport implements SignalFlowTransport {
 
     protected static final Logger log = LoggerFactory.getLogger(WebSocketTransport.class);
     public static final int DEFAULT_TIMEOUT = 1; // 1 second
+    public static final int MAX_BINARY_MESSAGE_SIZE = 163840000; // Need this in order to deal with big messages
 
     protected final String token;
     protected final SignalFxEndpoint endpoint;
@@ -74,6 +75,7 @@ public class WebSocketTransport implements SignalFlowTransport {
             factory.start();
 
             this.webSocketClient = factory.newWebSocketClient();
+            this.webSocketClient.setMaxBinaryMessageSize(MAX_BINARY_MESSAGE_SIZE);
 
             URIBuilder uriBuilder = new URIBuilder(String.format("%s://%s:%s%s",
                     endpoint.getScheme(), endpoint.getHostname(), endpoint.getPort(), path));
