@@ -52,7 +52,6 @@ public class WebSocketTransport implements SignalFlowTransport {
 
     protected static final Logger log = LoggerFactory.getLogger(WebSocketTransport.class);
     public static final int DEFAULT_TIMEOUT = 1; // 1 second
-    public static final int MAX_BINARY_MESSAGE_SIZE = 163840000; // Need this in order to deal with big messages
 
     protected final String token;
     protected final SignalFxEndpoint endpoint;
@@ -63,7 +62,7 @@ public class WebSocketTransport implements SignalFlowTransport {
     protected TransportConnection transportConnection;
 
     protected WebSocketTransport(String token, SignalFxEndpoint endpoint, int apiVersion,
-                                 int timeout, boolean compress) {
+                                 int timeout, boolean compress, int maxBinaryMessageSize) {
         this.token = token;
         this.endpoint = endpoint;
         this.path = "/v" + apiVersion + "/signalflow/connect";
@@ -75,7 +74,7 @@ public class WebSocketTransport implements SignalFlowTransport {
             factory.start();
 
             this.webSocketClient = factory.newWebSocketClient();
-            this.webSocketClient.setMaxBinaryMessageSize(MAX_BINARY_MESSAGE_SIZE);
+            this.webSocketClient.setMaxBinaryMessageSize(maxBinaryMessageSize);
 
             URIBuilder uriBuilder = new URIBuilder(String.format("%s://%s:%s%s",
                     endpoint.getScheme(), endpoint.getHostname(), endpoint.getPort(), path));
@@ -192,6 +191,7 @@ public class WebSocketTransport implements SignalFlowTransport {
         private int timeout = DEFAULT_TIMEOUT;
         private int version = 2;
         private boolean compress = true;
+        private int maxBinaryMessageSize = -1;
 
         public TransportBuilder(String token) {
             this.token = token;
@@ -227,10 +227,15 @@ public class WebSocketTransport implements SignalFlowTransport {
             return this;
         }
 
+        public TransportBuilder setMaxBinaryMessageSize(int size) {
+            this.maxBinaryMessageSize = size;
+            return this;
+        }
+
         public WebSocketTransport build() {
             SignalFxEndpoint endpoint = new SignalFxEndpoint(this.protocol, this.host, this.port);
             WebSocketTransport transport = new WebSocketTransport(this.token, endpoint,
-                    this.version, this.timeout, this.compress);
+                    this.version, this.timeout, this.compress, this.maxBinaryMessageSize);
             return transport;
         }
     }
