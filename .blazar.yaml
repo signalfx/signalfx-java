@@ -1,5 +1,0 @@
-enabled: true
-
-stepActivation:
-  notify:
-    branches: [hubspot]
