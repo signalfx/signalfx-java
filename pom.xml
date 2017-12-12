@@ -12,7 +12,7 @@
   <groupId>com.signalfx.public</groupId>
   <artifactId>clients-parent</artifactId>
   <name>SignalFx parent</name>
-  <version>0.0.40-SNAPSHOT</version>
+  <version>0.0.40-hubspot-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>
