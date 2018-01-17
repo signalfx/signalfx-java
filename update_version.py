@@ -16,17 +16,23 @@ import sys
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+def match_all(v):
+    return True
+
+def no_snapshots(v):
+    return 'SNAPSHOT' not in v
+
 FILE_REPLACES = {
     'signalfx-java/src/main/java/com/signalfx/connection/AbstractHttpReceiverConnection.java': [
-        (re.compile(r'public static final String VERSION_NUMBER = "(.*?)"'),
+        (match_all, re.compile(r'public static final String VERSION_NUMBER = "(.*?)"'),
          'public static final String VERSION_NUMBER = "%s"')
     ],
     'README.md': [
-        (re.compile(r'<version>([^<]+)</version>'),
+        (no_snapshots, re.compile(r'<version>([^<]+)</version>'),
          '<version>%s</version>'),
-        (re.compile(r'libraryDependencies \+= "com.signalfx.public" % "signalfx-codahale" % "(.*?)"'),
+        (no_snapshots, re.compile(r'libraryDependencies \+= "com.signalfx.public" % "signalfx-codahale" % "(.*?)"'),
          'libraryDependencies += "com.signalfx.public" %% "signalfx-codahale" %% "%s"'),
-        (re.compile(r'libraryDependencies \+= "com.signalfx.public" % "signalfx-yammer" % "(.*?)"'),
+        (no_snapshots, re.compile(r'libraryDependencies \+= "com.signalfx.public" % "signalfx-yammer" % "(.*?)"'),
          'libraryDependencies += "com.signalfx.public" %% "signalfx-yammer" %% "%s"'),
     ],
 }
@@ -61,11 +67,13 @@ def perform_file_replacements(version):
         logging.info('Updating %d version number location%s in %s...',
                      len(repls), 's' if len(repls) != 1 else '', file_name)
         for repl in repls:
-            logging.debug('%s -> %s', *repl)
+            if not repl[0](version):
+                continue
+            logging.debug('%s -> %s', repl[1], repl[2])
             file_name = os.path.join(os.getcwd(), file_name)
             with open(file_name, 'r') as f:
                 contents = f.read()
-            contents = repl[0].sub(repl[1] % version, contents)
+            contents = repl[1].sub(repl[2] % version, contents)
             with open(file_name, 'w') as f:
                 f.write(contents)
 
