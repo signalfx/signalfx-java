@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 SignalFx, Inc. All rights reserved.
+ * Copyright (C) 2016-2018 SignalFx, Inc. All rights reserved.
  */
 package com.signalfx.signalflow;
 
@@ -15,7 +15,7 @@ public interface SignalFlowTransport {
     /**
      * Default host for signalflow
      */
-    public static final String DEFAULT_HOST = "stream.signalfx.com";
+    String DEFAULT_HOST = "stream.signalfx.com";
 
     /**
      * Attach to an existing SignalFlow computation.
@@ -26,7 +26,7 @@ public interface SignalFlowTransport {
      *            computation parameters
      * @return An open channel attached to the given computation.
      */
-    public Channel attach(String handle, Map<String, String> parameters);
+    Channel attach(String handle, Map<String, String> parameters);
 
     /**
      * Execute the given SignalFlow program and stream the output back.
@@ -37,17 +37,18 @@ public interface SignalFlowTransport {
      *            computation parameters
      * @return An open channel attached to the newly started computation.
      */
-    public Channel execute(String program, Map<String, String> parameters);
+    Channel execute(String program, Map<String, String> parameters);
 
     /**
      * Execute a preflight of the given SignalFlow program and stream the output back.
      *
-       * @param program
+     * @param program
      *            computation written in signalflow language
      * @param parameters
-     * @return
+     *            computation parameters
+     * @return An open channel attached to the newly started preflight computation.
      */
-    public Channel preflight(String program, Map<String, String> parameters);
+    Channel preflight(String program, Map<String, String> parameters);
 
     /**
      * Start executing the given SignalFlow program without being attached to the output of the
@@ -58,7 +59,7 @@ public interface SignalFlowTransport {
      * @param parameters
      *            computation parameters
      */
-    public void start(String program, Map<String, String> parameters);
+    void start(String program, Map<String, String> parameters);
 
     /**
      * Stop a SignalFlow computation.
@@ -68,7 +69,7 @@ public interface SignalFlowTransport {
      * @param parameters
      *            computation parameter
      */
-    public void stop(String handle, Map<String, String> parameters);
+    void stop(String handle, Map<String, String> parameters);
 
     /**
      * Close this SignalFlow transport.
@@ -78,13 +79,13 @@ public interface SignalFlowTransport {
      * @param reason
      *            Optional description of why closing
      */
-    public void close(int code, String reason);
+    void close(int code, String reason);
 
     /**
-     * Keepalive a SignalFlow computation.
+     * Keep-alive a SignalFlow computation.
      *
      * @param handle
      *            computation id
      */
-    public void keepalive(String handle);
+    void keepalive(String handle);
 }
