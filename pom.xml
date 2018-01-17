@@ -299,6 +299,45 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <createSourcesJar>true</createSourcesJar>
+          <shadeSourcesContent>true</shadeSourcesContent>
+          <relocations>
+            <relocation>
+              <pattern>com.google.common</pattern>
+              <shadedPattern>com.signalfx.shaded.google.common</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.google.thirdparty</pattern>
+              <shadedPattern>com.signalfx.shaded.google.thirdparty</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.fasterxml</pattern>
+              <shadedPattern>com.signalfx.shaded.fasterxml</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.apache</pattern>
+              <shadedPattern>com.signalfx.shaded.apache</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.eclipse.jetty</pattern>
+              <shadedPattern>com.signalfx.shaded.jetty</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
