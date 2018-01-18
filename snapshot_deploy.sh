@@ -1,2 +1,2 @@
 #!/bin/bash
-mvn -DperformRelease=true clean deploy
+grep SNAPSHOT pom.xml > /dev/null && mvn -DperformRelease=true clean deploy
