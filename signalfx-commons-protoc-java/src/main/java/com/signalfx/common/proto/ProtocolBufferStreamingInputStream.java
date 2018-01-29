@@ -3,7 +3,7 @@ package com.signalfx.common.proto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import com.google.protobuf.MessageLite;
+import com.github.os72.protobuf351.MessageLite;
 
 /**
  * The idea with this class is that we can encapsulate a collection of protocol buffers and send
@@ -26,7 +26,7 @@ public final class ProtocolBufferStreamingInputStream<ProtocolBufferObject exten
      * Fill in our byte buffer if we're out of space by reading the next protocol buffer object.
      *
      * @throws IOException
-     *         If {@link com.google.protobuf.MessageLite#writeDelimitedTo(java.io.OutputStream)}
+     *         If {@link MessageLite#writeDelimitedTo(java.io.OutputStream)}
      *         fails
      */
     private void fillBytes() throws IOException {
