@@ -443,24 +443,22 @@ Executing a SignalFlow program is very simple with this client library:
 ```java
 String program = "data('cpu.utilization').mean().publish()";
 SignalFlowClient flow = new SignalFlowClient("MY_TOKEN");
-try {
-    System.out.println("Executing " + program);
-    Computation computation = flow.execute(program);
-    for (ChannelMessage message : computation) {
-        switch (message.getType()) {
-        case DATA_MESSAGE:
-            DataMessage dataMessage = (DataMessage) message;
-            System.out.printf("%d: %s%n",
-                    dataMessage.getLogicalTimestampMs(), dataMessage.getData());
-            break;
+System.out.println("Executing " + program);
+Computation computation = flow.execute(program);
+for (ChannelMessage message : computation) {
+    switch (message.getType()) {
+    case DATA_MESSAGE:
+        DataMessage dataMessage = (DataMessage) message;
+        System.out.printf("%d: %s%n",
+                dataMessage.getLogicalTimestampMs(), dataMessage.getData());
+        break;
 
-        case EVENT_MESSAGE:
-            EventMessage eventMessage = (EventMessage) message;
-            System.out.printf("%d: %s%n",
-                    eventMessage.getTimestampMs(),
-                    eventMessage.getProperties());
-            break;
-        }
+    case EVENT_MESSAGE:
+        EventMessage eventMessage = (EventMessage) message;
+        System.out.printf("%d: %s%n",
+                eventMessage.getTimestampMs(),
+                eventMessage.getProperties());
+        break;
     }
 }
 ```

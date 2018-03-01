@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 SignalFx, Inc. All rights reserved.
+ * Copyright (C) 2016-2018 SignalFx, Inc. All rights reserved.
  */
 package com.signalfx.signalflow;
 
@@ -55,6 +55,9 @@ public class SignalFlowClient {
     }
 
     /**
+     * This method is deprecated and will be removed in the next major release. Use
+     * {@link #execute(String, Long, Long, Long, Long, Boolean, Boolean)} instead
+     * 
      * Execute the given SignalFlow program with parameters and stream the output back.
      *
      * @param program
@@ -71,10 +74,40 @@ public class SignalFlowClient {
      *            Optional persistent setting
      * @return computation instance
      */
+    @Deprecated
     public Computation execute(String program, long start, long stop, long resolution,
                                long maxDelay, boolean persistent) {
+        return execute(program, start, stop, resolution, maxDelay, persistent, false);
+    }
+
+    /**
+     * Execute the given SignalFlow program with parameters and stream the output back.
+     *
+     * @param program
+     *            computation written in signalflow language
+     * @param start
+     *            Optional timestamp in milliseconds since epoch. Defaults to the current timestamp.
+     * @param stop
+     *            Optional timestamp in milliseconds since epoch. Defaults to infinity.
+     * @param resolution
+     *            Optional the minimum desired data resolution, in milliseconds. This allows the
+     *            client to put an upper bound on the number of datapoints in the computation
+     *            output.
+     * @param maxDelay
+     *            Optional desired maximum data delay, in milliseconds between 1 and 900000. When
+     *            set to zero or unset, max delay will be evaluated dynamically based on the
+     *            historical lag information of the input data.
+     * @param persistent
+     *            Optional persistent setting
+     * @param immediate
+     *            Optional adjusts the stop timestamp so that the computation doesn't wait for
+     *            future data to be available
+     * @return computation instance
+     */
+    public Computation execute(String program, Long start, Long stop, Long resolution,
+                               Long maxDelay, Boolean persistent, Boolean immediate) {
         Map<String, String> params = buildParams("start", start, "stop", stop, "resolution",
-                resolution, "maxDelay", maxDelay, "persistent", persistent);
+                resolution, "maxDelay", maxDelay, "persistent", persistent, "immediate", immediate);
         return new Computation(this.transport, program, params, false);
     }
 
