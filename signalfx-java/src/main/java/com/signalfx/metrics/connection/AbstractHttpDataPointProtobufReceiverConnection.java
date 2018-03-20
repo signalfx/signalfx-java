@@ -20,10 +20,13 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
 
     protected static final ContentType PROTO_TYPE = ContentType.create("application/x-protobuf");
 
-    public AbstractHttpDataPointProtobufReceiverConnection(
-            SignalFxReceiverEndpoint endpoint,
-            int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
-       super(endpoint, timeoutMs, httpClientConnectionManager);
+    private final boolean compress;
+
+    public AbstractHttpDataPointProtobufReceiverConnection(SignalFxReceiverEndpoint endpoint,
+                                                           int timeoutMs,
+                                                           HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, httpClientConnectionManager);
+        this.compress = !Boolean.getBoolean(DISABLE_COMPRESSION_PROPERTY);
     }
 
     @Override
@@ -35,9 +38,15 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
         try {
             CloseableHttpResponse resp = null;
             try {
-                resp = postToEndpoint(auth, getEntityForVersion(dataPoints),
-                        getEndpointForAddDatapoints());
+                resp = postToEndpoint(auth,
+                        getEntityForVersion(dataPoints),
+                        getEndpointForAddDatapoints(),
+                        compress);
 
+                int code = resp.getStatusLine().getStatusCode();
+                if (code != HttpStatus.SC_OK) {
+                    throw new SignalFxMetricsException("Invalid status code " + code);
+                }
             } finally {
                 if (resp != null) {
                     resp.close();
@@ -66,11 +75,13 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 resp = postToEndpoint(auth,
                         new InputStreamEntity(
                                 new ProtocolBufferStreamingInputStream<SignalFxProtocolBuffers.Datum>(
-                                        datumPoints.iterator()), PROTO_TYPE)
-                        , "/v1/backfill");
-                if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new SignalFxMetricsException(
-                            "Invalid status coded " + resp.getStatusLine().getStatusCode());
+                                        datumPoints.iterator()), PROTO_TYPE),
+                        "/v1/backfill",
+                        false);
+
+                int code = resp.getStatusLine().getStatusCode();
+                if (code != HttpStatus.SC_OK) {
+                    throw new SignalFxMetricsException("Invalid status code " + code);
                 }
             } finally {
                 if (resp != null) {

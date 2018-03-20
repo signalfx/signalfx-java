@@ -182,42 +182,6 @@ try {
 After setting up a SignalFxReporter, you can use Codahale metrics as you
 normally would, reported at the frequency configured by the `SignalFxReporter`.
 
-### Default Dimensions
-
-Sometimes there is a desire to set one or more dimension key/value pairs
-on every datapoint that is reported by this library. In order to do this
-call `addDimension(String key, String value)` or
-`addDimensions(Map<String,String> dimensions)` on the `SignalFxReport.Builder`
-object. Note that if IncrementalCounter is used to create a distributed
-counter you will want to make sure that none of the dimensions passed
-to addDimension/addDimensions are unique to the reporting source
-(e.g. hostname, AWSUniqueId) as this will make make the counter
-non-distributed. For such dimensions use `addUniqueDimensions/addUniqueDimension`
-on the `SignalFxReport.Builder` object.
-
-### AWS Integration
-
-To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
-you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
-a dimension in `MetricMetadata` or add it as a default dimension.
-
-```java
-String instanceInfo = AWSInstanceInfo.get()
-Timer t = metricMetadata
-    .forBuilder(MetricBuilder.TIMERS)
-    .withMetricName("request_time")
-    .withDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo)
-    .createOrGet(metricRegistery);
-
-/**
- * As default dimension
- */
-final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
-    metricRegistry,
-    "SIGNALFX_AUTH_TOKEN"
-).addUniqueDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
-```
-
 ### Yammer Metrics
 
 You can also use this library with Yammer metrics 2.0.x as shown in the
@@ -267,7 +231,7 @@ metricMetadata.forMetric(gauge)
     .withDimension("queue_name", "customer_backlog");
 ```
 
-#### 4. Adding Dimensions without knowing if they already exist
+#### 4. Adding dimensions without knowing if they already exist
 
 This is not supported in Yammer Metrics 2.0.x.
 
@@ -288,18 +252,27 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 ).build();
 ```
 
-## Default Dimensions
+### Default dimensions
 
-Sometimes there is a desire to set one or more dimension key/value pairs on
-every datapoint that is reported by this library. In order to do this call
-`addDimension(String key, String value)` or `addDimensions(Map<String,String>
-dimensions)` on the `SignalFxReport.Builder` object.
+Sometimes there is a desire to set one or more dimension key/value pairs
+on every datapoint that is reported by this library. In order to do this
+call `addDimension(String key, String value)` or
+`addDimensions(Map<String,String> dimensions)` on the
+`SignalFxReporter.Builder` object.
+
+Note that if `IncrementalCounter` is used to create a distributed
+counter you will want to make sure that none of the dimensions passed to
+`addDimension()/addDimensions()` are unique to the reporting source
+(e.g. `hostname`, `AWSUniqueId`) as this will make make the counter
+non-distributed. For such dimensions use
+`addUniqueDimension()/addUniqueDimensions()` on the
+`SignalFxReporter.Builder` object.
 
 ### AWS Integration
 
 To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
-you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as a
-dimension in `MetricMetadata` or add it as a default dimension.
+you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
+a dimension in `MetricMetadata` or add it as a default dimension.
 
 ```java
 String instanceInfo = AWSInstanceInfo.get()
@@ -315,39 +288,10 @@ Timer t = metricMetadata
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistry,
     "SIGNALFX_AUTH_TOKEN"
-).addDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
+).addUniqueDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
 ```
 
-## Example Project
-
-You can find a full-stack example project called "signalfx-java-examples" in
-the repo.
-
-Run it as follows:
-
-1. Download the code and create an "auth" file in the "signalfx-java-examples"
-   directory. The auth file should contain the following:
-
-    ```
-    auth=<signalfx API Token>
-    host=https://ingest.signalfx.com
-    ```
-
-2. Run the following commands in your terminal to install and run the example
-   project, replacing `path/to/signalfx-java-examples` with the location of the
-   example project code in your environment. You must have Maven installed.
-
-    ```
-    cd path/to/signalfx-java-examples
-    mvn install
-    # an example for Yammer 2.x metrics
-    mvn exec:java -Dexec.mainClass="com.signalfx.example.YammerExample"
-    # an example for sending datapoints and events using protocol buffers
-    mvn exec:java -Dexec.mainClass="com.signalfx.example.ProtobufExample"
-    ```
-New metrics and events from the example project should appear in SignalFx.
-
-## Sending metrics without using Codahale
+### Sending metrics without using Codahale
 
 We recommend sending metrics using Codahale as shown above. You can also
 interact with our Java library directly if you do not want to use Codahale. To
@@ -403,16 +347,16 @@ try (AggregateMetricSender.Session i = mf.createSession()) {
 }
 ```
 
-## Sending metrics through a http proxy
+### Sending metrics through a HTTP proxy
 
-To send metrics through a http proxy one can set the standard java system
-properties used to control http protocol handling. There are 3 properties you
-can set to specify the proxy that will be used by the http protocol handler:
+To send metrics through a HTTP proxy one can set the standard java system
+properties used to control HTTP protocol handling. There are 3 properties you
+can set to specify the proxy that will be used by the HTTP protocol handler:
 
-* http.proxyHost: the host name of the proxy server
-* http.proxyPort: the port number, the default value being 80.
-* http.nonProxyHosts: a list of hosts that should be reached directly, bypassing
-  the proxy. This is a list of regular expressions separated by '|'. Any host
+* `http.proxyHost`: the host name of the proxy server
+* `http.proxyPort`: the port number, the default value being 80.
+* `http.nonProxyHosts`: a list of hosts that should be reached directly, bypassing
+  the proxy. This is a list of regular expressions separated by `|`. Any host
   matching one of these regular expressions will be reached through a direct
   connection instead of through a proxy.
 
@@ -427,6 +371,46 @@ Example with directive to bypass proxy for `localhost` and `host.mydomain.com`:
 ```
 $ java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080 -Dhttp.noProxyHosts=”localhost|host.mydomain.com”
 ```
+
+### Disabling compression when sending datapoints
+
+By default, the Java library compresses datapoint payloads when sending them to
+SignalFx. This can provide significant egress volume savings when sending data
+to SignalFx's ingest API. This behavior can be disabled by setting the
+`com.signalfx.public.java.disableHttpCompression` system property to `true`:
+
+```
+$ java -Dcom.signalfx.public.java.disableHttpCompression=true ...
+```
+
+## Example Project
+
+You can find a full-stack example project called "signalfx-java-examples" in
+the repo.
+
+Run it as follows:
+
+1. Download the code and create an "auth" file in the "signalfx-java-examples"
+   directory. The auth file should contain the following:
+
+    ```
+    auth=<signalfx API Token>
+    host=https://ingest.signalfx.com
+    ```
+
+2. Run the following commands in your terminal to install and run the example
+   project, replacing `path/to/signalfx-java-examples` with the location of the
+   example project code in your environment. You must have Maven installed.
+
+    ```
+    cd path/to/signalfx-java-examples
+    mvn install
+    # an example for Yammer 2.x metrics
+    mvn exec:java -Dexec.mainClass="com.signalfx.example.YammerExample"
+    # an example for sending datapoints and events using protocol buffers
+    mvn exec:java -Dexec.mainClass="com.signalfx.example.ProtobufExample"
+    ```
+New metrics and events from the example project should appear in SignalFx.
 
 ## Executing SignalFlow computations
 
