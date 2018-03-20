@@ -5,6 +5,7 @@ package com.signalfx.metrics.connection;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +53,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
             }
             SignalFxProtocolBuffers.DataPointUploadMessage all_datapoints =
                     SignalFxProtocolBuffers.DataPointUploadMessage.parseFrom(
-                            baseRequest.getInputStream());
+                            new GZIPInputStream(baseRequest.getInputStream()));
             if (!all_datapoints.getDatapoints(0).getSource().equals("source")) {
                 error("Invalid datapoint source", response, baseRequest);
                 return;

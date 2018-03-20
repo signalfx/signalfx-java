@@ -32,8 +32,10 @@ public abstract class AbstractHttpEventProtobufReceiverConnection extends Abstra
         try {
             CloseableHttpResponse resp = null;
             try {
-                resp = postToEndpoint(auth, getEntityForVersion(events),
-                        getEndpointForAddEvents());
+                resp = postToEndpoint(auth,
+                        getEntityForVersion(events),
+                        getEndpointForAddEvents(),
+                        false);
                 checkHttpResponse(resp);
             } finally {
                 if (resp != null) {

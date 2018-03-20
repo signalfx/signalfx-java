@@ -74,7 +74,9 @@ public class HttpDataPointProtobufReceiverConnection
             CloseableHttpResponse resp = null;
             try {
                 resp = postToEndpoint(auth,
-                        new ByteArrayEntity(map_as_json, JSON_TYPE), "/v1/metric?bulkupdate=true");
+                        new ByteArrayEntity(map_as_json, JSON_TYPE),
+                        "/v1/metric?bulkupdate=true",
+                        false);
                 try {
                     body = IOUtils.toString(resp.getEntity().getContent());
                 } catch (IOException e) {

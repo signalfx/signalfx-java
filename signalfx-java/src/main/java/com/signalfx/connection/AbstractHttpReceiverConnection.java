@@ -8,6 +8,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.GzipCompressingEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -28,6 +29,8 @@ public abstract class AbstractHttpReceiverConnection {
     // Do not modify this line.  It is auto replaced to a version number.
     public static final String VERSION_NUMBER = "0.0.43-SNAPSHOT";
     public static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
+    public static final String DISABLE_COMPRESSION_PROPERTY = "com.signalfx.public.java.disableHttpCompression";
+
     protected static final ObjectMapper MAPPER = new ObjectMapper();
     protected static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
 
@@ -35,34 +38,40 @@ public abstract class AbstractHttpReceiverConnection {
     protected final HttpHost host;
     protected final RequestConfig requestConfig;
 
-    protected AbstractHttpReceiverConnection(
-            SignalFxReceiverEndpoint endpoint,
-            int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
+    protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs,
+                                             HttpClientConnectionManager httpClientConnectionManager) {
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)
                 .build();
-        this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(),
-                endpoint.getScheme());
+        this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(), endpoint.getScheme());
 
-        final HttpHost proxy = createHttpProxyFromSystemProperties(endpoint.getHostname());
-        this.requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs)
-                .setConnectionRequestTimeout(timeoutMs).setConnectTimeout(timeoutMs).setProxy(proxy).build();
+        HttpHost proxy = createHttpProxyFromSystemProperties(endpoint.getHostname());
+        this.requestConfig = RequestConfig.custom()
+                .setSocketTimeout(timeoutMs)
+                .setConnectionRequestTimeout(timeoutMs)
+                .setConnectTimeout(timeoutMs)
+                .setProxy(proxy)
+                .build();
     }
 
-    protected CloseableHttpResponse postToEndpoint(String auth, HttpEntity httpEntity,
-                                                   String endpoint)
+    protected CloseableHttpResponse postToEndpoint(String auth, HttpEntity entity, String endpoint,
+                                                   boolean compress)
             throws IOException {
-        HttpPost http_post = new HttpPost(String.format("%s%s", host.toURI(), endpoint));
-        http_post.setConfig(requestConfig);
-        http_post.setHeader("X-SF-TOKEN", auth);
-        http_post.setHeader("User-Agent", USER_AGENT);
-        http_post.setEntity(httpEntity);
+        if (compress) {
+            entity = new GzipCompressingEntity(entity);
+        }
+
+        HttpPost post = new HttpPost(String.format("%s%s", host.toURI(), endpoint));
+        post.setConfig(requestConfig);
+        post.setHeader("X-SF-TOKEN", auth);
+        post.setHeader("User-Agent", USER_AGENT);
+        post.setEntity(entity);
 
         try {
-            log.trace("Talking to endpoint {}", http_post);
-            return client.execute(http_post);
+            log.trace("Talking to endpoint {}", post);
+            return client.execute(post);
         } catch (IOException e) {
-            log.trace("Exception trying to execute {}, Exception: {} ", http_post, e);
+            log.trace("Exception trying to execute {}", post, e);
             throw e;
         }
     }
@@ -73,7 +82,7 @@ public abstract class AbstractHttpReceiverConnection {
         try {
             body = IOUtils.toString(resp.getEntity().getContent());
         } catch (IOException e) {
-            throw new SignalFxMetricsException("Unable to get reponse content", e);
+            throw new SignalFxMetricsException("Unable to get response content", e);
         }
         if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             throw new SignalFxMetricsException("Invalid status code "
