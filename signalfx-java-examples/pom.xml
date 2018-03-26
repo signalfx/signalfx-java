@@ -4,7 +4,7 @@
 
   <groupId>com.signalfx.example</groupId>
   <artifactId>signalfx.example</artifactId>
-  <version>0.0.44-SNAPSHOT</version>
+  <version>0.0.44</version>
   <packaging>jar</packaging>
 
   <name>signalfx.example</name>
