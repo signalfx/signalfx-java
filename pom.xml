@@ -291,6 +291,11 @@
         <configuration>
           <createSourcesJar>true</createSourcesJar>
           <shadeSourcesContent>true</shadeSourcesContent>
+          <artifactSet>
+            <excludes>
+              <exclude>org.slf4j:*</exclude>
+            </excludes>
+          </artifactSet>
           <relocations>
             <relocation>
               <pattern>com.google.common</pattern>
