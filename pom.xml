@@ -312,6 +312,10 @@
               <pattern>org.eclipse.jetty</pattern>
               <shadedPattern>com.signalfx.shaded.jetty</shadedPattern>
             </relocation>
+            <relocation>
+              <pattern>org.slf4j</pattern>
+              <shadedPattern>com.signalfx.shaded.slf4j</shadedPattern>
+            </relocation>
           </relocations>
         </configuration>
         <executions>
