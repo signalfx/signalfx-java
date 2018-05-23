@@ -13,8 +13,8 @@ import subprocess
 from subprocess import PIPE
 import sys
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(os.path.basename(__file__))
 
 def match_all(v):
     return True
@@ -39,7 +39,7 @@ FILE_REPLACES = {
 
 
 def execute(cmd, expected_code=None, stdin=None, background=False):
-    logger.debug('Executing %s', cmd)
+    logger.info('Executing in %s: %s', os.getcwd(), ' '.join(cmd))
     proc = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     if background:
         return ('', '', 0)  # In background
@@ -53,7 +53,7 @@ def execute(cmd, expected_code=None, stdin=None, background=False):
 
 def update_pom_files(version):
     base_dir = os.getcwd()
-    logging.info('Updating POM files to version %s...', version)
+    logger.info('Updating POM files to version %s...', version)
     cmd = ['mvn', 'versions:set', 'versions:update-child-modules',
            '-DnewVersion=%s' % version]
     (stdout, _, code) = execute(cmd, expected_code=0)
@@ -64,12 +64,12 @@ def update_pom_files(version):
 
 def perform_file_replacements(version):
     for file_name, repls in FILE_REPLACES.items():
-        logging.info('Updating %d version number location%s in %s...',
-                     len(repls), 's' if len(repls) != 1 else '', file_name)
+        logger.info('Updating %d version number location%s in %s...',
+                    len(repls), 's' if len(repls) != 1 else '', file_name)
         for repl in repls:
             if not repl[0](version):
                 continue
-            logging.debug('%s -> %s', repl[1], repl[2])
+            logger.debug('%s -> %s', repl[1], repl[2])
             file_name = os.path.join(os.getcwd(), file_name)
             with open(file_name, 'r') as f:
                 contents = f.read()
