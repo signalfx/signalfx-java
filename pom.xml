@@ -294,6 +294,7 @@
           <artifactSet>
             <excludes>
               <exclude>org.slf4j:*</exclude>
+              <exclude>*:metrics-core:*</exclude>
             </excludes>
           </artifactSet>
           <relocations>
