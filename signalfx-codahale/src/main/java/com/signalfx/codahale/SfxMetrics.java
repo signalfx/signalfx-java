@@ -191,9 +191,9 @@ public class SfxMetrics {
      * @param function
      *         The {@link Callable} to execute.
      * @param metricPrefix
-     *         A prefix for the metric names. Successes are counted by a "<prefix> .success" metric;
-     *         failures by a "<prefix>.failure" metric, and the {@link Callable}'s execution is
-     *         tracked by a "<prefix>.time" timer.
+     *         A prefix for the metric names. Successes are counted by a "prefix.success" metric;
+     *         failures by a "prefix.failure" metric, and the {@link Callable}'s execution is
+     *         tracked by a "prefix.time" timer.
      * @param dimensions
      *         Additional dimension key/value pairs (an even number of strings must be provided).
      * @param <T>
@@ -228,9 +228,9 @@ public class SfxMetrics {
      * @param unit
      *         The unit of the retry delay.
      * @param metricPrefix
-     *         A prefix for the metric names. Successes are counted by a "<prefix> .success" metric;
-     *         failures by a "<prefix>.failure" metric, and the {@link Callable}'s execution is
-     *         tracked by a "<prefix>.time" timer.
+     *         A prefix for the metric names. Successes are counted by a "prefix.success" metric;
+     *         failures by a "prefix.failure" metric, and the {@link Callable}'s execution is
+     *         tracked by a "prefix.time" timer.
      * @param dimensions
      *         Additional dimension key/value pairs (an even number of strings must be provided).
      * @param <T>
