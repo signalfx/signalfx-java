@@ -11,7 +11,11 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Utility functions that make common SignalFx operations easier to do.
+ *
+ * This class is deprecated and will be removed in a future release. Use functions from {@link
+ * com.signalfx.codahale.SfxMetrics} instead.
  */
+@Deprecated
 public class SfUtil {
     private SfUtil(){}
 
@@ -34,6 +38,7 @@ public class SfUtil {
      * @param callback          The callback that gets the counter's current value
      * @return The registered metric
      */
+    @Deprecated
     public static Metric cumulativeCounter(MetricRegistry metricRegistry,
                                            String name,
                                            MetricMetadata metricMetadata,
@@ -48,6 +53,7 @@ public class SfUtil {
      * @param metricsToRemove    Which metrics to remove
      * @return The number of metrics removed
      */
+    @Deprecated
     public static int removeMetrics(MetricRegistry metricRegistry, final Metric... metricsToRemove) {
         final Set<Metric> toRemove = ImmutableSet.copyOf(metricsToRemove);
         final AtomicInteger totalRemoved = new AtomicInteger(0);
