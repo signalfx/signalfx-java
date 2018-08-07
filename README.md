@@ -29,7 +29,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 <dependency>
   <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-codahale</artifactId>
-  <version>0.0.47</version>
+  <version>0.0.48</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 <dependency>
 <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-yammer</artifactId>
-  <version>0.0.47</version>
+  <version>0.0.48</version>
 </dependency>
 ```
 
@@ -50,13 +50,13 @@ If you're using SBT, add the following to your project's `build.sbt` file.
 * To work with Codahale 3.0.x:
 
 ```
-libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.47"
+libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.48"
 ```
 
 * To work with Yammer Metrics 2.0.x:
 
 ```
-libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.47"
+libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.48"
 ```
 
 ### From source
@@ -106,28 +106,21 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 ).build();
 signalfxReporter.start(1, TimeUnit.SECONDS);
 final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
+final SfxMetrics metrics = new SfxMetrics(metricRegistry, metricMetadata);
 ```
 
 #### 2. Send a metric
 
 ```java
 // This will send the current time in ms to SignalFx as a gauge
-metricRegistry.register("gauge", new Gauge<Long>() {
+metrics.registerGauge("gauge", new Gauge<Long>() {
     public Long getValue() {
         return System.currentTimeMillis();
     }
 });
 ```
 
-#### 3. Add existing dimensions and metadata to metrics
-
-You can add SignalFx specific metadata to Codahale metrics by first gathering
-available metadata using `getMetricMetadata()`, then attaching the
-MetricMetadata to the metric.
-
-When you use MetricMetadata, call the .register() method you get from the call
-forMetric() rather than registering your metric directly with the
-metricRegistry.  This will construct a unique Codahale string for your metric.
+#### 3. Add dimensions and metadata to metrics
 
 ```java
 /*
@@ -135,31 +128,24 @@ metricRegistry.  This will construct a unique Codahale string for your metric.
  * 'queue_name' to the gauge.
  */
 final Queue customerQueue = new ArrayBlockingQueue(100);
-metricMetadata.forMetric(new Gauge<Long>() {
+metrics.registerGauge("queue_size", new Gauge<Long>() {
     @Override
     public Long getValue() {
         return customerQueue.size();
     }
-}).withDimension("queue_name", "customer_backlog")
-  .register(metricRegistry);
+}, "queue_name", "customer_backlog");
 ```
 
-#### 4. (optional) Add dimensions without knowing if they already exist
-
-We recommend creating your Codahale object as a field of your class, as a
-counter or gauge, then using that field to increment values. If you don't want
-to maintain this for reasons of code cleanliness, you can create it on the fly
-with our builders.
+We recommend creating your Codahale object as a field of your class (a
+`Counter`, `Gauge<?>`, `Histogram` or `Timer`) then using that field to
+increment or update values. If you don't want to maintain this for reasons of
+code cleanliness, you can always just create it on the fly.
 
 For example, if you wanted a timer that included a dimension indicating which
 store it is from, you could use code like this.
 
 ```java
-Timer t = metricMetadata
-    .forBuilder(MetricBuilder.TIMERS)
-    .withMetricName("request_time")
-    .withDimension("storename", "electronics")
-    .createOrGet(metricRegistery);
+Timer t = metrics.timer("request_time", "storename", "electronics");
 
 Timer.Context c = t.time();
 try {
@@ -169,12 +155,20 @@ try {
 }
 
 /*
- * Java 7 alternative:
+ * Java 7+ alternative:
  *
  * try (Timer.Context ignored = t.time()) {
  *     System.out.println("Doing store things");
  * }
  */
+
+// Or on the fly:
+Timer.Context c = metrics.timer("request_time").time();
+try {
+    // Do something
+} finally {
+    c.close();
+}
 ```
 
 #### After setting up Codahale
@@ -198,6 +192,8 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 signalfxReporter.start(1, TimeUnit.SECONDS);
 final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 ```
+
+Note: the `SfxMetrics` helper is not supported for Yammer metrics.
 
 #### 2. Send a metric with Yammer metrics
 
@@ -230,10 +226,6 @@ Metric gauge = metricRegistry.newGauge(gaugeName, new Gauge<Integer>() {
 metricMetadata.forMetric(gauge)
     .withDimension("queue_name", "customer_backlog");
 ```
-
-#### 4. Adding dimensions without knowing if they already exist
-
-This is not supported in Yammer Metrics 2.0.x.
 
 ### Changing the default source
 
@@ -276,11 +268,7 @@ a dimension in `MetricMetadata` or add it as a default dimension.
 
 ```java
 String instanceInfo = AWSInstanceInfo.get()
-Timer t = metricMetadata
-    .forBuilder(MetricBuilder.TIMERS)
-    .withMetricName("request_time")
-    .withDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo)
-    .createOrGet(metricRegistery);
+Timer t = metrics.timer("request_time", AWSInstanceInfo.DIMENSION_NAME, instanceInfo);
 
 /**
  * As default dimension
