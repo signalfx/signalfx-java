@@ -11,9 +11,9 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
+import com.signalfx.codahale.SfxMetrics;
 import com.signalfx.codahale.reporter.IncrementalCounter;
 import com.signalfx.codahale.reporter.MetricMetadata;
-import com.signalfx.codahale.reporter.SfUtil;
 import com.signalfx.codahale.reporter.SignalFxReporter;
 import com.signalfx.metrics.auth.StaticAuthToken;
 import com.signalfx.metrics.connection.StaticDataPointReceiverFactory;
@@ -32,6 +32,7 @@ public class SignalFxReporterTest {
                 .setDetailsToAdd(ImmutableSet.of(SignalFxReporter.MetricDetails.COUNT,
                         SignalFxReporter.MetricDetails.MIN, SignalFxReporter.MetricDetails.MAX))
                 .build();
+        SfxMetrics metrics = new SfxMetrics(metricRegistery, reporter.getMetricMetadata());
 
         Metric gauge = metricRegistery.register("gauge", new Gauge<Integer>() {
             @Override
@@ -71,11 +72,11 @@ public class SignalFxReporterTest {
         dbank.addDataPoints.clear();
         metricMetadata.forMetric(metricRegistery.counter("raw_counter"))
                 .withMetricType(SignalFxProtocolBuffers.MetricType.COUNTER);
-        SfUtil.cumulativeCounter(metricRegistery, "cumulative_counter_callback",
-                metricMetadata, new Gauge<Long>() {
+        metrics.registerGaugeAsCumulativeCounter("cumulative_counter_callback", new Gauge<Long>() {
             private long i = 0;
 
-            @Override public Long getValue() {
+            @Override
+            public Long getValue() {
                 return i++;
             }
         });
@@ -123,9 +124,8 @@ public class SignalFxReporterTest {
                 .createOrGet(metricRegistery)
                 .inc(3);
 
-        assertEquals(0, SfUtil.removeMetrics(metricRegistery, new Counter()));
-        assertEquals(2,
-                SfUtil.removeMetrics(metricRegistery, gauge, metricRegistery.counter("counter")));
+        assertEquals(false, metrics.unregister(new Counter()));
+        assertEquals(2, metrics.unregister(gauge, metrics.counter("counter")));
         assertEquals(true, dbank.clearValues("newsource", "newname"));
         assertEquals(false, dbank.clearValues("newsource", "newname"));
         reporter.report();
