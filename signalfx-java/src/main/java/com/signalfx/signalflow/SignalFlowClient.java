@@ -29,7 +29,7 @@ public class SignalFlowClient {
      *            user api token
      */
     public SignalFlowClient(String token) {
-        this.transport = new WebSocketTransport.TransportBuilder(token).build();
+        this(new WebSocketTransport.TransportBuilder(token).build());
     }
 
     /**
