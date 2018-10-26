@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 SignalFx, Inc. All rights reserved.
+ * Copyright (C) 2016-2018 SignalFx, Inc. All rights reserved.
  */
 package com.signalfx.signalflow;
 
@@ -14,14 +14,13 @@ public class SignalFlowException extends RuntimeException {
 
     protected int code = 0;
 
-    public SignalFlowException(int code) {
-        super("Error " + code);
+    public SignalFlowException(int code, String message) {
+        super(message);
         this.code = code;
     }
 
-    public SignalFlowException(final Integer code, String message) {
+    public SignalFlowException(String message) {
         super(message);
-        this.code = code;
     }
 
     public SignalFlowException(String message, Throwable cause) {

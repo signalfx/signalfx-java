@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2016 SignalFx, Inc. All rights reserved.
+ * Copyright (C) 2016-2018 SignalFx, Inc. All rights reserved.
  */
 package com.signalfx.signalflow;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -18,14 +19,16 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.eclipse.jetty.websocket.WebSocket;
-import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.signalflow.ChannelMessage.Type;
 import com.signalfx.signalflow.StreamMessage.Kind;
@@ -70,18 +74,20 @@ public class WebSocketTransport implements SignalFlowTransport {
         this.compress = compress;
 
         try {
-            WebSocketClientFactory factory = new WebSocketClientFactory();
-            factory.start();
-
-            this.webSocketClient = factory.newWebSocketClient();
-            this.webSocketClient.setMaxBinaryMessageSize(maxBinaryMessageSize);
-
-            URIBuilder uriBuilder = new URIBuilder(String.format("%s://%s:%s%s",
-                    endpoint.getScheme(), endpoint.getHostname(), endpoint.getPort(), path));
-
             this.transportConnection = new TransportConnection(token);
-            this.webSocketClient.open(uriBuilder.build(), this.transportConnection, timeout,
-                    TimeUnit.SECONDS);
+            URI uri = new URIBuilder(String.format("%s://%s:%s%s", endpoint.getScheme(),
+                    endpoint.getHostname(), endpoint.getPort(), path)).build();
+
+            this.webSocketClient = new WebSocketClient();
+            if (maxBinaryMessageSize > 0) {
+                this.webSocketClient.getPolicy().setMaxBinaryMessageSize(maxBinaryMessageSize);
+            }
+            if (timeout > 0) {
+                this.webSocketClient.setConnectTimeout(TimeUnit.SECONDS.toMillis(timeout));
+            }
+            this.webSocketClient.start();
+            this.webSocketClient.connect(this.transportConnection, uri);
+            this.transportConnection.awaitConnected(timeout, TimeUnit.SECONDS);
         } catch (Exception ex) {
             throw new SignalFlowException("failed to construct websocket transport", ex);
         }
@@ -156,14 +162,8 @@ public class WebSocketTransport implements SignalFlowTransport {
 
     @Override
     public void close(int code, String reason) {
-        if ((transportConnection.getConnection() != null)
-                && (transportConnection.getConnection().isOpen())) {
+        if (transportConnection.getSession() != null && transportConnection.getSession().isOpen()) {
             transportConnection.close(code, reason);
-            try {
-                this.webSocketClient.getFactory().stop();
-            } catch (Exception ex) {
-                log.error("error while stopping websocketfactory", ex);
-            }
             log.debug("transport closed");
         }
     }
@@ -260,10 +260,9 @@ public class WebSocketTransport implements SignalFlowTransport {
     /**
      * WebSocket Transport Connection
      */
-    protected static class TransportConnection
-            implements WebSocket.OnTextMessage, WebSocket.OnBinaryMessage {
+    protected static class TransportConnection extends WebSocketAdapter {
 
-        protected static final Logger log = LoggerFactory.getLogger(TransportConnection.class);
+        private static final Logger log = LoggerFactory.getLogger(TransportConnection.class);
 
         private static final Charset ASCII = Charset.forName("US-ASCII");
         private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -278,44 +277,25 @@ public class WebSocketTransport implements SignalFlowTransport {
         private static final int DOUBLE_TYPE = 0x02;
         private static final int INT_TYPE = 0x03;
 
-        protected String token;
-        protected SignalFlowException error;
-        protected WebSocket.Connection connection;
-        protected Map<String, TransportChannel> channels = Collections
-                .synchronizedMap(new HashMap<String, TransportChannel>());
-        protected static ObjectMapper objectMapper = new ObjectMapper();
-
+        private static final ObjectMapper objectMapper = new ObjectMapper();
         static {
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
 
-        public TransportConnection(String token) {
+        private final CountDownLatch latch = new CountDownLatch(1);
+        private final String token;
+        private final Map<String, TransportChannel> channels = Collections
+                .synchronizedMap(new HashMap<String, TransportChannel>());
+        private SignalFlowException error;
+
+        protected TransportConnection(String token) {
             this.token = token;
         }
 
         @Override
-        public void onClose(int code, String reason) {
-            log.debug("websocket connection closed ({} {})", code, reason);
-
-            if (code != 1000) {
-                this.error = new SignalFlowException(code, reason);
-                log.info("Lost WebSocket connection with {} ({}).", connection, code);
-
-                SignalFlowExceptionStreamMessage errorMessage = new SignalFlowExceptionStreamMessage(
-                        this.error);
-                for (TransportChannel channel : this.channels.values()) {
-                    channel.offer(errorMessage);
-                }
-            }
-
-            this.channels.clear();
-            this.connection = null;
-        }
-
-        @Override
-        public void onOpen(Connection connection) {
-            log.debug("open connection: {}", connection);
-            this.connection = connection;
+        public void onWebSocketConnect(Session session) {
+            super.onWebSocketConnect(session);
+            log.debug("websocket connected to {}", session.getRemoteAddress());
 
             Map<String, String> authRequest = new HashMap<String, String>();
             authRequest.put("type", "authenticate");
@@ -325,7 +305,27 @@ public class WebSocketTransport implements SignalFlowTransport {
         }
 
         @Override
-        public void onMessage(byte[] data, int offset, int length) {
+        public void onWebSocketClose(int code, String reason) {
+            log.debug("websocket connection closed ({} {})", code, reason);
+
+            if (code != 1000) {
+                this.error = new SignalFlowException(code, reason);
+                log.info("Lost WebSocket connection with {} ({}).", getSession().getRemoteAddress(),
+                        code);
+
+                SignalFlowExceptionStreamMessage errorMessage = new SignalFlowExceptionStreamMessage(
+                        this.error);
+                for (TransportChannel channel : this.channels.values()) {
+                    channel.offer(errorMessage);
+                }
+            }
+
+            this.channels.clear();
+            super.onWebSocketClose(code, reason);
+        }
+
+        @Override
+        public void onWebSocketBinary(byte[] data, int offset, int length) {
             byte version = data[offset];
             byte type;
             byte flags;
@@ -386,7 +386,7 @@ public class WebSocketTransport implements SignalFlowTransport {
 
             boolean json = (flags & (1 << 1)) != 0;
             if (json) {
-                onMessage(new String(body, UTF_8));
+                onWebSocketText(new String(body, UTF_8));
                 return;
             }
 
@@ -464,7 +464,7 @@ public class WebSocketTransport implements SignalFlowTransport {
         }
 
         @Override
-        public void onMessage(String data) {
+        public void onWebSocketText(String data) {
             try {
                 // Incoming text message is expected to be JSON.
                 Map<String, Object> dataMap = objectMapper.readValue(data, MAP_TYPE_REF);
@@ -486,6 +486,7 @@ public class WebSocketTransport implements SignalFlowTransport {
                 if (type.equals("authenticated")) {
                     log.info("WebSocket connection authenticated as {} (in {})",
                             dataMap.get("userId"), dataMap.get("orgId"));
+                    this.latch.countDown();
                 } else {
                     // All other messages should have a channel.
                     String channelName = (String) dataMap.get("channel");
@@ -507,30 +508,30 @@ public class WebSocketTransport implements SignalFlowTransport {
         public void sendMessage(final Map<String, String> request) {
             try {
                 String message = objectMapper.writeValueAsString(request);
-                this.connection.sendMessage(message);
-            } catch (IOException ex) {
+                this.getRemote().sendString(message);
+            } catch (Exception ex) {
                 throw new SignalFlowException("failed to send message", ex);
             }
         }
 
         public void sendMessage(final Channel channel, final Map<String, String> request) {
-            Map<String, String> channelRequest = new HashMap<String, String>(request);
-            channelRequest.put("channel", channel.getName());
             try {
+                Map<String, String> channelRequest = new HashMap<String, String>(request);
+                channelRequest.put("channel", channel.getName());
                 String message = objectMapper.writeValueAsString(channelRequest);
-                this.connection.sendMessage(message);
-            } catch (IOException ex) {
+                this.getRemote().sendString(message);
+            } catch (Exception ex) {
                 throw new SignalFlowException(
                         "failed to send message for channel " + channel.getName(), ex);
             }
         }
 
         public void add(TransportChannel channel) {
-            channels.put(channel.getName(), channel);
+            this.channels.put(channel.getName(), channel);
         }
 
         public void remove(TransportChannel channel) {
-            channels.remove(channel);
+            this.channels.remove(channel);
         }
 
         public void close(int code, String reason) {
@@ -538,11 +539,12 @@ public class WebSocketTransport implements SignalFlowTransport {
                 channel.close();
             }
             this.channels.clear();
-            this.connection.close(code, reason);
+            this.getSession().close(code, reason);
+            this.latch.countDown();
         }
 
-        public WebSocket.Connection getConnection() {
-            return this.connection;
+        public void awaitConnected(long timeout, TimeUnit unit) {
+            Uninterruptibles.awaitUninterruptibly(this.latch, timeout, unit);
         }
     }
 

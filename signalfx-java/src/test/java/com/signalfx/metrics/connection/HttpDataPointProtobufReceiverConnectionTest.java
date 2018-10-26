@@ -1,9 +1,10 @@
 /**
- * Copyright (C) 2016 SignalFx, Inc. All rights reserved.
+ * Copyright (C) 2016-2018 SignalFx, Inc. All rights reserved.
  */
 package com.signalfx.metrics.connection;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.zip.GZIPInputStream;
 
@@ -30,25 +31,27 @@ public class HttpDataPointProtobufReceiverConnectionTest {
         Server server = new Server(0);
         server.setHandler(new MyHandler());
         server.start();
-        final int port = server.getConnectors()[0].getLocalPort();
+        URI uri = server.getURI();
         DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
-                new SignalFxEndpoint("http", "localhost", port)).createDataPointReceiver();
+                new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+                .createDataPointReceiver();
         dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
                 SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
         server.stop();
     }
 
     private class MyHandler extends AbstractHandler {
-        @Override public void handle(String target, Request baseRequest, HttpServletRequest request,
-                                     HttpServletResponse response)
-                throws IOException, ServletException {
+        @Override
+        public void handle(String target, Request baseRequest, HttpServletRequest request,
+                           HttpServletResponse response) throws IOException, ServletException {
             if (!request.getHeader("X-SF-TOKEN").equals(AUTH_TOKEN)) {
                 error("Invalid auth token", response, baseRequest);
                 return;
             }
             if (!request.getHeader("User-Agent")
                     .equals(AbstractHttpReceiverConnection.USER_AGENT)) {
-                error("Invalid User agent: " + request.getHeader("User-Agent") + " vs " + AbstractHttpReceiverConnection.USER_AGENT, response, baseRequest);
+                error("Invalid User agent: " + request.getHeader("User-Agent") + " vs "
+                        + AbstractHttpReceiverConnection.USER_AGENT, response, baseRequest);
                 return;
             }
             SignalFxProtocolBuffers.DataPointUploadMessage all_datapoints =
@@ -68,6 +71,36 @@ public class HttpDataPointProtobufReceiverConnectionTest {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
             response.getWriter().write(message);
             baseRequest.setHandled(true);
+        }
+
+        @Override
+        public boolean isRunning() {
+            return false;
+        }
+
+        @Override
+        public boolean isStarted() {
+            return false;
+        }
+
+        @Override
+        public boolean isStarting() {
+            return false;
+        }
+
+        @Override
+        public boolean isStopping() {
+            return false;
+        }
+
+        @Override
+        public boolean isStopped() {
+            return false;
+        }
+
+        @Override
+        public boolean isFailed() {
+            return false;
         }
     }
 }
