@@ -1,7 +1,6 @@
 package com.signalfx.metrics.connection;
 
 import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
@@ -11,13 +10,13 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
     public static final int DEFAULT_VERSION = 2;
 
     private final SignalFxReceiverEndpoint endpoint;
-    private HttpClientConnectionManager httpClientConnectionManager =
-            new BasicHttpClientConnectionManager();
+    private HttpClientConnectionManager httpClientConnectionManager;
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
 
     public HttpEventProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
+        this.httpClientConnectionManager = null;
     }
 
     public HttpEventProtobufReceiverFactory setTimeoutMs(int timeoutMs) {
@@ -39,9 +38,20 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
     public EventReceiver createEventReceiver() throws
             SignalFxMetricsException {
         if (version == 2) {
-            return new HttpEventProtobufReceiverConnectionV2(endpoint, this.timeoutMs, httpClientConnectionManager);
+            return new HttpEventProtobufReceiverConnectionV2(
+                endpoint,
+                this.timeoutMs,
+                buildHttpClientConnectionManager());
         }else{
             throw new SignalFxMetricsException("Version v1 is deprecated, We encourage to use v2/event");
+        }
+    }
+
+    private HttpClientConnectionManager buildHttpClientConnectionManager() {
+        if (httpClientConnectionManager != null) {
+            return httpClientConnectionManager;
+        } else {
+            return HttpClientConnectionManagerFactory.withTimeoutMs(timeoutMs);
         }
     }
 }
