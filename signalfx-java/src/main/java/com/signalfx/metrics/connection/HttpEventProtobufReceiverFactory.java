@@ -2,6 +2,7 @@ package com.signalfx.metrics.connection;
 
 import org.apache.http.conn.HttpClientConnectionManager;
 
+import com.google.common.base.MoreObjects;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
@@ -11,16 +12,21 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
 
     private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager;
+    private HttpClientConnectionManager explicitHttpClientConnectionManager;
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
 
     public HttpEventProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
-        this.httpClientConnectionManager = null;
+        this.httpClientConnectionManager =
+            HttpClientConnectionManagerFactory.withTimeoutMs(DEFAULT_TIMEOUT_MS);
+        this.explicitHttpClientConnectionManager = null;
     }
 
     public HttpEventProtobufReceiverFactory setTimeoutMs(int timeoutMs) {
         this.timeoutMs = timeoutMs;
+        this.httpClientConnectionManager =
+            HttpClientConnectionManagerFactory.withTimeoutMs(timeoutMs);
         return this;
     }
 
@@ -31,7 +37,7 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
 
     public void setHttpClientConnectionManager(
             HttpClientConnectionManager httpClientConnectionManager) {
-        this.httpClientConnectionManager = httpClientConnectionManager;
+        this.explicitHttpClientConnectionManager = httpClientConnectionManager;
     }
 
     @Override
@@ -41,17 +47,13 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
             return new HttpEventProtobufReceiverConnectionV2(
                 endpoint,
                 this.timeoutMs,
-                buildHttpClientConnectionManager());
+                resolveHttpClientConnectionManager());
         }else{
             throw new SignalFxMetricsException("Version v1 is deprecated, We encourage to use v2/event");
         }
     }
 
-    private HttpClientConnectionManager buildHttpClientConnectionManager() {
-        if (httpClientConnectionManager != null) {
-            return httpClientConnectionManager;
-        } else {
-            return HttpClientConnectionManagerFactory.withTimeoutMs(timeoutMs);
-        }
+    private HttpClientConnectionManager resolveHttpClientConnectionManager() {
+        return MoreObjects.firstNonNull(explicitHttpClientConnectionManager, httpClientConnectionManager);
     }
 }
