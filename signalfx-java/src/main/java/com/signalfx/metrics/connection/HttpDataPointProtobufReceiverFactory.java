@@ -2,6 +2,7 @@ package com.signalfx.metrics.connection;
 
 import org.apache.http.conn.HttpClientConnectionManager;
 
+import com.google.common.base.MoreObjects;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
@@ -11,16 +12,21 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
 
     private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager;
+    private HttpClientConnectionManager explicitHttpClientConnectionManager;
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
 
     public HttpDataPointProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
-        this.httpClientConnectionManager = null;
+        this.httpClientConnectionManager =
+            HttpClientConnectionManagerFactory.withTimeoutMs(DEFAULT_TIMEOUT_MS);
+        this.explicitHttpClientConnectionManager = null;
     }
 
     public HttpDataPointProtobufReceiverFactory setTimeoutMs(int timeoutMs) {
         this.timeoutMs = timeoutMs;
+        this.httpClientConnectionManager =
+            HttpClientConnectionManagerFactory.withTimeoutMs(timeoutMs);
         return this;
     }
 
@@ -31,7 +37,7 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
 
     public void setHttpClientConnectionManager(
             HttpClientConnectionManager httpClientConnectionManager) {
-        this.httpClientConnectionManager = httpClientConnectionManager;
+        this.explicitHttpClientConnectionManager = httpClientConnectionManager;
     }
 
     @Override
@@ -41,21 +47,17 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
             return new HttpDataPointProtobufReceiverConnection(
                 endpoint,
                 this.timeoutMs,
-                buildHttpClientConnectionManager());
+                resolveHttpClientConnectionManager());
         } else {
             return new HttpDataPointProtobufReceiverConnectionV2(
                 endpoint,
                 this.timeoutMs,
-                buildHttpClientConnectionManager());
+                resolveHttpClientConnectionManager());
         }
 
     }
 
-    private HttpClientConnectionManager buildHttpClientConnectionManager() {
-        if (httpClientConnectionManager != null) {
-            return httpClientConnectionManager;
-        } else {
-            return HttpClientConnectionManagerFactory.withTimeoutMs(timeoutMs);
-        }
+    private HttpClientConnectionManager resolveHttpClientConnectionManager() {
+        return MoreObjects.firstNonNull(explicitHttpClientConnectionManager, httpClientConnectionManager);
     }
 }
