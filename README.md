@@ -102,13 +102,13 @@ profile page in the SignalFx web application (click the avatar in the upper righ
 If you are not in the `us0` realm, you will need to configure the SignalFxReporter class
 to send to the correct realm using one of the following ways:
 
-1. Using the system.properties, add the `com.signalfx.api.hostname` property with the 
+- Using the system.properties, add the `com.signalfx.api.hostname` property with the 
 value of `https://ingest.{REALM}.signalfx.com`
 
-2. Using environment variables, set `SIGNALFX_API_PORT` to 
+- Using environment variables, set `SIGNALFX_API_PORT` to
 `https://ingest.{REALM}.signalfx.com`
 
-3. Manually building the SignalFxReceiverEndpoint, and specifying the SignalFxReporter
+- Manually building the SignalFxReceiverEndpoint, and specifying the SignalFxReporter
 class to use it:
 
 ```java
@@ -437,8 +437,8 @@ SignalFlow API allows SignalFx users to execute real-time streaming analytics
 computations on the SignalFx platform. For more information, head over to our
 Developers documentation:
 
-* [SignalFlow Overview](https://developers.signalfx.com/docs/signalflow-overview)
-* [Getting started with the SignalFlow API](https://developers.signalfx.com/docs/getting-started-with-the-signalflow-api)
+* [SignalFlow Overview](https://developers.signalfx.com/signalflow_analytics/signalflow_overview.html)
+* [SignalFlow API Reference](https://developers.signalfx.com/signalflow_reference.html)
 
 Executing a SignalFlow program is very simple with this client library:
 
