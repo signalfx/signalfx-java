@@ -40,12 +40,6 @@ message DataPoint {
     optional Datum value = 4;
     optional MetricType metricType = 5;
     repeated Dimension dimensions = 6;
-
-    /**
-     *  Note: Properties on datapoints are currently experimental and
-     *        not fully supported by SignalFx
-     */
-    repeated Property properties = 7;
 }
 
 message DataPointUploadMessage {
