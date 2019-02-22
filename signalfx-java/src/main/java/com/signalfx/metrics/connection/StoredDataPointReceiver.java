@@ -64,8 +64,8 @@ public class StoredDataPointReceiver implements DataPointReceiver {
     }
 
     @Override
-    public void backfillDataPoints(String auth, String source, String metric,
-                                   List<SignalFxProtocolBuffers.Datum> datumPoints)
+    public void backfillDataPoints(String auth, String metric, String metricType, String orgId, Map<String,String> dimensions,
+                                   List<SignalFxProtocolBuffers.PointValue> datumPoints)
             throws SignalFxMetricsException {}
 
     @Override

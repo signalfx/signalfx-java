@@ -10,8 +10,8 @@ public interface DataPointReceiver {
     void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
             throws SignalFxMetricsException;
 
-    void backfillDataPoints(String auth, String source, String metric,
-                            List<SignalFxProtocolBuffers.Datum> datumPoints)
+    void backfillDataPoints(String auth, String metric, String metricType, String orgId, Map<String,String> dimensions,
+                            List<SignalFxProtocolBuffers.PointValue> datumPoints)
             throws SignalFxMetricsException;
 
     Map<String, Boolean> registerMetrics(String auth, Map<String, SignalFxProtocolBuffers.MetricType> metricTypes)
