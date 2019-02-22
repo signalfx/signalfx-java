@@ -21,6 +21,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -543,8 +544,10 @@ public class WebSocketTransport implements SignalFlowTransport {
             this.latch.countDown();
         }
 
-        public void awaitConnected(long timeout, TimeUnit unit) {
-            Uninterruptibles.awaitUninterruptibly(this.latch, timeout, unit);
+        public void awaitConnected(long timeout, TimeUnit unit) throws TimeoutException {
+            if (!Uninterruptibles.awaitUninterruptibly(this.latch, timeout, unit)) {
+                throw new TimeoutException("timeout establishing connection");
+            }
         }
     }
 
