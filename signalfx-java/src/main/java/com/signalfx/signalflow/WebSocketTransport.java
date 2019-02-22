@@ -26,6 +26,7 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -79,7 +80,7 @@ public class WebSocketTransport implements SignalFlowTransport {
             URI uri = new URIBuilder(String.format("%s://%s:%s%s", endpoint.getScheme(),
                     endpoint.getHostname(), endpoint.getPort(), path)).build();
 
-            this.webSocketClient = new WebSocketClient();
+            this.webSocketClient = new WebSocketClient(new SslContextFactory());
             if (maxBinaryMessageSize > 0) {
                 this.webSocketClient.getPolicy().setMaxBinaryMessageSize(maxBinaryMessageSize);
             }
@@ -90,6 +91,13 @@ public class WebSocketTransport implements SignalFlowTransport {
             this.webSocketClient.connect(this.transportConnection, uri);
             this.transportConnection.awaitConnected(timeout, TimeUnit.SECONDS);
         } catch (Exception ex) {
+            if (this.webSocketClient != null) {
+                try {
+                    this.webSocketClient.stop();
+                } catch (Exception e) {
+                    log.warn("error closing websocket client", e);
+                }
+            }
             throw new SignalFlowException("failed to construct websocket transport", ex);
         }
     }
