@@ -405,13 +405,26 @@ public abstract class ChannelMessage {
 
     /**
      * Message received when the computation encounters errors during its initialization.
+     * Because the error that is returned might have one of two sets of contents, this has both an
+     * `errors` and a `message` accessor. We'll be liberal here so the code can decide how to show
+     * this error later. Optimally, these should be different message types, but that's a lot of
+     * work to handle on both the backend and client side for +1/-1.
      */
     public static class ErrorMessage extends ChannelMessage {
 
+        protected int error;
         protected ArrayList<Object> errors;
+        protected String message;
 
         public ErrorMessage() {
             this.channelMessageType = Type.ERROR_MESSAGE;
+        }
+
+        /**
+         * @return The error number, akin to an HTTP error code.
+         */
+        public int getError() {
+            return this.error;
         }
 
         /**
@@ -420,6 +433,13 @@ public abstract class ChannelMessage {
          */
         public List<Object> getErrors() {
             return this.errors;
+        }
+
+        /**
+         * @return The error message for the failure
+         */
+        public String getMessage() {
+            return this.message;
         }
     }
 }
