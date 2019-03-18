@@ -216,7 +216,7 @@ following examples.
 ```java
 final MetricsRegistry metricsRegistry = new MetricsRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
-    metricRegistery,
+    metricsRegistery,
     "ORG_TOKEN"
 ).build();
 signalfxReporter.start(1, TimeUnit.SECONDS);
