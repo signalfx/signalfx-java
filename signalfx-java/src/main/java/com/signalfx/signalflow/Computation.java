@@ -123,7 +123,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
 
     @Override
     public boolean hasNext() throws ComputationAbortedException,
-           ComputationFailedException, SignalFlowException {
+           ComputationFailedException, SignalFlowException, StreamRequestException {
         while ((state != State.STATE_COMPLETED) && (!channel.isClosed) && (nextMessage == null)) {
             parseNext();
         }
@@ -305,7 +305,15 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
 
                 case ERROR_MESSAGE:
                     ErrorMessage errorMessage = (ErrorMessage) message;
-                    throw new ComputationFailedException(errorMessage.getErrors());
+                    /* This is a hack based on the fact that the API can return type different
+                     * error messages with the same type. We have to check attributes to know
+                     * which error we're working with.
+                     */
+                    if (errorMessage.getMessage() != null) {
+                        throw new StreamRequestException(errorMessage.getError(), errorMessage.getMessage());
+                    } else {
+                        throw new ComputationFailedException(errorMessage.getErrors());
+                    }
                 }
             }
 

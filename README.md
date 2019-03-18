@@ -214,7 +214,7 @@ following examples.
 #### 1. Set up Yammer metrics
 
 ```java
-final MetricRegistry metricRegistry = new MetricRegistry();
+final MetricsRegistry metricsRegistry = new MetricsRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistery,
     "ORG_TOKEN"

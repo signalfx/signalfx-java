@@ -16,6 +16,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
@@ -88,6 +89,38 @@ public class SfxMetrics {
             return metricRegistry.counter(metricName);
         }
         return build(MetricBuilder.COUNTERS, metricName, dimensions);
+    }
+
+    /**
+     * Get or create a new meter.
+     *
+     * @param metricName
+     *         The metric name.
+     * @param dimensions
+     *         Additional dimension key/value pairs (an even number of strings must be provided).
+     * @return The {@link Meter} instance.
+     */
+    public Meter meter(String metricName, String... dimensions) {
+        if (dimensions.length == 0) {
+            return metricRegistry.meter(metricName);
+        }
+        return build(MetricBuilder.METERS, metricName, dimensions);
+    }
+
+    /**
+     * Get or create a new meter.
+     *
+     * @param metricName
+     *         The metric name.
+     * @param dimensions
+     *         Additional dimension key/value pairs, as a map.
+     * @return The {@link Meter} instance.
+     */
+    public Meter meter(String metricName, Map<String, String> dimensions) {
+        if (dimensions == null || dimensions.isEmpty()) {
+            return metricRegistry.meter(metricName);
+        }
+        return build(MetricBuilder.METERS, metricName, dimensions);
     }
 
     /**
