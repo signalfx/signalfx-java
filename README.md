@@ -94,6 +94,36 @@ $ mvn install
 
 ## Sending metrics
 
+### Configuring your endpoint
+
+Before we can send metrics to SignalFx, we need to make sure you are sending them to
+the correct SignalFx realm. To determine what realm you are in, check your
+profile page in the SignalFx web application (click the avatar in the upper right and click My Profile).
+If you are not in the `us0` realm, you will need to configure the SignalFxReporter class
+to send to the correct realm using one of the following ways:
+
+- Using the system.properties, add the `com.signalfx.api.hostname` property with the 
+value of `https://ingest.{REALM}.signalfx.com`
+
+- Using environment variables, set `SIGNALFX_API_PORT` to
+`https://ingest.{REALM}.signalfx.com`
+
+- Manually building the SignalFxReceiverEndpoint, and specifying the SignalFxReporter
+class to use it:
+
+```java
+    // load string from properties file, env, manually, etc...
+    final String ingestStr = "https://ingest.{REALM}.signalfx.com";
+    final URL ingestUrl = new URL("https://ingest.{REALM}.signalfx.com");
+    SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint(ingestUrl.getProtocol(),
+        ingestUrl.getHost(), ingestUrl.getPort());
+    MetricsRegistry metricsRegistry = new MetricsRegistry();
+    SignalFxReporter reporter = new SignalFxReporter.Builder(metricsRegistry,
+        new StaticAuthToken(ORG_TOKEN),
+        ingestStr).setEndpoint(endpoint);
+```
+
+
 ### Codahale Metrics 3.0.x
 
 #### 1. Set up the Codahale reporter
@@ -102,7 +132,7 @@ $ mvn install
 final MetricRegistry metricRegistry = new MetricRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistry,
-    "SIGNALFX_AUTH_TOKEN"
+    "ORG_TOKEN"
 ).build();
 signalfxReporter.start(1, TimeUnit.SECONDS);
 final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
@@ -186,8 +216,8 @@ following examples.
 ```java
 final MetricsRegistry metricsRegistry = new MetricsRegistry();
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
-    metricsRegistry,
-    "SIGNALFX_AUTH_TOKEN"
+    metricsRegistery,
+    "ORG_TOKEN"
 ).build();
 signalfxReporter.start(1, TimeUnit.SECONDS);
 final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
@@ -239,7 +269,7 @@ For example:
 ```
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistry,
-    "SIGNALFX_AUTH_TOKEN",
+    "ORG_TOKEN",
     "MYHOST1"
 ).build();
 ```
@@ -275,7 +305,7 @@ Timer t = metrics.timer("request_time", AWSInstanceInfo.DIMENSION_NAME, instance
  */
 final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
     metricRegistry,
-    "SIGNALFX_AUTH_TOKEN"
+    "ORG_TOKEN"
 ).addUniqueDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
 ```
 
@@ -407,8 +437,8 @@ SignalFlow API allows SignalFx users to execute real-time streaming analytics
 computations on the SignalFx platform. For more information, head over to our
 Developers documentation:
 
-* [SignalFlow Overview](https://developers.signalfx.com/docs/signalflow-overview)
-* [Getting started with the SignalFlow API](https://developers.signalfx.com/docs/getting-started-with-the-signalflow-api)
+* [SignalFlow Overview](https://developers.signalfx.com/signalflow_analytics/signalflow_overview.html)
+* [SignalFlow API Reference](https://developers.signalfx.com/signalflow_reference.html)
 
 Executing a SignalFlow program is very simple with this client library:
 
