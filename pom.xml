@@ -12,7 +12,7 @@
   <groupId>com.signalfx.public</groupId>
   <artifactId>clients-parent</artifactId>
   <name>SignalFx parent</name>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>pom</packaging>
 
   <description>
@@ -102,27 +102,27 @@
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-protoc</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-codahale</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-yammer</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-commons-protoc-java</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-java</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
       </dependency>
 
       <!-- ********************** -->
