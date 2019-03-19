@@ -96,33 +96,30 @@ $ mvn install
 
 ### Configuring your endpoint
 
-Before we can send metrics to SignalFx, we need to make sure you are sending them to
-the correct SignalFx realm. To determine what realm you are in, check your
-profile page in the SignalFx web application (click the avatar in the upper right and click My Profile).
-If you are not in the `us0` realm, you will need to configure the SignalFxReporter class
-to send to the correct realm using one of the following ways:
+Before we can send metrics to SignalFx, we need to make sure you are sending
+them to the correct SignalFx realm. To determine what realm you are in, check
+your profile page in the SignalFx web application (click the avatar in the upper
+right and click My Profile). If you are not in the `us0` realm, you will need to
+configure the SignalFxReporter class to send to the correct realm using one of
+the following ways:
 
-- Using the system.properties, add the `com.signalfx.api.hostname` property with the 
-value of `https://ingest.{REALM}.signalfx.com`
-
+- Using the system.properties, add the `com.signalfx.api.hostname` property with
+  the value of `https://ingest.{REALM}.signalfx.com`
 - Using environment variables, set `SIGNALFX_API_PORT` to
-`https://ingest.{REALM}.signalfx.com`
-
+  `https://ingest.{REALM}.signalfx.com`
 - Manually building the SignalFxReceiverEndpoint, and specifying the SignalFxReporter
-class to use it:
+  class to use it:
 
 ```java
-    // load string from properties file, env, manually, etc...
-    final String ingestStr = "https://ingest.{REALM}.signalfx.com";
-    final URL ingestUrl = new URL("https://ingest.{REALM}.signalfx.com");
-    SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint(ingestUrl.getProtocol(),
-        ingestUrl.getHost(), ingestUrl.getPort());
-    MetricsRegistry metricsRegistry = new MetricsRegistry();
-    SignalFxReporter reporter = new SignalFxReporter.Builder(metricsRegistry,
-        new StaticAuthToken(ORG_TOKEN),
-        ingestStr).setEndpoint(endpoint);
+// Load string from properties file, env, manually, etc...
+final String ingestStr = "https://ingest.{REALM}.signalfx.com";
+final URL ingestUrl = new URL(ingestStr);
+SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint(ingestUrl.getProtocol(),
+    ingestUrl.getHost(), ingestUrl.getPort());
+MetricsRegistry metricsRegistry = new MetricsRegistry();
+SignalFxReporter reporter = new SignalFxReporter.Builder(metricsRegistry,
+    new StaticAuthToken(ORG_TOKEN), ingestStr).setEndpoint(endpoint);
 ```
-
 
 ### Codahale Metrics 3.0.x
 
