@@ -272,9 +272,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <excludePackageNames>com.signalfx.metrics.protobuf</excludePackageNames>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
