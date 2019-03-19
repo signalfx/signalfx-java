@@ -29,7 +29,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 <dependency>
   <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-codahale</artifactId>
-  <version>0.0.48</version>
+  <version>0.0.49</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 <dependency>
 <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-yammer</artifactId>
-  <version>0.0.48</version>
+  <version>0.0.49</version>
 </dependency>
 ```
 
@@ -50,13 +50,13 @@ If you're using SBT, add the following to your project's `build.sbt` file.
 * To work with Codahale 3.0.x:
 
 ```
-libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.48"
+libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "0.0.49"
 ```
 
 * To work with Yammer Metrics 2.0.x:
 
 ```
-libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.48"
+libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "0.0.49"
 ```
 
 ### From source
