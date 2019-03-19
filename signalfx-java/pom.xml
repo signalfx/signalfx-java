@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>0.0.49</version>
+    <version>0.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>signalfx-java</artifactId>
