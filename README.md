@@ -37,7 +37,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 
 ```xml
 <dependency>
-<groupId>com.signalfx.public</groupId>
+  <groupId>com.signalfx.public</groupId>
   <artifactId>signalfx-yammer</artifactId>
   <version>0.1.0</version>
 </dependency>
