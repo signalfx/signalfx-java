@@ -41,6 +41,18 @@ public interface MetricBuilder<T extends Metric> {
         }
     };
 
+    public MetricBuilder<Histogram> RESETTING_HISTOGRAMS = new MetricBuilder<Histogram>() {
+        @Override
+        public Histogram newMetric() {
+            return new ResettingHistogram();
+        }
+
+        @Override
+        public boolean isInstance(Metric metric) {
+            return Histogram.class.isInstance(metric);
+        }
+    };
+
     public MetricBuilder<Meter> METERS = new MetricBuilder<Meter>() {
         @Override
         public Meter newMetric() {

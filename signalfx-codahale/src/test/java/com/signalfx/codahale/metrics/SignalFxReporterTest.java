@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
@@ -139,6 +140,44 @@ public class SignalFxReporterTest {
         assertEquals(SignalFxProtocolBuffers.MetricType.GAUGE,
                 dbank.registeredMetrics.get("timer.min"));
         assertTrue(sfxMetrics.unregister(timer));
+    }
+
+    @Test
+    public void testHistogram() {
+        Histogram histogram = sfxMetrics.histogram("histogram", "dimName", "dimValue");
+        histogram.update(20);
+        histogram.update(30);
+        reporter.report();
+        assertEquals(3, dbank.addDataPoints.size());
+        assertEquals(2, dbank.lastValueFor(SOURCE_NAME, "histogram.count").getIntValue());
+        assertEquals(20, dbank.lastValueFor(SOURCE_NAME, "histogram.min").getIntValue());
+        assertEquals(30, dbank.lastValueFor(SOURCE_NAME, "histogram.max").getIntValue());
+        dbank.addDataPoints.clear();
+        histogram.update(25);
+        reporter.report();
+        assertEquals(3, dbank.addDataPoints.size());
+        assertEquals(3, dbank.lastValueFor(SOURCE_NAME, "histogram.count").getIntValue());
+        assertEquals(20, dbank.lastValueFor(SOURCE_NAME, "histogram.min").getIntValue());
+        assertEquals(30, dbank.lastValueFor(SOURCE_NAME, "histogram.max").getIntValue());
+    }
+
+    @Test
+    public void testResettingHistogram() {
+        Histogram resettingHistogram = sfxMetrics.resettingHistogram("resettingHistogram");
+        resettingHistogram.update(20);
+        resettingHistogram.update(30);
+        reporter.report();
+        assertEquals(3, dbank.addDataPoints.size());
+        assertEquals(2, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.count").getIntValue());
+        assertEquals(20, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.min").getIntValue());
+        assertEquals(30, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.max").getIntValue());
+        dbank.addDataPoints.clear();
+        resettingHistogram.update(25);
+        reporter.report();
+        assertEquals(3, dbank.addDataPoints.size());
+        assertEquals(3, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.count").getIntValue());
+        assertEquals(25, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.min").getIntValue());
+        assertEquals(25, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.max").getIntValue());
     }
 
     @Test
