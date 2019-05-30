@@ -15,6 +15,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Reservoir;
+import com.codahale.metrics.ResettingExponentiallyDecayingReservoir;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
@@ -184,6 +186,24 @@ public class SfxMetrics {
             return metricRegistry.histogram(metricName);
         }
         return build(MetricBuilder.HISTOGRAMS, metricName, dimensions);
+    }
+
+    /**
+     * Get or create a new histogram with {@link ResettingExponentiallyDecayingReservoir} that
+     * clears the resorvoir after each {@link Reservoir#getSnapshot()}. Clearing resorvoir after
+     * snapshot removes the effect of old data points and provides better visibility (as necessary).
+     *
+     * @param metricName
+     *         The metric name.
+     * @param dimensions
+     *         Additional dimension key/value pairs, as a map.
+     * @return The {@link Histogram} instance.
+     */
+    public Histogram resettingHistogram(String metricName, Map<String, String> dimensions) {
+        if (dimensions == null || dimensions.isEmpty()) {
+            return metricRegistry.histogram(metricName);
+        }
+        return build(MetricBuilder.RESETTING_HISTOGRAMS, metricName, dimensions);
     }
 
     /**

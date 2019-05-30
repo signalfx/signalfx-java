@@ -5,6 +5,7 @@ import com.codahale.metrics.ExponentiallyDecayingReservoir;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metric;
+import com.codahale.metrics.ResettingExponentiallyDecayingReservoir;
 import com.codahale.metrics.Timer;
 
 /**
@@ -33,6 +34,18 @@ public interface MetricBuilder<T extends Metric> {
         @Override
         public Histogram newMetric() {
             return new Histogram(new ExponentiallyDecayingReservoir());
+        }
+
+        @Override
+        public boolean isInstance(Metric metric) {
+            return Histogram.class.isInstance(metric);
+        }
+    };
+
+    public MetricBuilder<Histogram> RESETTING_HISTOGRAMS = new MetricBuilder<Histogram>() {
+        @Override
+        public Histogram newMetric() {
+            return new Histogram(new ResettingExponentiallyDecayingReservoir());
         }
 
         @Override
