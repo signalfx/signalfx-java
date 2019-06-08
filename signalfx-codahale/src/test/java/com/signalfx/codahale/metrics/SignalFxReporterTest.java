@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -140,6 +142,25 @@ public class SignalFxReporterTest {
         assertEquals(SignalFxProtocolBuffers.MetricType.GAUGE,
                 dbank.registeredMetrics.get("timer.min"));
         assertTrue(sfxMetrics.unregister(timer));
+    }
+
+    @Test
+    public void testResettingTimer() {
+        Timer resettingTimer = sfxMetrics.resettingTimer("resettingTimer", "dimName", "dimValue");
+        resettingTimer.update(20, TimeUnit.MILLISECONDS);
+        resettingTimer.update(30, TimeUnit.MILLISECONDS);
+        reporter.report();
+        assertEquals(3, dbank.addDataPoints.size());
+        assertEquals(2, dbank.lastValueFor(SOURCE_NAME, "resettingTimer.count").getIntValue());
+        assertEquals(20000000, dbank.lastValueFor(SOURCE_NAME, "resettingTimer.min").getIntValue());
+        assertEquals(30000000, dbank.lastValueFor(SOURCE_NAME, "resettingTimer.max").getIntValue());
+        dbank.addDataPoints.clear();
+        resettingTimer.update(25, TimeUnit.MILLISECONDS);
+        reporter.report();
+        assertEquals(3, dbank.addDataPoints.size());
+        assertEquals(3, dbank.lastValueFor(SOURCE_NAME, "resettingTimer.count").getIntValue());
+        assertEquals(25000000, dbank.lastValueFor(SOURCE_NAME, "resettingTimer.min").getIntValue());
+        assertEquals(25000000, dbank.lastValueFor(SOURCE_NAME, "resettingTimer.max").getIntValue());
     }
 
     @Test

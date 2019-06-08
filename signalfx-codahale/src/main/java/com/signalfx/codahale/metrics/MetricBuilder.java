@@ -76,4 +76,16 @@ public interface MetricBuilder<T extends Metric> {
             return Timer.class.isInstance(metric);
         }
     };
+
+    public MetricBuilder<Timer> RESETTING_TIMERS = new MetricBuilder<Timer>() {
+        @Override
+        public Timer newMetric() {
+            return new ResettingTimer();
+        }
+
+        @Override
+        public boolean isInstance(Metric metric) {
+            return Timer.class.isInstance(metric);
+        }
+    };
 }

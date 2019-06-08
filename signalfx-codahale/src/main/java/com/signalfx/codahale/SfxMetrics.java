@@ -12,18 +12,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.ResettingExponentiallyDecayingReservoir;
 import com.codahale.metrics.Timer;
-import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.signalfx.codahale.metrics.MetricBuilder;
 import com.signalfx.codahale.metrics.ResettingHistogram;
+import com.signalfx.codahale.metrics.ResettingTimer;
 import com.signalfx.codahale.metrics.SettableDoubleGauge;
 import com.signalfx.codahale.metrics.SettableLongGauge;
 import com.signalfx.codahale.reporter.IncrementalCounter;
@@ -255,6 +256,42 @@ public class SfxMetrics {
             return metricRegistry.timer(metricName);
         }
         return build(MetricBuilder.TIMERS, metricName, dimensions);
+    }
+
+    /**
+     * Get or create a new timer with {@link ResettingExponentiallyDecayingReservoir} that
+     * clears the reservoir after each {@link Reservoir#getSnapshot()}. Clearing reservoir after
+     * snapshot removes the effect of old data points and provides better visibility (where needed).
+     *
+     * @param metricName
+     *         The metric name.
+     * @param dimensions
+     *         Additional dimension key/value pairs (an even number of strings must be provided).
+     * @return The {@link Timer} instance.
+     */
+    public Timer resettingTimer(String metricName, String... dimensions) {
+        if (dimensions.length == 0) {
+            return metricRegistry.register(metricName, new ResettingTimer());
+        }
+        return build(MetricBuilder.RESETTING_TIMERS, metricName, dimensions);
+    }
+
+    /**
+     * Get or create a new timer with {@link ResettingExponentiallyDecayingReservoir} that
+     * clears the reservoir after each {@link Reservoir#getSnapshot()}. Clearing reservoir after
+     * snapshot removes the effect of old data points and provides better visibility (where needed).
+     *
+     * @param metricName
+     *         The metric name.
+     * @param dimensions
+     *         Additional dimension key/value pairs, as a map.
+     * @return The {@link Timer} instance.
+     */
+    public Timer resettingTimer(String metricName, Map<String, String> dimensions) {
+        if (dimensions == null || dimensions.isEmpty()) {
+            return metricRegistry.register(metricName, new ResettingTimer());
+        }
+        return build(MetricBuilder.RESETTING_TIMERS, metricName, dimensions);
     }
 
     /**
