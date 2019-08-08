@@ -25,7 +25,8 @@
     <os72.protobuf-shaded.version>351</os72.protobuf-shaded.version>
     <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
     <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
-    <jackson.version>2.9.7</jackson.version>
+    <jackson.version>2.9.9</jackson.version>
+    <jackson.databind.version>2.9.9.3</jackson.databind.version>
     <jetty.version>9.2.26.v20180806</jetty.version>
   </properties>
 
@@ -186,6 +187,16 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
+        <version>${jackson.databind.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
@@ -198,16 +209,6 @@
         <artifactId>metrics-core</artifactId>
         <version>2.0.0</version>
         </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
