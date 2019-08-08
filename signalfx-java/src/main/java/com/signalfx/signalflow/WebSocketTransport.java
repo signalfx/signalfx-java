@@ -27,7 +27,6 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -173,6 +172,11 @@ public class WebSocketTransport implements SignalFlowTransport {
     public void close(int code, String reason) {
         if (transportConnection.getSession() != null && transportConnection.getSession().isOpen()) {
             transportConnection.close(code, reason);
+            try {
+                webSocketClient.stop();
+            } catch (Exception e) {
+                log.warn("error while close underlying websocket client", e);
+            }
             log.debug("transport closed");
         }
     }
