@@ -114,11 +114,13 @@ the following ways:
 // Load string from properties file, env, manually, etc...
 final String ingestStr = "https://ingest.{REALM}.signalfx.com";
 final URL ingestUrl = new URL(ingestStr);
-SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint(ingestUrl.getProtocol(),
-    ingestUrl.getHost(), ingestUrl.getPort());
-MetricsRegistry metricsRegistry = new MetricsRegistry();
-SignalFxReporter reporter = new SignalFxReporter.Builder(metricsRegistry,
-    new StaticAuthToken(ORG_TOKEN), ingestStr).setEndpoint(endpoint);
+SignalFxReceiverEndpoint endpoint = 
+    new SignalFxEndpoint(ingestUrl.getProtocol(), ingestUrl.getHost(), ingestUrl.getPort());
+MetricRegistry metricRegistry = new MetricRegistry();
+SignalFxReporter reporter = 
+    new SignalFxReporter.Builder(metricRegistry, new StaticAuthToken(ORG_TOKEN), ingestStr)
+        .setEndpoint(endpoint)
+        .build();
 ```
 
 ### Codahale Metrics 3.0.x
