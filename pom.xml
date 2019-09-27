@@ -27,7 +27,7 @@
     <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
     <jackson.version>2.9.9</jackson.version>
     <jackson.databind.version>2.9.9.3</jackson.databind.version>
-    <jetty.version>9.2.26.v20180806</jetty.version>
+    <jetty.version>9.2.28.v20190418</jetty.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
