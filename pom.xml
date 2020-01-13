@@ -27,7 +27,7 @@
     <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
     <jackson.version>2.9.10</jackson.version>
     <jackson.databind.version>2.9.10</jackson.databind.version>
-    <jetty.version>9.2.28.v20190418</jetty.version>
+    <jetty.version>9.4.25.v20191220</jetty.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
@@ -257,14 +257,17 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.0.1</version>
+        <configuration>
+          <source>8</source>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>

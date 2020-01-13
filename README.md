@@ -15,7 +15,7 @@ using protocol buffers, without using Codahale or Yammer metrics.
 
 ## Supported languages
 
-* Java 6+ with `signalfx-metrics`.
+* Java 8+ with `signalfx-metrics`.
 
 ## Using this library in your project
 
@@ -176,27 +176,13 @@ store it is from, you could use code like this.
 ```java
 Timer t = metrics.timer("request_time", "storename", "electronics");
 
-Timer.Context c = t.time();
-try {
+try (Timer.Context ignored = t.time()) {
     System.out.println("Doing store things");
-} finally {
-    c.close();
 }
 
-/*
- * Java 7+ alternative:
- *
- * try (Timer.Context ignored = t.time()) {
- *     System.out.println("Doing store things");
- * }
- */
-
 // Or on the fly:
-Timer.Context c = metrics.timer("request_time").time();
-try {
+try (Timer.Context ignored = metrics.timer("request_time").time()) {
     // Do something
-} finally {
-    c.close();
 }
 ```
 
@@ -479,4 +465,4 @@ case DATA_MESSAGE:
 
 ## License
 
-Apache Software License v2. Copyright © 2014-2017 SignalFx
+Apache Software License v2. Copyright © 2014-2020 SignalFx
