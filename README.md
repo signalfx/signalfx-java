@@ -100,14 +100,14 @@ Before we can send metrics to SignalFx, we need to make sure you are sending
 them to the correct SignalFx realm. To determine what realm you are in, check
 your profile page in the SignalFx web application (click the avatar in the upper
 right and click My Profile). If you are not in the `us0` realm, you will need to
-configure the SignalFxReporter class to send to the correct realm using one of
+configure the `SignalFxReporter` class to send to the correct realm using one of
 the following ways:
 
 - Using the system.properties, add the `com.signalfx.api.hostname` property with
-  the value of `https://ingest.{REALM}.signalfx.com`
-- Using environment variables, set `SIGNALFX_API_PORT` to
-  `https://ingest.{REALM}.signalfx.com`
-- Manually building the SignalFxReceiverEndpoint, and specifying the SignalFxReporter
+  the value of `ingest.{REALM}.signalfx.com`
+- Using environment variables, set `SIGNALFX_API_HOSTNAME` to
+  `ingest.{REALM}.signalfx.com`
+- Manually building the `SignalFxReceiverEndpoint`, and specifying the `SignalFxReporter`
   class to use it:
 
 ```java
