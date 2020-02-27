@@ -25,6 +25,7 @@ import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Gauge;
 import com.yammer.metrics.core.Histogram;
 import com.yammer.metrics.core.Meter;
+import com.yammer.metrics.core.Metric;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricPredicate;
 import com.yammer.metrics.core.MetricsRegistry;
@@ -112,6 +113,10 @@ public class SignalFxReporter extends CustomScheduledReporter {
 
     public MetricMetadata getMetricMetadata() {
         return metricMetadata;
+    }
+
+    public void setDimension(Metric metric, String key, String value) {
+        metricMetadata.forMetric(metric).withDimension(key, value);
     }
 
     public enum MetricDetails {

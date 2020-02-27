@@ -1,21 +1,18 @@
 package com.signalfx.example;
 
 import java.io.FileInputStream;
-import java.lang.String;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableSet;
-import com.signalfx.codahale.reporter.MetricMetadata;
 import com.signalfx.codahale.reporter.SfUtil;
 import com.signalfx.codahale.reporter.SignalFxReporter;
 import com.signalfx.endpoint.SignalFxEndpoint;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.auth.StaticAuthToken;
-import com.signalfx.metrics.errorhandler.MetricError;
-import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Gauge;
 import com.yammer.metrics.core.Metric;
@@ -24,131 +21,97 @@ import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
 
-/*
-    An example class for Yammer 2.x metrics.  For more information see
-    http://metrics.dropwizard.io/2.2.0/getting-started/
- */
+// An example class for Yammer 2.x metrics.  For more information see
+// http://metrics.dropwizard.io/2.2.0/getting-started/
+
 public class YammerExample {
 
-    public static final String SIGNAL_FX = "SignalFx";
-    public static final String LIBRARY_VERSION = "library-version";
-    public static final String YAMMER = "yammer";
+    private static String LIBRARY_VERSION = "library-version";
+    private static String YAMMER = "yammer";
 
     public static void main(String[] args) throws Exception {
-
-        System.out.println("Running example...");
-
-        Properties prop = new Properties();
-        prop.load(new FileInputStream("auth.properties"));
-        final String auth_token = prop.getProperty("auth");
-        final String hostUrlStr = prop.getProperty("host");
-        final URL hostUrl = new URL(hostUrlStr);
-        System.out.println("Auth=" + auth_token + " .. host=" + hostUrl);
-        SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint(hostUrl.getProtocol(),
-                hostUrl.getHost(), hostUrl.getPort());
-
-        MetricsRegistry metricsRegistry = new MetricsRegistry();
-        SignalFxReporter reporter = new SignalFxReporter.Builder(metricsRegistry,
-                new StaticAuthToken(auth_token),
-                hostUrlStr).setEndpoint(endpoint)
-                .setOnSendErrorHandlerCollection(
-                        Collections.<OnSendErrorHandler>singleton(new OnSendErrorHandler() {
-                            public void handleError(MetricError error) {
-                                System.out.println("" + error.getMessage());
-                            }
-                        }))
-                .setDetailsToAdd(ImmutableSet.of(SignalFxReporter.MetricDetails.COUNT,
-                        SignalFxReporter.MetricDetails.MIN,
-                        SignalFxReporter.MetricDetails.MAX))
-                .build();
-
-        final MetricMetadata metricMetadata = reporter.getMetricMetadata();
-
-        Counter counter = getCounter(metricsRegistry, metricMetadata);
-
-        Metric cumulativeCounter = getCumulativeCounter(metricsRegistry, metricMetadata);
-
-        Gauge gauge1 = getGauge(metricsRegistry, metricMetadata);
-
-        Timer timer = getTimer(metricsRegistry, metricMetadata);
-
-        // main body generating data and sending it in a loop
+        MetricsRegistry registry = new MetricsRegistry();
+        SignalFxReporter reporter = buildReporter(registry);
+        registerCumulativeCounter(registry, reporter);
+        registerGauge(registry, reporter);
+        Counter counter = registerCounter(registry, reporter);
+        Timer timer = registerTimer(registry, reporter);
         while (true) {
-            final TimerContext context = timer.time();
+            TimerContext timerContext = timer.time();
             try {
-                System.out.println("Sending data...");
                 Thread.sleep(500);
                 counter.inc();
             } finally {
-                context.stop();
+                timerContext.stop();
             }
+            System.out.println("Reporting");
             reporter.report(); // Report all metrics
         }
-
     }
 
-    private static Counter getCounter(MetricsRegistry metricsRegistry,
-                                      MetricMetadata metricMetadata) {
-        Counter counter = metricsRegistry.newCounter(YammerExample.class, "yammer.test.counter");
-        metricMetadata.forMetric(counter)
-                .withSourceName("signalFx")
-                .withDimension(LIBRARY_VERSION, YAMMER);
-        return counter;
+    private static SignalFxReporter buildReporter(MetricsRegistry metricsRegistry) throws IOException {
+        Properties prop = new Properties();
+        prop.load(new FileInputStream("auth.properties"));
+        String token = prop.getProperty("token");
+        String urlStr = prop.getProperty("host");
+
+        URL url = new URL(urlStr);
+        System.out.println("token=" + token + " host=" + url);
+        SignalFxReceiverEndpoint endpoint = new SignalFxEndpoint(
+                url.getProtocol(),
+                url.getHost(),
+                url.getPort()
+        );
+        return new SignalFxReporter.Builder(metricsRegistry, new StaticAuthToken(token), urlStr)
+                .setEndpoint(endpoint)
+                .setOnSendErrorHandlerCollection(Collections.singleton(error -> System.out.println(error.getMessage())))
+                .setDetailsToAdd(ImmutableSet.of(
+                        SignalFxReporter.MetricDetails.COUNT,
+                        SignalFxReporter.MetricDetails.MIN,
+                        SignalFxReporter.MetricDetails.MAX
+                ))
+                .build();
     }
 
-    /*
-      There will be 3 metrics present:
-      yammer.test.timer.count  # cumulative counter
-      yammer.test.timer.max    # gauge
-      yammer.test.timer.min    # gauge
-     */
-    private static Timer getTimer(MetricsRegistry metricsRegistry, MetricMetadata metricMetadata) {
-        Timer timer = metricsRegistry
-                .newTimer(YammerExample.class, "yammer.test.timer", TimeUnit.MILLISECONDS, TimeUnit.SECONDS);
-        metricMetadata.forMetric(timer)
-                .withSourceName(SIGNAL_FX)
-                .withDimension(LIBRARY_VERSION, YAMMER);
-        return timer;
-    }
-
-    private static Gauge getGauge(MetricsRegistry metricsRegistry, MetricMetadata metricMetadata) {
-        Gauge gauge = metricsRegistry.newGauge(YammerExample.class, "yammer.test.gauge",
-                new Gauge<Double>() {
-                    @Override
-                    public Double value() {
-                        return Math.sin(System.currentTimeMillis() * 0.001 * 2 * Math.PI / 60);
-                    }
-                });
-
-        metricMetadata.forMetric(gauge)
-                .withSourceName(SIGNAL_FX)
-                .withDimension(LIBRARY_VERSION, YAMMER);
-        return gauge;
-    }
-
-    private static Metric getCumulativeCounter(MetricsRegistry metricsRegistry,
-                                               MetricMetadata metricMetadata) {
-        MetricName counterCallbackName = new MetricName(YammerExample.class, "yammer.test.cumulativeCounter");
+    private static void registerCumulativeCounter(MetricsRegistry metricsRegistry, SignalFxReporter reporter) {
+        MetricName cumulativeCounterName = new MetricName(YammerExample.class, "yammer.test.cumulativeCounter");
         Metric cumulativeCounter = SfUtil.cumulativeCounter(
                 metricsRegistry,
-                counterCallbackName,
-                metricMetadata,
+                cumulativeCounterName,
+                reporter,
                 new Gauge<Long>() {
-
-                    private long i = 0;
-
+                    long i = 0;
                     @Override
                     public Long value() {
                         return i++;
                     }
 
-                });
-
-        metricMetadata.forMetric(cumulativeCounter)
-                .withSourceName(SIGNAL_FX)
-                .withDimension(LIBRARY_VERSION, YAMMER);
-
-        return cumulativeCounter;
+                }
+        );
+        reporter.setDimension(cumulativeCounter, LIBRARY_VERSION, YAMMER);
     }
 
+    private static void registerGauge(MetricsRegistry metricsRegistry, SignalFxReporter reporter) {
+        Gauge<Double> gauge = metricsRegistry.newGauge(YammerExample.class, "yammer.test.gauge",
+                new Gauge<Double>() {
+                    @Override
+                    public Double value() {
+                        return Math.sin(System.currentTimeMillis() * 0.001 * 2 * Math.PI / 60);
+                    }
+                }
+        );
+        reporter.setDimension(gauge, LIBRARY_VERSION, YAMMER);
+    }
+
+    private static Counter registerCounter(MetricsRegistry metricsRegistry, SignalFxReporter reporter) {
+        Counter counter = metricsRegistry.newCounter(YammerExample.class, "yammer.test.counter");
+        reporter.setDimension(counter, LIBRARY_VERSION, YAMMER);
+        return counter;
+    }
+
+    private static Timer registerTimer(MetricsRegistry metricsRegistry, SignalFxReporter reporter) {
+        Timer timer = metricsRegistry.newTimer(YammerExample.class, "yammer.test.timer", TimeUnit.MILLISECONDS, TimeUnit.SECONDS);
+        reporter.setDimension(timer, LIBRARY_VERSION, YAMMER);
+        return timer;
+    }
 }

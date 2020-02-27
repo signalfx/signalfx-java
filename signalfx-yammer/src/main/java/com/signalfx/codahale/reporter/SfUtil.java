@@ -11,6 +11,14 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
  */
 public class SfUtil {
 
+    public static Metric cumulativeCounter(MetricsRegistry metricRegistry,
+                                           MetricName name,
+                                           SignalFxReporter reporter,
+                                           Gauge<Long> callback) {
+
+        return cumulativeCounter(metricRegistry, name, reporter.getMetricMetadata(), callback);
+    }
+
     /**
      * <p>
      * Creates a {@link com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType#CUMULATIVE_COUNTER}
@@ -38,5 +46,4 @@ public class SfUtil {
                 SignalFxProtocolBuffers.MetricType.CUMULATIVE_COUNTER).metric();
     }
 
-    
 }
