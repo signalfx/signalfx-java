@@ -25,8 +25,7 @@
     <os72.protobuf-shaded.version>351</os72.protobuf-shaded.version>
     <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
     <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
-    <jackson.version>2.9.10</jackson.version>
-    <jackson.databind.version>2.9.10.3</jackson.databind.version>
+    <jackson.version>2.10.3</jackson.version>
     <jetty.version>9.4.25.v20191220</jetty.version>
   </properties>
 
@@ -187,7 +186,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson.databind.version}</version>
+        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
