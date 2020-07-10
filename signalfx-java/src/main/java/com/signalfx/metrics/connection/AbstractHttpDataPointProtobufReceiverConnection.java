@@ -55,6 +55,10 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 }
             } finally {
                 if (resp != null) {
+                    HttpEntity entity = resp.getEntity();
+                    if (entity != null) {
+                        entity.getContent().close();
+                    }
                     resp.close();
                 }
             }
@@ -102,6 +106,10 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 }
             } finally {
                 if (resp != null) {
+                    HttpEntity entity = resp.getEntity();
+                    if (entity != null) {
+                        entity.getContent().close();
+                    }
                     resp.close();
                 }
             }
