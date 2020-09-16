@@ -203,7 +203,7 @@ public class SfxMetrics {
      */
     public Histogram resettingHistogram(String metricName, String... dimensions) {
         if (dimensions.length == 0) {
-            return metricRegistry.register(metricName, new ResettingHistogram());
+            return metricRegistry.histogram(metricName, ResettingHistogram::new);
         }
         return build(MetricBuilder.RESETTING_HISTOGRAMS, metricName, dimensions);
     }
@@ -221,7 +221,7 @@ public class SfxMetrics {
      */
     public Histogram resettingHistogram(String metricName, Map<String, String> dimensions) {
         if (dimensions == null || dimensions.isEmpty()) {
-            return metricRegistry.register(metricName, new ResettingHistogram());
+            return metricRegistry.histogram(metricName, ResettingHistogram::new);
         }
         return build(MetricBuilder.RESETTING_HISTOGRAMS, metricName, dimensions);
     }
@@ -271,7 +271,7 @@ public class SfxMetrics {
      */
     public Timer resettingTimer(String metricName, String... dimensions) {
         if (dimensions.length == 0) {
-            return metricRegistry.register(metricName, new ResettingTimer());
+            return metricRegistry.timer(metricName, ResettingTimer::new);
         }
         return build(MetricBuilder.RESETTING_TIMERS, metricName, dimensions);
     }
@@ -289,7 +289,7 @@ public class SfxMetrics {
      */
     public Timer resettingTimer(String metricName, Map<String, String> dimensions) {
         if (dimensions == null || dimensions.isEmpty()) {
-            return metricRegistry.register(metricName, new ResettingTimer());
+            return metricRegistry.timer(metricName, ResettingTimer::new);
         }
         return build(MetricBuilder.RESETTING_TIMERS, metricName, dimensions);
     }
