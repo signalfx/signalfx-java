@@ -2,6 +2,7 @@ package com.signalfx.codahale.metrics;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -199,6 +200,49 @@ public class SignalFxReporterTest {
         assertEquals(3, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.count").getIntValue());
         assertEquals(25, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.min").getIntValue());
         assertEquals(25, dbank.lastValueFor(SOURCE_NAME, "resettingHistogram.max").getIntValue());
+    }
+
+    @Test
+    public void testMultipleRegistersOfResettingHistogramWithSameName() {
+        Histogram resettingHistogram = sfxMetrics.resettingHistogram("resettingHistogram");
+        resettingHistogram.update(20);
+        Histogram resettingHistogram1 = sfxMetrics.resettingHistogram("resettingHistogram");
+        assertEquals(resettingHistogram, resettingHistogram1);
+        assertEquals(1, resettingHistogram1.getCount());
+        assertEquals(20, resettingHistogram1.getSnapshot().getMax());
+
+        Histogram resettingHistogramWithDims = sfxMetrics.resettingHistogram("resettingHistogram", "foo", "bar");
+        assertNotEquals(resettingHistogram, resettingHistogramWithDims);
+        resettingHistogramWithDims.update(30);
+        Histogram resettingHistogramWithDims1 = sfxMetrics.resettingHistogram("resettingHistogram", "foo", "bar");
+        assertEquals(1, resettingHistogramWithDims1.getCount());
+        assertEquals(30, resettingHistogramWithDims1.getSnapshot().getMax());
+    }
+
+    @Test
+    public void testMultipleRegistersOfResettingTimerWithSameName() {
+        Timer resettingTimer = sfxMetrics.resettingTimer("resettingTimer");
+        long timeInNanos = TimeUnit.NANOSECONDS.convert(20, TimeUnit.SECONDS);
+        resettingTimer.update(timeInNanos, TimeUnit.NANOSECONDS);
+        Timer resettingTimer1 = sfxMetrics.resettingTimer("resettingTimer");
+        assertEquals(resettingTimer, resettingTimer1);
+        assertEquals(1, resettingTimer1.getCount());
+        assertEquals(timeInNanos, resettingTimer1.getSnapshot().getMax());
+
+        Timer resettingTimerWithDims = sfxMetrics.resettingTimer("resettingTimer", "foo", "bar");
+        assertNotEquals(resettingTimer, resettingTimerWithDims);
+        timeInNanos = TimeUnit.NANOSECONDS.convert(30, TimeUnit.SECONDS);
+        resettingTimerWithDims.update(timeInNanos, TimeUnit.NANOSECONDS);
+        Timer resettingTimerWithDims1 = sfxMetrics.resettingTimer("resettingTimer", "foo", "bar");
+        assertEquals(1, resettingTimerWithDims1.getCount());
+        assertEquals(timeInNanos, resettingTimerWithDims1.getSnapshot().getMax());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDuplicateMetricRegistrationAroundResettingHistogramTimers() {
+        sfxMetrics.resettingHistogram("countstuff");
+        sfxMetrics.resettingTimer("countstuff");
+        fail("I expect an already registered metric on this name");
     }
 
     @Test
