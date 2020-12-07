@@ -50,7 +50,8 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                         compress);
 
                 int code = resp.getStatusLine().getStatusCode();
-                if (code != HttpStatus.SC_OK) {
+                // SignalFx may respond with various 2xx return codes for success.
+                if (code < 200 || code > 299) {
                     throw new SignalFxMetricsException("Invalid status code " + code);
                 }
             } finally {
@@ -101,7 +102,8 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                         false);
 
                 int code = resp.getStatusLine().getStatusCode();
-                if (code != HttpStatus.SC_OK) {
+                // SignalFx may respond with various 2xx return codes for success.
+                if (code < 200 || code > 299) {
                     throw new SignalFxMetricsException("Invalid status code " + code);
                 }
             } finally {
