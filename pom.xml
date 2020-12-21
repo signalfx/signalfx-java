@@ -25,7 +25,7 @@
     <os72.protobuf-shaded.version>351</os72.protobuf-shaded.version>
     <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
     <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
-    <jackson.version>2.10.3</jackson.version>
+    <jackson.version>2.11.0</jackson.version>
     <jetty.version>9.4.35.v20201120</jetty.version>
   </properties>
 
