@@ -69,7 +69,7 @@ public class ResettingExponentiallyDecayingReservoir implements Reservoir {
      * @param clock the clock used to timestamp samples and track rescaling
      */
     public ResettingExponentiallyDecayingReservoir(int size, double alpha, Clock clock) {
-        this.values = new ConcurrentSkipListMap<Double, WeightedSample>();
+        this.values = new ConcurrentSkipListMap<>();
         this.lock = new ReentrantReadWriteLock();
         this.alpha = alpha;
         this.size = size;
@@ -101,7 +101,7 @@ public class ResettingExponentiallyDecayingReservoir implements Reservoir {
         try {
             final double itemWeight = weight(timestamp - startTime);
             final WeightedSample sample = new WeightedSample(value, itemWeight);
-            final double priority = itemWeight / ThreadLocalRandomProxy.current().nextDouble();
+            final double priority = itemWeight / ThreadLocalRandom.current().nextDouble();
 
             final long newCount = count.incrementAndGet();
             if (newCount <= size) {
@@ -183,7 +183,7 @@ public class ResettingExponentiallyDecayingReservoir implements Reservoir {
                 if (Double.compare(scalingFactor, 0) == 0) {
                     values.clear();
                 } else {
-                    final ArrayList<Double> keys = new ArrayList<Double>(values.keySet());
+                    final ArrayList<Double> keys = new ArrayList<>(values.keySet());
                     for (Double key : keys) {
                         final WeightedSample sample = values.remove(key);
                         final WeightedSample newSample = new WeightedSample(sample.value, sample.weight * scalingFactor);
