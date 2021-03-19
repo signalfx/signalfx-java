@@ -28,10 +28,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:signalfx/signalfx-clients.git</connection>
-    <developerConnection>scm:git:git@github.com:signalfx/signalfx-clients.git
-    </developerConnection>
-    <url>git@github.com:signalfx/signalfx-clients.git</url>
+    <connection>scm:git:git@github.com:signalfx/signalfx-java.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfx-java.git</developerConnection>
+    <url>git@github.com:signalfx/signalfx-java.git</url>
   </scm>
 
   <developers>

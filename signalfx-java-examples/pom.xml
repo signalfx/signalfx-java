@@ -7,18 +7,45 @@
   <version>1.0.12-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>signalfx.example</name>
-  <url>http://maven.apache.org</url>
+  <name>SignalFx client library examples</name>
+  <description>
+    Example programs demonstrating the usage of the SignalFx client library.
+  </description>
+
+  <url>http://www.signalfx.com</url>
+
+  <scm>
+    <connection>scm:git:git@github.com:signalfx/signalfx-java.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfx-java.git</developerConnection>
+    <url>git@github.com:signalfx/signalfx-java.git</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>signalfx</id>
+      <name>SignalFx</name>
+      <email>support+java@signalfx.com</email>
+      <organization>SignalFx, Inc</organization>
+      <organizationUrl>http://www.signalfx.com</organizationUrl>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
   <dependencies>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>30.1-jre</version>
+    </dependency>
+    <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-yammer</artifactId>
-      <version>0.0.31-SNAPSHOT</version>
+      <version>1.0.11</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
