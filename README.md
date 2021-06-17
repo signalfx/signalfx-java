@@ -62,7 +62,7 @@ libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "1.0.11"
 ### From source
 
 You can also install this library from source by cloning the repo and using
-`mvn install` as follows. However, we strongly recommend using the automated
+`./mvnw install` as follows. However, we strongly recommend using the automated
 mechanisms described above.
 
 ```
@@ -75,7 +75,7 @@ Receiving objects: 100% (930/930), 146.79 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (289/289), done.
 Checking connectivity... done.
 $ cd signalfx-java
-$ mvn install
+$ ./mvnw install
 [INFO] Scanning for projects...
 ...
 ...

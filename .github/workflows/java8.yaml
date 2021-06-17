@@ -16,6 +16,6 @@ jobs:
         with:
           java-version: 8
       - name: Install
-        run: mvn clean install -DskipTests=true
+        run: ./mvnw clean install -DskipTests=true
       - name: Verify
-        run: mvn verify
+        run: ./mvnw verify
