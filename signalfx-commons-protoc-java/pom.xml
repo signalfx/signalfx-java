@@ -43,24 +43,25 @@
   </developers>
 
   <dependencies>
+    <!-- compile -->
     <dependency>
       <groupId>com.github.os72</groupId>
       <artifactId>protobuf-java-shaded-${os72.protobuf-shaded.version}</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
 
+    <!-- test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-protoc</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
