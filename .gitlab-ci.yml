@@ -8,7 +8,7 @@ stages:
 build:
   stage: build
   script:
-    - ./mvnw clean package -DskipTests
+    - ./mvnw clean package -DskipTests=true
     - ./mvnw test
 
 release:
