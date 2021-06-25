@@ -44,6 +44,7 @@
   </developers>
 
   <dependencies>
+    <!-- compile -->
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-java</artifactId>
@@ -61,20 +62,18 @@
       <artifactId>metrics-core</artifactId>
     </dependency>
 
+    <!-- test -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
