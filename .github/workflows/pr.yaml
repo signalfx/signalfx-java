@@ -1,0 +1,35 @@
+name: CI build
+
+concurrency:
+  group: ci
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        java-version: [ 8.0.292+10, 11.0.11+9 ]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ java-version }}
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: ${{ java-version }}
+
+      - name: Build
+        run: ./mvnw clean package -DskipTests=true
+
+      - name: Test
+        run: ./mvnw test
