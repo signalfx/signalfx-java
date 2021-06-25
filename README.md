@@ -1,4 +1,14 @@
-# SignalFx client libraries [![Build Status](https://travis-ci.org/signalfx/signalfx-java.svg?branch=master)](https://travis-ci.org/signalfx/signalfx-java)
+---
+
+<p align="center">
+  <a href="https://github.com/signalfx/splunk-otel-java/actions?query=workflow%3A%22CI+build%22">
+    <img alt="Build Status" src="https://img.shields.io/github/workflow/status/signalfx/signalfx-java/CI%20build?style=for-the-badge">
+  </a>
+</p>
+
+---
+
+# SignalFx client libraries
 
 This repository contains libraries for instrumenting Java applications and
 reporting metrics to SignalFx. You will need a SignalFx account and organization
