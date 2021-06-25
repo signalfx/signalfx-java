@@ -19,11 +19,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK ${{ java-version }}
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2
         with:
           distribution: adopt
-          java-version: ${{ java-version }}
+          java-version: ${{ matrix.java-version }}
 
       - name: Build
         run: ./mvnw clean package -DskipTests=true
