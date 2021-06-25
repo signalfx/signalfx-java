@@ -8,7 +8,7 @@ stages:
 build:
   stage: build
   script:
-    - ./mvnw clean install -DskipTests
+    - ./mvnw clean package -DskipTests
     - ./mvnw verify
 
 release:
