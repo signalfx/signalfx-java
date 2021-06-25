@@ -29,4 +29,4 @@ jobs:
         run: ./mvnw clean package -DskipTests=true
 
       - name: Test
-        run: ./mvnw test
+        run: ./mvnw verify
