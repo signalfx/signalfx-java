@@ -9,7 +9,7 @@ build:
   stage: build
   script:
     - ./mvnw clean package -DskipTests
-    - ./mvnw verify
+    - ./mvnw test
 
 release:
   stage: release
