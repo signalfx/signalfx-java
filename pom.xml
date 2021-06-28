@@ -21,12 +21,15 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <protobuf.version>3.5.1</protobuf.version>
-    <os72.protobuf-shaded.version>351</os72.protobuf-shaded.version>
-    <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
-    <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
+
+    <!-- versions -->
     <jackson.version>2.12.3</jackson.version>
     <jetty.version>9.4.42.v20210604</jetty.version>
+    <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
+    <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
+    <os72.protobuf-shaded.version>351</os72.protobuf-shaded.version>
+    <protobuf.version>3.5.1</protobuf.version>
+    <sfl4j.version>1.7.31</sfl4j.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
@@ -192,7 +195,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.5</version>
+        <version>${sfl4j.version}</version>
       </dependency>
 
         <!-- test -->
@@ -223,7 +226,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.7.5</version>
+        <version>${sfl4j.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
