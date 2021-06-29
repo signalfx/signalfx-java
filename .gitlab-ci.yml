@@ -14,7 +14,7 @@ build:
 snapshot:
   stage: release
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_REF_NAME == "master"'
   script:
     - ./deploy.sh snapshot
 
