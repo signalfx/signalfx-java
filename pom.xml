@@ -44,11 +44,11 @@
 
   <developers>
     <developer>
-      <id>signalfx</id>
-      <name>SignalFx</name>
+      <id>splunk</id>
+      <name>Splunk Instrumentation Authors</name>
       <email>support+java@signalfx.com</email>
-      <organization>SignalFx, Inc</organization>
-      <organizationUrl>http://www.signalfx.com</organizationUrl>
+      <organization>Splunk</organization>
+      <organizationUrl>https://www.splunk.com</organizationUrl>
     </developer>
   </developers>
 

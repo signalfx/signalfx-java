@@ -2,6 +2,10 @@
 
 set -e
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="${SCRIPT_DIR}/../"
+cd ${ROOT_DIR}
+
 print_usage() {
   echo "Usage: ./$(basename $0) [snapshot|release]"
 }
@@ -43,8 +47,6 @@ no-tty
 pinentry-mode loopback
 EOF
 
-echo ">>> Importing public key ..."
-gpg --batch --import "${GPG_PUBLIC_KEY}"
 echo ">>> Importing secret key ..."
 gpg --batch --allow-secret-key-import --import "${GPG_SECRET_KEY}"
 
@@ -68,7 +70,7 @@ cat > release-settings.xml <<EOF
   </profiles>
 </settings>
 EOF
-trap "rm release-settings.xml" EXIT
+trap "rm release-settings.xml" EXIT INT KILL STOP TERM
 
 echo ">>> Running maven ..."
 ./mvnw -s release-settings.xml clean deploy -P release-sign-artifacts,gpg
