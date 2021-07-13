@@ -21,6 +21,7 @@ import com.signalfx.connection.AbstractHttpReceiverConnection;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import org.apache.http.util.EntityUtils;
 
 public abstract class AbstractHttpDataPointProtobufReceiverConnection extends AbstractHttpReceiverConnection implements DataPointReceiver {
 
@@ -56,11 +57,12 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                 }
             } finally {
                 if (resp != null) {
-                    HttpEntity entity = resp.getEntity();
-                    if (entity != null) {
-                        entity.getContent().close();
+                    try {
+                        HttpEntity entity = resp.getEntity();
+                        EntityUtils.consume(entity);
+                    } finally {
+                        resp.close();
                     }
-                    resp.close();
                 }
             }
         } catch (IOException e) {

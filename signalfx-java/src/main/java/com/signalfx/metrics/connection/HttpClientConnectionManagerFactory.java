@@ -10,7 +10,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 
 public class HttpClientConnectionManagerFactory {
@@ -20,13 +20,13 @@ public class HttpClientConnectionManagerFactory {
   }
 
   public static HttpClientConnectionManager withTimeoutMs(int timeoutMs) {
-    BasicHttpClientConnectionManager httpClientConnectionManager = new BasicHttpClientConnectionManager(
+    PoolingHttpClientConnectionManager httpClientConnectionManager = new PoolingHttpClientConnectionManager(
         RegistryBuilder.<ConnectionSocketFactory>create()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
             .register("https", new SSLConnectionSocketFactoryWithTimeout(timeoutMs))
             .build());
 
-    httpClientConnectionManager.setSocketConfig(
+    httpClientConnectionManager.setDefaultSocketConfig(
         SocketConfig.custom().setSoTimeout(timeoutMs).build());
 
     return httpClientConnectionManager;
