@@ -3,7 +3,7 @@ package com.signalfx.common.proto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import com.github.os72.protobuf351.MessageLite;
+import com.github.os72.protobuf_3_11_1.MessageLite;
 
 /**
  * The idea with this class is that we can encapsulate a collection of protocol buffers and send

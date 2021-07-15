@@ -14,7 +14,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
-import com.github.os72.protobuf351.InvalidProtocolBufferException;
+import com.github.os72.protobuf_3_11_1.InvalidProtocolBufferException;
 import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.DataPoint;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.Datum;

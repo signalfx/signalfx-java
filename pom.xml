@@ -20,9 +20,9 @@
     <jackson.version>2.12.4</jackson.version>
     <jetty.version>9.4.43.v20210629</jetty.version>
     <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
-    <os72.protobuf-shaded.plugin-version>${protobuf.version}.1</os72.protobuf-shaded.plugin-version>
-    <os72.protobuf-shaded.version>351</os72.protobuf-shaded.version>
-    <protobuf.version>3.5.1</protobuf.version>
+    <os72.protobuf-shaded.plugin-version>${protobuf.version}</os72.protobuf-shaded.plugin-version>
+    <os72.protobuf-shaded.version>3-11-1</os72.protobuf-shaded.version>
+    <protobuf.version>3.11.1</protobuf.version>
     <sfl4j.version>1.7.31</sfl4j.version>
   </properties>
 
