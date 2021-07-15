@@ -1,14 +1,6 @@
 package com.signalfx.metrics.flush;
 
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import static java.util.Objects.requireNonNull;
 
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.auth.AuthToken;
@@ -21,6 +13,15 @@ import com.signalfx.metrics.errorhandler.MetricErrorImpl;
 import com.signalfx.metrics.errorhandler.MetricErrorType;
 import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -74,7 +75,7 @@ public class AggregateMetricSender {
                                  DataPointReceiverFactory dataPointReceiverFactory,
                                  EventReceiverFactory eventReceiverFactory, AuthToken authToken,
                                  Collection<OnSendErrorHandler> onSendErrorHandlerCollection) {
-        this.defaultSourceName = defaultSourceName;
+        this.defaultSourceName = requireNonNull(defaultSourceName, "defaultSourceName must be a non-null value");
         this.dataPointReceiverFactory = dataPointReceiverFactory;
         this.eventReceiverFactory = eventReceiverFactory;
         this.authToken = authToken;
