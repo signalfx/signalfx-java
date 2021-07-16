@@ -3,10 +3,13 @@
 */
 package com.signalfx.codahale.reporter;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -177,11 +180,11 @@ public class SignalFxReporter extends ScheduledReporter {
         public Builder(MetricRegistry registry, AuthToken authToken, String defaultSourceName) {
             this.registry = registry;
             this.authToken = authToken;
-            this.defaultSourceName = defaultSourceName;
+            this.defaultSourceName = requireNonNull(defaultSourceName, "defaultSourceName must be a non-null value");
         }
 
         public Builder setDefaultSourceName(String defaultSourceName) {
-            this.defaultSourceName = defaultSourceName;
+            this.defaultSourceName = requireNonNull(defaultSourceName, "defaultSourceName must be a non-null value");
             return this;
         }
 
