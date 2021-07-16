@@ -6,11 +6,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -24,6 +19,9 @@ import com.signalfx.metrics.auth.StaticAuthToken;
 import com.signalfx.metrics.connection.StaticDataPointReceiverFactory;
 import com.signalfx.metrics.connection.StoredDataPointReceiver;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import java.util.concurrent.TimeUnit;
+import org.junit.Before;
+import org.junit.Test;
 
 public class SignalFxReporterTest {
 
@@ -302,5 +300,26 @@ public class SignalFxReporterTest {
                 .withMetricName("name")
                 .createOrGet(metricRegistry);
         fail("We shouldn't be able to make it with the same name and different type");
+    }
+
+    @Test
+    public void shouldFailOnNullDefaultSourceMethod_constructor() {
+        try {
+            new SignalFxReporter.Builder(null, null, null);
+            fail("NPE was expected");
+        } catch (NullPointerException npe) {
+            assertTrue(npe.getMessage().contains("defaultSourceName"));
+        }
+    }
+
+    @Test
+    public void shouldFailOnNullDefaultSourceMethod_method() {
+        try {
+            new SignalFxReporter.Builder(null, "test")
+                .setDefaultSourceName(null);
+            fail("NPE was expected");
+        } catch (NullPointerException npe) {
+            assertTrue(npe.getMessage().contains("defaultSourceName"));
+        }
     }
 }
