@@ -38,7 +38,7 @@ whitesource:
   variables:
     ws_user_key: ${WHITESOURCE_USER_KEY}
     product_id: ${WHITESOURCE_ID}
-    config: java-gradle-wrapper
+    config: java-maven
 
 snapshot:
   stage: release
