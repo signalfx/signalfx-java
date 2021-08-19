@@ -20,7 +20,7 @@ build:
 sast-scan:
   stage: verify
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "main"'
+    - if: '$CI_COMMIT_REF_NAME == "master"'
   extends: .sast_scan
   variables:
     SAST_SCANNER: "Semgrep"
