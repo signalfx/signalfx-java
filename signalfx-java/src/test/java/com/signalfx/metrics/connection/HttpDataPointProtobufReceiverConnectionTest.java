@@ -38,14 +38,33 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     Server server = new Server(0);
     server.setHandler(new AddPointsHandler());
     server.start();
-    URI uri = server.getURI();
-    DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
-        new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
-        .createDataPointReceiver();
 
-    dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
-        SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
-    server.stop();
+    try (AutoCloseable ignored = server::stop) {
+      URI uri = server.getURI();
+      DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
+          new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+          .createDataPointReceiver();
+
+      dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
+          SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+    }
+  }
+
+  @Test
+  public void testOptionalAuthToken() throws Exception {
+    Server server = new Server(0);
+    server.setHandler(new NoAuthTokenExpectedHandler());
+    server.start();
+
+    try (AutoCloseable ignored = server::stop) {
+      URI uri = server.getURI();
+      DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
+          new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+          .createDataPointReceiver();
+
+      dpr.addDataPoints(null, Collections.singletonList(
+          SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+    }
   }
 
   @Test
@@ -60,19 +79,20 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     server.setHandler(new AddPointsHandler());
     server.start();
 
-    URI uri = server.getURI();
-    DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
-        new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
-        .createDataPointReceiver();
+    try (AutoCloseable ignored = server::stop) {
+      URI uri = server.getURI();
+      DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
+          new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+          .createDataPointReceiver();
 
-    dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
-        SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+      dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
+          SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
 
-    Thread.sleep(serverIdleTimeout + 1000);
+      Thread.sleep(serverIdleTimeout + 1000);
 
-    dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
-        SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
-    server.stop();
+      dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
+          SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+    }
   }
 
   @Test
@@ -80,27 +100,29 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     Server server = new Server(0);
     server.setHandler(new BackfillHandler());
     server.start();
-    URI uri = server.getURI();
-    DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
-        new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
-        .createDataPointReceiver();
 
-    ArrayList<SignalFxProtocolBuffers.PointValue> values = new ArrayList<SignalFxProtocolBuffers.PointValue>(Arrays.asList(
-        SignalFxProtocolBuffers.PointValue.newBuilder().setTimestamp(System.currentTimeMillis())
-            .setValue(SignalFxProtocolBuffers.Datum.newBuilder().setDoubleValue(123.0)).build()
-    ));
-    HashMap<String, String> dims = new HashMap<String, String>();
-    dims.put("baz", "gorch");
-    dims.put("moo", "cow");
+    try (AutoCloseable ignored = server::stop) {
+      URI uri = server.getURI();
+      DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
+          new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+          .createDataPointReceiver();
 
-    dpr.backfillDataPoints(AUTH_TOKEN, "foo.bar.baz", "counter", "ABC123", dims, values);
-    server.stop();
+      ArrayList<SignalFxProtocolBuffers.PointValue> values = new ArrayList<SignalFxProtocolBuffers.PointValue>(Arrays.asList(
+          SignalFxProtocolBuffers.PointValue.newBuilder().setTimestamp(System.currentTimeMillis())
+              .setValue(SignalFxProtocolBuffers.Datum.newBuilder().setDoubleValue(123.0)).build()
+      ));
+      HashMap<String, String> dims = new HashMap<String, String>();
+      dims.put("baz", "gorch");
+      dims.put("moo", "cow");
+
+      dpr.backfillDataPoints(AUTH_TOKEN, "foo.bar.baz", "counter", "ABC123", dims, values);
+    }
   }
 
-  private class AddPointsHandler extends AbstractHandler {
+  private static class AddPointsHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
-                       HttpServletResponse response) throws IOException, ServletException {
+                       HttpServletResponse response) throws IOException {
       if (!request.getHeader("X-SF-TOKEN").equals(AUTH_TOKEN)) {
         error("Invalid auth token", response, baseRequest);
         return;
@@ -108,7 +130,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       if (!request.getHeader("User-Agent")
           .equals(AbstractHttpReceiverConnection.USER_AGENT)) {
         error("Invalid User agent: " + request.getHeader("User-Agent") + " vs "
-              + AbstractHttpReceiverConnection.USER_AGENT, response, baseRequest);
+            + AbstractHttpReceiverConnection.USER_AGENT, response, baseRequest);
         return;
       }
       SignalFxProtocolBuffers.DataPointUploadMessage all_datapoints =
@@ -118,53 +140,15 @@ public class HttpDataPointProtobufReceiverConnectionTest {
         error("Invalid datapoint source", response, baseRequest);
         return;
       }
-      response.setStatus(HttpStatus.SC_OK);
-      response.getWriter().write("\"OK\"");
-      baseRequest.setHandled(true);
-    }
 
-    private void error(String message, HttpServletResponse response, Request baseRequest)
-        throws IOException {
-      response.setStatus(HttpStatus.SC_BAD_REQUEST);
-      response.getWriter().write(message);
-      baseRequest.setHandled(true);
-    }
-
-    @Override
-    public boolean isRunning() {
-      return false;
-    }
-
-    @Override
-    public boolean isStarted() {
-      return false;
-    }
-
-    @Override
-    public boolean isStarting() {
-      return false;
-    }
-
-    @Override
-    public boolean isStopping() {
-      return false;
-    }
-
-    @Override
-    public boolean isStopped() {
-      return false;
-    }
-
-    @Override
-    public boolean isFailed() {
-      return false;
+      ok(response, baseRequest);
     }
   }
 
-  private class BackfillHandler extends AbstractHandler {
+  private static class BackfillHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
-                       HttpServletResponse response) throws IOException, ServletException {
+                       HttpServletResponse response) throws IOException {
       if (!request.getMethod().equals("POST")) {
         error("Incorrect HTTP method for backfill", response, baseRequest);
         return;
@@ -190,46 +174,36 @@ public class HttpDataPointProtobufReceiverConnectionTest {
         error("metric is missing for backfill", response, baseRequest);
       }
 
-      response.setStatus(HttpStatus.SC_OK);
-      response.getWriter().write("\"OK\"");
-      baseRequest.setHandled(true);
+      ok(response, baseRequest);
     }
+  }
 
-    private void error(String message, HttpServletResponse response, Request baseRequest)
+  private static class NoAuthTokenExpectedHandler extends AbstractHandler {
+
+    @Override
+    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-      response.setStatus(HttpStatus.SC_BAD_REQUEST);
-      response.getWriter().write(message);
-      baseRequest.setHandled(true);
-    }
 
-    @Override
-    public boolean isRunning() {
-      return false;
-    }
+      if (request.getHeader("X-SF-TOKEN") != null) {
+        error("Invalid auth token", response, baseRequest);
+        return;
+      }
 
-    @Override
-    public boolean isStarted() {
-      return false;
+      ok(response, baseRequest);
     }
+  }
 
-    @Override
-    public boolean isStarting() {
-      return false;
-    }
+  private static void error(String message, HttpServletResponse response, Request baseRequest)
+      throws IOException {
+    response.setStatus(HttpStatus.SC_BAD_REQUEST);
+    response.getWriter().write(message);
+    baseRequest.setHandled(true);
+  }
 
-    @Override
-    public boolean isStopping() {
-      return false;
-    }
-
-    @Override
-    public boolean isStopped() {
-      return false;
-    }
-
-    @Override
-    public boolean isFailed() {
-      return false;
-    }
+  private static void ok(HttpServletResponse response, Request baseRequest)
+      throws IOException {
+    response.setStatus(HttpStatus.SC_OK);
+    response.getWriter().write("\"OK\"");
+    baseRequest.setHandled(true);
   }
 }
