@@ -63,7 +63,9 @@ public abstract class AbstractHttpReceiverConnection {
 
         HttpPost post = new HttpPost(String.format("%s%s", host.toURI(), endpoint));
         post.setConfig(requestConfig);
-        post.setHeader("X-SF-TOKEN", auth);
+        if (auth != null) {
+            post.setHeader("X-SF-TOKEN", auth);
+        }
         post.setHeader("User-Agent", USER_AGENT);
         post.setEntity(entity);
 
