@@ -42,6 +42,7 @@ public abstract class AbstractHttpReceiverConnection {
                                              HttpClientConnectionManager httpClientConnectionManager) {
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)
+                .setRetryHandler(new RetryHandler())
                 .build();
         this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(), endpoint.getScheme());
 
