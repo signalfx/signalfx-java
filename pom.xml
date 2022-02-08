@@ -23,7 +23,7 @@
     <os72.protobuf-shaded.plugin-version>${protobuf.version}</os72.protobuf-shaded.plugin-version>
     <os72.protobuf-shaded.version>3-11-1</os72.protobuf-shaded.version>
     <protobuf.version>3.11.1</protobuf.version>
-    <sfl4j.version>1.7.36</sfl4j.version>
+    <slf4j.version>1.7.36</slf4j.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
@@ -196,7 +196,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>${sfl4j.version}</version>
+        <version>${slf4j.version}</version>
       </dependency>
 
         <!-- test -->
@@ -227,7 +227,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>${sfl4j.version}</version>
+        <version>${slf4j.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
