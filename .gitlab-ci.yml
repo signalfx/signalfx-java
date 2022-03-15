@@ -23,7 +23,7 @@ build:
 sast-scan:
   stage: verify
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master"'
+    - if: '$CI_COMMIT_REF_NAME == "main"'
   extends: .sast_scan
   variables:
     SAST_SCANNER: "Semgrep"
@@ -33,7 +33,7 @@ sast-scan:
 whitesource:
   stage: verify
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master"'
+    - if: '$CI_COMMIT_REF_NAME == "main"'
   extends: .whitesource
   variables:
     ws_user_key: ${WHITESOURCE_USER_KEY}
@@ -43,7 +43,7 @@ whitesource:
 snapshot:
   stage: release
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master"'
+    - if: '$CI_COMMIT_REF_NAME == "main"'
   script:
     - ./deploy.sh snapshot
 
