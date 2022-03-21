@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.signalfx.public</groupId>
+    <artifactId>clients-parent</artifactId>
+    <version>1.0.14</version>
+  </parent>
+
+  <artifactId>micrometer-registry-signalfx</artifactId>
+  <name>Micrometer Registry for SignalFx</name>
+  <packaging>jar</packaging>
+  <description>
+    A temporary fork of the io.micrometer:micrometer-registry-signalfx project
+  </description>
+  <version>1.8.4-splunk1</version>
+
+  <url>https://www.signalfx.com</url>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:signalfx/signalfx-java.git</connection>
+    <developerConnection>scm:git:git@github.com:signalfx/signalfx-java.git</developerConnection>
+    <url>git@github.com:signalfx/signalfx-java.git</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>signalfx</id>
+      <name>SignalFx</name>
+      <email>support+java@signalfx.com</email>
+      <organization>SignalFx, Inc</organization>
+      <organizationUrl>http://www.signalfx.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <!-- compile -->
+    <dependency>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+      <version>1.8.4</version>
+    </dependency>
+
+    <!-- test -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-test</artifactId>
+      <version>1.8.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.8.2</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- skip the shading for this artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <id>build-shaded-jar</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- use a newer version for junit5 support -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M3</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
