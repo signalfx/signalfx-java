@@ -72,7 +72,7 @@
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-test</artifactId>
-      <version>1.8.3</version>
+      <version>1.8.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
