@@ -6,7 +6,7 @@
   <groupId>com.signalfx.public</groupId>
   <artifactId>clients-parent</artifactId>
   <name>SignalFx parent</name>
-  <version>1.0.15</version>
+  <version>1.0.16</version>
   <packaging>pom</packaging>
 
   <description>
@@ -105,27 +105,27 @@
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-protoc</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-codahale</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-yammer</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-commons-protoc-java</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-java</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
       </dependency>
 
       <!-- shaded and included in the jar -->
@@ -301,14 +301,6 @@
           </artifactSet>
           <relocations>
             <relocation>
-              <pattern>com.google.common</pattern>
-              <shadedPattern>com.signalfx.shaded.google.common</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>com.google.thirdparty</pattern>
-              <shadedPattern>com.signalfx.shaded.google.thirdparty</shadedPattern>
-            </relocation>
-            <relocation>
               <pattern>com.fasterxml</pattern>
               <shadedPattern>com.signalfx.shaded.fasterxml</shadedPattern>
             </relocation>
@@ -319,6 +311,31 @@
             <relocation>
               <pattern>org.eclipse.jetty</pattern>
               <shadedPattern>com.signalfx.shaded.jetty</shadedPattern>
+            </relocation>
+            <!-- guava and its dependencies -->
+            <relocation>
+              <pattern>com.google.common</pattern>
+              <shadedPattern>com.signalfx.shaded.google.common</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.google.errorprone</pattern>
+              <shadedPattern>com.signalfx.shaded.google.errorprone</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.google.j2objc</pattern>
+              <shadedPattern>com.signalfx.shaded.google.j2objc</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.google.thirdparty</pattern>
+              <shadedPattern>com.signalfx.shaded.google.thirdparty</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>javax.annotation</pattern>
+              <shadedPattern>com.signalfx.shaded.javax.annotation</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.checkerframework</pattern>
+              <shadedPattern>com.signalfx.shaded.checkerframework</shadedPattern>
             </relocation>
           </relocations>
         </configuration>
