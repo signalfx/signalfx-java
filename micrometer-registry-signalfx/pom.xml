@@ -16,7 +16,7 @@
   <description>
     A temporary fork of the io.micrometer:micrometer-registry-signalfx project
   </description>
-  <version>1.8.4-splunk2</version>
+  <version>1.8.4-splunk3</version>
 
   <url>https://www.signalfx.com</url>
 
