@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>1.0.17</version>
+    <version>1.0.18-SNAPSHOT</version>
   </parent>
 
   <artifactId>micrometer-registry-signalfx</artifactId>
