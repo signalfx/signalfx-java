@@ -294,6 +294,14 @@
         <configuration>
           <createSourcesJar>true</createSourcesJar>
           <shadeSourcesContent>true</shadeSourcesContent>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>google/protobuf/**/*.proto</exclude>
+              </excludes>
+            </filter>
+          </filters>
           <artifactSet>
             <excludes>
               <exclude>org.slf4j:*</exclude>
