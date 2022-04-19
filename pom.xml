@@ -298,7 +298,9 @@
             <filter>
               <artifact>*:*</artifact>
               <excludes>
+                <exclude>about.html</exclude>
                 <exclude>google/protobuf/**/*.proto</exclude>
+                <exclude>mozilla/*.txt</exclude>
               </excludes>
             </filter>
           </filters>
@@ -367,6 +369,5 @@
     <module>signalfx-commons-protoc-java</module>
     <module>signalfx-codahale</module>
     <module>signalfx-yammer</module>
-    <module>micrometer-registry-signalfx</module>
   </modules>
 </project>
