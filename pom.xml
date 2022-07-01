@@ -156,6 +156,12 @@
         <version>2.11.0</version>
       </dependency>
       <dependency>
+        <!-- Temp work-around until httpclient upgrades its codec version -->
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.15</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>4.5.13</version>
