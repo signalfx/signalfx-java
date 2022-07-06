@@ -239,6 +239,7 @@ public class Computation implements Iterable<ChannelMessage>, Iterator<ChannelMe
 
                 case END_OF_CHANNEL:
                     state = State.STATE_COMPLETED;
+                    nextMessage = message;
                     break;
 
                 case METADATA_MESSAGE:
