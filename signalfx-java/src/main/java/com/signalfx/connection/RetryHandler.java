@@ -15,8 +15,8 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
  */
 class RetryHandler extends DefaultHttpRequestRetryHandler {
 
-  public RetryHandler() {
-    super(3, true, Arrays.asList(
+  public RetryHandler(final int maxRetries) {
+    super(maxRetries, true, Arrays.asList(
         InterruptedIOException.class,
         UnknownHostException.class,
         ConnectException.class));

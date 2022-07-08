@@ -9,12 +9,14 @@ import com.signalfx.metrics.SignalFxMetricsException;
 public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
     public static final int DEFAULT_VERSION = 2;
+    public static final int DEFAULT_MAX_RETRIES = 3;
 
     private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager;
     private HttpClientConnectionManager explicitHttpClientConnectionManager;
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
+    private int maxRetries = DEFAULT_MAX_RETRIES;
 
     public HttpEventProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
@@ -35,6 +37,11 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
         return this;
     }
 
+    public HttpEventProtobufReceiverFactory setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+        return this;
+    }
+
     public void setHttpClientConnectionManager(
             HttpClientConnectionManager httpClientConnectionManager) {
         this.explicitHttpClientConnectionManager = httpClientConnectionManager;
@@ -47,6 +54,7 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
             return new HttpEventProtobufReceiverConnectionV2(
                 endpoint,
                 this.timeoutMs,
+                this.maxRetries,
                 resolveHttpClientConnectionManager());
         }else{
             throw new SignalFxMetricsException("Version v1 is deprecated, We encourage to use v2/event");

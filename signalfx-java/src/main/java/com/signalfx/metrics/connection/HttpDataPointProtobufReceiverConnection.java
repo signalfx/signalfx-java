@@ -26,9 +26,9 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 public class HttpDataPointProtobufReceiverConnection
         extends AbstractHttpDataPointProtobufReceiverConnection {
     public HttpDataPointProtobufReceiverConnection(
-            SignalFxReceiverEndpoint endpoint, int timeoutMs,
+            SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
             HttpClientConnectionManager httpClientConnectionManager) {
-        super(endpoint, timeoutMs, httpClientConnectionManager);
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
     }
 
     @Override

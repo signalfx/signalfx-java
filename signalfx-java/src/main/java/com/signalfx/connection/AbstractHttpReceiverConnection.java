@@ -38,11 +38,12 @@ public abstract class AbstractHttpReceiverConnection {
     protected final HttpHost host;
     protected final RequestConfig requestConfig;
 
-    protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs,
+    protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
                                              HttpClientConnectionManager httpClientConnectionManager) {
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)
-                .setRetryHandler(new RetryHandler())
+                .setRetryHandler(new RetryHandler(maxRetries))
+                .setServiceUnavailableRetryStrategy(new RetryStrategy(maxRetries))
                 .build();
         this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(), endpoint.getScheme());
 
