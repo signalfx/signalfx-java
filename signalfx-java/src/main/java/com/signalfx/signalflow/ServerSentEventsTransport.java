@@ -55,15 +55,12 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
     protected Integer timeout = DEFAULT_TIMEOUT;
     protected Integer maxRetries = DEFAULT_MAX_RETRIES;
 
-    protected ServerSentEventsTransport(String token, final SignalFxEndpoint endpoint,
+    protected ServerSentEventsTransport(final String token, final SignalFxEndpoint endpoint,
                                         final int apiVersion, final Integer timeout) {
-        this.token = token;
-        this.endpoint = endpoint;
-        this.path = "/v" + apiVersion + "/signalflow";
-        this.timeout = timeout;
+        this(token, endpoint, apiVersion, timeout, DEFAULT_MAX_RETRIES);
     }
 
-    protected ServerSentEventsTransport(String token, final SignalFxEndpoint endpoint,
+    protected ServerSentEventsTransport(final String token, final SignalFxEndpoint endpoint,
                                         final int apiVersion, final Integer timeout, final Integer maxRetries) {
         this.token = token;
         this.endpoint = endpoint;

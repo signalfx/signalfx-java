@@ -19,6 +19,12 @@ public abstract class AbstractHttpEventProtobufReceiverConnection extends Abstra
 
     public AbstractHttpEventProtobufReceiverConnection(
             SignalFxReceiverEndpoint endpoint,
+            int timeoutMs, HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, httpClientConnectionManager);
+    }
+
+    public AbstractHttpEventProtobufReceiverConnection(
+            SignalFxReceiverEndpoint endpoint,
             int timeoutMs, int maxRetries, HttpClientConnectionManager httpClientConnectionManager) {
         super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
     }

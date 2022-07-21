@@ -31,6 +31,13 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
 
     public AbstractHttpDataPointProtobufReceiverConnection(SignalFxReceiverEndpoint endpoint,
                                                            int timeoutMs,
+                                                           HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, httpClientConnectionManager);
+        this.compress = !Boolean.getBoolean(DISABLE_COMPRESSION_PROPERTY);
+    }
+
+    public AbstractHttpDataPointProtobufReceiverConnection(SignalFxReceiverEndpoint endpoint,
+                                                           int timeoutMs,
                                                            int maxRetries,
                                                            HttpClientConnectionManager httpClientConnectionManager) {
         super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
