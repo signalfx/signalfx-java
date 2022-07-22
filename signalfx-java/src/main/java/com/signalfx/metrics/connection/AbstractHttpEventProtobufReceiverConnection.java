@@ -23,6 +23,12 @@ public abstract class AbstractHttpEventProtobufReceiverConnection extends Abstra
         super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
+    public AbstractHttpEventProtobufReceiverConnection(
+            SignalFxReceiverEndpoint endpoint,
+            int timeoutMs, int maxRetries, HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
+    }
+
     @Override
     public void addEvents(String auth, List<SignalFxProtocolBuffers.Event> events)
             throws SignalFxMetricsException {

@@ -20,6 +20,12 @@ public class HttpDataPointProtobufReceiverConnectionV2
         super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
+    public HttpDataPointProtobufReceiverConnectionV2(
+            SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+            HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
+    }
+
     @Override
     protected String getEndpointForAddDatapoints() {
         return "/v2/datapoint";

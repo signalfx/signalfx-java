@@ -31,6 +31,12 @@ public class HttpDataPointProtobufReceiverConnection
         super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
+    public HttpDataPointProtobufReceiverConnection(
+            SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+            HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
+    }
+
     @Override
     protected HttpEntity getEntityForVersion(List<SignalFxProtocolBuffers.DataPoint> dataPoints) {
         return new InputStreamEntity(

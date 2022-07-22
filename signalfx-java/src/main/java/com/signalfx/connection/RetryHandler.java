@@ -14,11 +14,19 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
  * "stale" connections in such a way that http client is unable to detect this.
  */
 class RetryHandler extends DefaultHttpRequestRetryHandler {
+  public static final Integer DEFAULT_MAX_RETRIES = 3;
 
-  public RetryHandler() {
-    super(3, true, Arrays.asList(
+  public RetryHandler(final int maxRetries) {
+    super(maxRetries, true, Arrays.asList(
         InterruptedIOException.class,
         UnknownHostException.class,
         ConnectException.class));
+  }
+
+  public RetryHandler() {
+    super(DEFAULT_MAX_RETRIES, true, Arrays.asList(
+            InterruptedIOException.class,
+            UnknownHostException.class,
+            ConnectException.class));
   }
 }

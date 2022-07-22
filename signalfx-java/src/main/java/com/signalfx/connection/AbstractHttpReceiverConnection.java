@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
+import static com.signalfx.connection.RetryHandler.DEFAULT_MAX_RETRIES;
+
 public abstract class AbstractHttpReceiverConnection {
 
     protected static final Logger log = LoggerFactory.getLogger(AbstractHttpReceiverConnection.class);
@@ -40,9 +42,15 @@ public abstract class AbstractHttpReceiverConnection {
 
     protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs,
                                              HttpClientConnectionManager httpClientConnectionManager) {
+        this(endpoint, timeoutMs, DEFAULT_MAX_RETRIES, httpClientConnectionManager);
+    }
+
+    protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+                                             HttpClientConnectionManager httpClientConnectionManager) {
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)
-                .setRetryHandler(new RetryHandler())
+                .setRetryHandler(new RetryHandler(maxRetries))
+                .setServiceUnavailableRetryStrategy(new RetryStrategy(maxRetries))
                 .build();
         this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(), endpoint.getScheme());
 

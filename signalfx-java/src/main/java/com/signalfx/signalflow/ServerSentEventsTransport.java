@@ -47,18 +47,26 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
 
     protected static final Logger log = LoggerFactory.getLogger(ServerSentEventsTransport.class);
     public static final Integer DEFAULT_TIMEOUT = 1000;
+    public static final Integer DEFAULT_MAX_RETRIES = 3;
 
     protected final String token;
     protected final SignalFxEndpoint endpoint;
     protected final String path;
     protected Integer timeout = DEFAULT_TIMEOUT;
+    protected Integer maxRetries = DEFAULT_MAX_RETRIES;
 
-    protected ServerSentEventsTransport(String token, final SignalFxEndpoint endpoint,
+    protected ServerSentEventsTransport(final String token, final SignalFxEndpoint endpoint,
                                         final int apiVersion, final Integer timeout) {
+        this(token, endpoint, apiVersion, timeout, DEFAULT_MAX_RETRIES);
+    }
+
+    protected ServerSentEventsTransport(final String token, final SignalFxEndpoint endpoint,
+                                        final int apiVersion, final Integer timeout, final Integer maxRetries) {
         this.token = token;
         this.endpoint = endpoint;
         this.path = "/v" + apiVersion + "/signalflow";
         this.timeout = timeout;
+        this.maxRetries = maxRetries;
     }
 
     @Override
@@ -70,7 +78,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         TransportConnection connection = null;
         CloseableHttpResponse response = null;
         try {
-            connection = new TransportConnection(this.endpoint, timeout);
+            connection = new TransportConnection(this.endpoint, timeout, maxRetries);
 
             response = connection.post(this.token, this.path + "/" + handle + "/attach", parameters,
                     null);
@@ -93,7 +101,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         TransportConnection connection = null;
         CloseableHttpResponse response = null;
         try {
-            connection = new TransportConnection(this.endpoint, timeout);
+            connection = new TransportConnection(this.endpoint, timeout, maxRetries);
 
             response = connection.post(this.token, this.path + "/execute", parameters, program);
 
@@ -115,7 +123,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         TransportConnection connection = null;
         CloseableHttpResponse response = null;
         try {
-            connection = new TransportConnection(this.endpoint, timeout);
+            connection = new TransportConnection(this.endpoint, timeout, maxRetries);
 
             response = connection.post(this.token, this.path + "/preflight", parameters, program);
 
@@ -135,7 +143,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         TransportConnection connection = null;
         CloseableHttpResponse response = null;
         try {
-            connection = new TransportConnection(this.endpoint, timeout);
+            connection = new TransportConnection(this.endpoint, timeout, maxRetries);
             response = connection.post(this.token, this.path + "/start", parameters, program);
         } catch (Exception ex) {
             throw new SignalFlowException("failed to start program - " + program, ex);
@@ -154,7 +162,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         TransportConnection connection = null;
         CloseableHttpResponse response = null;
         try {
-            connection = new TransportConnection(this.endpoint, timeout);
+            connection = new TransportConnection(this.endpoint, timeout, maxRetries);
             response = connection.post(this.token, this.path + "/" + handle + "/stop", parameters,
                     null);
         } catch (Exception ex) {
@@ -174,7 +182,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         TransportConnection connection = null;
         CloseableHttpResponse response = null;
         try {
-            connection = new TransportConnection(this.endpoint, timeout);
+            connection = new TransportConnection(this.endpoint, timeout, maxRetries);
             response = connection.post(this.token, this.path + "/" + handle + "/keepalive", null,
                     null);
         } catch (Exception ex) {
@@ -266,14 +274,15 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
 
         protected static final Logger log = LoggerFactory.getLogger(TransportConnection.class);
         public static final int DEFAULT_TIMEOUT_MS = 1000;
+        public static final int DEFAULT_MAX_RETRIES = 3;
         protected final RequestConfig transportRequestConfig;
 
         public TransportConnection(SignalFxEndpoint endpoint) {
-            this(endpoint, DEFAULT_TIMEOUT_MS);
+            this(endpoint, DEFAULT_TIMEOUT_MS, DEFAULT_MAX_RETRIES);
         }
 
-        public TransportConnection(SignalFxEndpoint endpoint, int timeoutMs) {
-            super(endpoint, timeoutMs, new BasicHttpClientConnectionManager());
+        public TransportConnection(SignalFxEndpoint endpoint, int timeoutMs, int maxRetries) {
+            super(endpoint, timeoutMs, maxRetries, new BasicHttpClientConnectionManager());
 
             this.transportRequestConfig = RequestConfig.custom().setSocketTimeout(0)
                     .setConnectionRequestTimeout(this.requestConfig.getConnectionRequestTimeout())

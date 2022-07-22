@@ -17,6 +17,12 @@ public class HttpEventProtobufReceiverConnectionV2
         super(endpoint, timeoutMs, httpClientConnectionManager);
     }
 
+    public HttpEventProtobufReceiverConnectionV2(
+            SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+            HttpClientConnectionManager httpClientConnectionManager) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
+    }
+
     @Override
     protected String getEndpointForAddEvents() {
         return "/v2/event";
