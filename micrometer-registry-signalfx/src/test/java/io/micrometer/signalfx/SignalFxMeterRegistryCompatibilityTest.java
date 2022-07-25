@@ -68,4 +68,5 @@ class SignalFxMeterRegistryCompatibilityTest extends MeterRegistryCompatibilityK
     public Duration step() {
         return config.step();
     }
+
 }
