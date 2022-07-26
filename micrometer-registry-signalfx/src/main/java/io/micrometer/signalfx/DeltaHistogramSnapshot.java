@@ -20,23 +20,14 @@ import io.micrometer.core.instrument.distribution.CountAtBucket;
 import io.micrometer.core.instrument.distribution.HistogramSnapshot;
 
 final class DeltaHistogramSnapshot {
-    // It may get called from different threads, so use volatile to ensure updates are visible.
-    // Not null only if producing delta.
-    private volatile HistogramSnapshot lastSnapshot;
+    private HistogramSnapshot lastSnapshot;
 
-    DeltaHistogramSnapshot(boolean isDelta) {
-        if (isDelta) {
-            lastSnapshot = HistogramSnapshot.empty(0, 0, 0);
-        } else {
-            lastSnapshot = null;
-        }
+    DeltaHistogramSnapshot() {
+        lastSnapshot = HistogramSnapshot.empty(0, 0, 0);
     }
 
     // TODO: Determine if we need to synchronize, in case multiple calls in parallel.
     HistogramSnapshot calculateSnapshot(HistogramSnapshot currentSnapshot) {
-        if (lastSnapshot == null) {
-            return currentSnapshot;
-        }
         HistogramSnapshot deltaSnapshot = new HistogramSnapshot(
                 currentSnapshot.count() - lastSnapshot.count(),
                 currentSnapshot.total() - lastSnapshot.total(),

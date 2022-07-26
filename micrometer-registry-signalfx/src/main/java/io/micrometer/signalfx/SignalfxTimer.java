@@ -63,6 +63,7 @@ final class SignalfxTimer extends AbstractTimer {
 
     private final TimeWindowMax max;
 
+    // Not null only if producing delta.
     private final DeltaHistogramSnapshot deltaHistogramSnapshot;
 
     SignalfxTimer(Id id, Clock clock, DistributionStatisticConfig distributionStatisticConfig,
@@ -71,7 +72,11 @@ final class SignalfxTimer extends AbstractTimer {
                 baseTimeUnit, false);
         countTotal = new StepTuple2<>(clock, stepMillis, 0L, 0L, count::sumThenReset, total::sumThenReset);
         max = new TimeWindowMax(clock, distributionStatisticConfig);
-        deltaHistogramSnapshot = new DeltaHistogramSnapshot(isDelta);
+        if (isDelta) {
+            deltaHistogramSnapshot = new DeltaHistogramSnapshot();
+        } else {
+            deltaHistogramSnapshot = null;
+        }
     }
 
     @Override
@@ -99,6 +104,9 @@ final class SignalfxTimer extends AbstractTimer {
 
     @Override
     public HistogramSnapshot takeSnapshot() {
-        return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+        if (deltaHistogramSnapshot != null) {
+            return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+        }
+        return super.takeSnapshot();
     }
 }

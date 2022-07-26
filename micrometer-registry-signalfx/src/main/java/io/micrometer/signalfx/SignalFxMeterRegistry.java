@@ -172,7 +172,7 @@ public class SignalFxMeterRegistry extends StepMeterRegistry {
             return super.newTimer(id, distributionStatisticConfig, pauseDetector);
         }
         Timer timer = new SignalfxTimer(id, clock, distributionStatisticConfig, pauseDetector, getBaseTimeUnit(),
-                config.step().toMillis(), this.publishDeltaHistogram);
+                config.step().toMillis(), publishDeltaHistogram);
         HistogramGauges.registerWithCommonFormat(timer, this);
         return timer;
     }
@@ -184,7 +184,7 @@ public class SignalFxMeterRegistry extends StepMeterRegistry {
             return super.newDistributionSummary(id, distributionStatisticConfig, scale);
         }
         DistributionSummary summary = new SignalfxDistributionSummary(id, clock, distributionStatisticConfig, scale,
-                config.step().toMillis(), this.publishDeltaHistogram);
+                config.step().toMillis(), publishDeltaHistogram);
         HistogramGauges.registerWithCommonFormat(summary, this);
         return summary;
     }

@@ -69,7 +69,11 @@ final class SignalfxDistributionSummary extends AbstractDistributionSummary {
         super(id, clock, CumulativeHistogramConfigUtil.updateConfig(distributionStatisticConfig), scale, false);
         this.countTotal = new StepTuple2<>(clock, stepMillis, 0L, 0.0, count::sumThenReset, total::sumThenReset);
         this.max = new TimeWindowMax(clock, distributionStatisticConfig);
-        this.deltaHistogramSnapshot = new DeltaHistogramSnapshot(isDelta);
+        if (isDelta) {
+            deltaHistogramSnapshot = new DeltaHistogramSnapshot();
+        } else {
+            deltaHistogramSnapshot = null;
+        }
     }
 
     @Override
@@ -96,6 +100,9 @@ final class SignalfxDistributionSummary extends AbstractDistributionSummary {
 
     @Override
     public HistogramSnapshot takeSnapshot() {
-        return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+        if (deltaHistogramSnapshot != null) {
+            return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+        }
+        return super.takeSnapshot();
     }
 }
