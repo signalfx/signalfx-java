@@ -19,6 +19,7 @@ package io.micrometer.signalfx;
 import io.micrometer.core.instrument.distribution.CountAtBucket;
 import io.micrometer.core.instrument.distribution.HistogramSnapshot;
 
+// WARNING: This class is not available upstream yet, but will be soon, and may suffer modifications.
 final class DeltaHistogramSnapshot {
     private HistogramSnapshot lastSnapshot;
 
