@@ -35,6 +35,7 @@ package io.micrometer.signalfx;
 import io.micrometer.core.instrument.AbstractDistributionSummary;
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
+import io.micrometer.core.instrument.distribution.HistogramSnapshot;
 import io.micrometer.core.instrument.distribution.TimeWindowMax;
 import io.micrometer.core.instrument.step.StepTuple2;
 
@@ -61,11 +62,14 @@ final class SignalfxDistributionSummary extends AbstractDistributionSummary {
 
     private final TimeWindowMax max;
 
+    private final DeltaHistogramSnapshot deltaHistogramSnapshot;
+
     SignalfxDistributionSummary(Id id, Clock clock, DistributionStatisticConfig distributionStatisticConfig,
-            double scale, long stepMillis) {
+            double scale, long stepMillis, boolean isDelta) {
         super(id, clock, CumulativeHistogramConfigUtil.updateConfig(distributionStatisticConfig), scale, false);
         this.countTotal = new StepTuple2<>(clock, stepMillis, 0L, 0.0, count::sumThenReset, total::sumThenReset);
-        max = new TimeWindowMax(clock, distributionStatisticConfig);
+        this.max = new TimeWindowMax(clock, distributionStatisticConfig);
+        this.deltaHistogramSnapshot = new DeltaHistogramSnapshot(isDelta);
     }
 
     @Override
@@ -90,4 +94,8 @@ final class SignalfxDistributionSummary extends AbstractDistributionSummary {
         return max.poll();
     }
 
+    @Override
+    public HistogramSnapshot takeSnapshot() {
+        return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+    }
 }
