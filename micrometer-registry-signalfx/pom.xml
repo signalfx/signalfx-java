@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>1.0.18-SNAPSHOT</version>
+    <version>1.0.20</version>
   </parent>
 
   <artifactId>micrometer-registry-signalfx</artifactId>
@@ -16,7 +16,7 @@
   <description>
     A temporary fork of the io.micrometer:micrometer-registry-signalfx project
   </description>
-  <version>1.8.4-splunk3</version>
+  <version>1.9.2-splunk</version>
 
   <url>https://www.signalfx.com</url>
 
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-core</artifactId>
-      <version>1.8.5</version>
+      <version>1.9.2</version>
     </dependency>
 
     <!-- test -->
@@ -72,7 +72,7 @@
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-test</artifactId>
-      <version>1.8.5</version>
+      <version>1.9.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>

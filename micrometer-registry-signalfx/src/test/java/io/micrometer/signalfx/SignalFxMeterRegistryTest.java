@@ -48,6 +48,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -113,8 +114,7 @@ class SignalFxMeterRegistryTest {
         SignalFxMeterRegistry registry = new SignalFxMeterRegistry(cumulativeHistogramConfig, clock);
         Timer timer = Timer.builder("testTimer")
                 .serviceLevelObjectives(Duration.ofMillis(10), Duration.ofMillis(100), Duration.ofMillis(1000))
-                .distributionStatisticExpiry(Duration.ofSeconds(10))
-                .distributionStatisticBufferLength(1)
+                .distributionStatisticExpiry(Duration.ofSeconds(10)).distributionStatisticBufferLength(1)
                 .register(registry);
 
         timer.record(Duration.ofSeconds(10));
@@ -130,22 +130,18 @@ class SignalFxMeterRegistryTest {
         // max moves over the first observed 10s value
         assertThat(timer.max(TimeUnit.SECONDS)).isEqualTo(5);
         // histogram counts reflect everything that was observed
-        assertThat(timer.takeSnapshot().histogramCounts())
-                .containsExactly(
-                        new CountAtBucket(millisToUnit(10, TimeUnit.NANOSECONDS), 1),
-                        new CountAtBucket(millisToUnit(100, TimeUnit.NANOSECONDS), 2),
-                        new CountAtBucket(millisToUnit(1000, TimeUnit.NANOSECONDS), 3),
-                        new CountAtBucket(Double.MAX_VALUE, 5));
+        assertThat(timer.takeSnapshot().histogramCounts()).containsExactly(
+                new CountAtBucket(millisToUnit(10, TimeUnit.NANOSECONDS), 1),
+                new CountAtBucket(millisToUnit(100, TimeUnit.NANOSECONDS), 2),
+                new CountAtBucket(millisToUnit(1000, TimeUnit.NANOSECONDS), 3), new CountAtBucket(Double.MAX_VALUE, 5));
     }
 
     @Test
-    void shouldConfigureCumulativeHistogram_DistributionSummar() {
+    void shouldConfigureCumulativeHistogram_DistributionSummary() {
         MockClock clock = new MockClock();
         SignalFxMeterRegistry registry = new SignalFxMeterRegistry(cumulativeHistogramConfig, clock);
-        DistributionSummary summary = DistributionSummary.builder("testSummary")
-                .serviceLevelObjectives(10, 100, 1000)
-                .distributionStatisticExpiry(Duration.ofSeconds(10))
-                .distributionStatisticBufferLength(1)
+        DistributionSummary summary = DistributionSummary.builder("testSummary").serviceLevelObjectives(10, 100, 1000)
+                .distributionStatisticExpiry(Duration.ofSeconds(10)).distributionStatisticBufferLength(1)
                 .register(registry);
 
         summary.record(10_000);
@@ -161,12 +157,8 @@ class SignalFxMeterRegistryTest {
         // max moves over the first observed 10_000 value
         assertThat(summary.max()).isEqualTo(5_000);
         // histogram counts reflect everything that was observed
-        assertThat(summary.takeSnapshot().histogramCounts())
-                .containsExactly(
-                        new CountAtBucket(10d, 1),
-                        new CountAtBucket(100d, 2),
-                        new CountAtBucket(1000d, 3),
-                        new CountAtBucket(Double.MAX_VALUE, 5));
+        assertThat(summary.takeSnapshot().histogramCounts()).containsExactly(new CountAtBucket(10d, 1),
+                new CountAtBucket(100d, 2), new CountAtBucket(1000d, 3), new CountAtBucket(Double.MAX_VALUE, 5));
     }
 
     @ParameterizedTest
@@ -174,22 +166,19 @@ class SignalFxMeterRegistryTest {
     void shouldExportCumulativeHistogramData_Timer(Duration[] buckets) {
         MockClock mockClock = new MockClock();
         SignalFxMeterRegistry registry = new SignalFxMeterRegistry(cumulativeHistogramConfig, mockClock);
-        Timer timer = Timer.builder("my.timer")
-                .serviceLevelObjectives(buckets)
-                .register(registry);
+        Timer timer = Timer.builder("my.timer").serviceLevelObjectives(buckets).register(registry);
 
         timer.record(5, TimeUnit.MILLISECONDS);
         timer.record(20, TimeUnit.MILLISECONDS);
         timer.record(175, TimeUnit.MILLISECONDS);
         timer.record(2, TimeUnit.SECONDS);
 
-        // Advance time, so we are in the "next" step where currently recorded values will be reported.
+        // Advance time, so we are in the "next" step where currently recorded values will
+        // be reported.
         mockClock.add(config.step());
 
-        assertThat(getDataPoints(registry, mockClock.wallTime()))
-                .hasSize(9)
-                .has(gaugePoint("my.timer.avg", 0.55), atIndex(0))
-                .has(counterPoint("my.timer.count", 4), atIndex(1))
+        assertThat(getDataPoints(registry, mockClock.wallTime())).hasSize(9)
+                .has(gaugePoint("my.timer.avg", 0.55), atIndex(0)).has(counterPoint("my.timer.count", 4), atIndex(1))
                 .has(allOf(cumulativeCounterPoint("my.timer.histogram", 4), bucket("+Inf")), atIndex(2))
                 .has(allOf(cumulativeCounterPoint("my.timer.histogram", 0), bucket(buckets[0])), atIndex(3))
                 .has(allOf(cumulativeCounterPoint("my.timer.histogram", 1), bucket(buckets[1])), atIndex(4))
@@ -205,17 +194,13 @@ class SignalFxMeterRegistryTest {
 
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            Object buckets = Arrays.array(Duration.ofMillis(1),
-                    Duration.ofMillis(10),
-                    Duration.ofMillis(100),
+            Object buckets = Arrays.array(Duration.ofMillis(1), Duration.ofMillis(10), Duration.ofMillis(100),
                     Duration.ofMillis(1000));
-            Object bucketsWithInf = Arrays.array(Duration.ofMillis(1),
-                    Duration.ofMillis(10),
-                    Duration.ofMillis(100),
-                    Duration.ofMillis(1000),
-                    Duration.ofNanos(Long.MAX_VALUE));
+            Object bucketsWithInf = Arrays.array(Duration.ofMillis(1), Duration.ofMillis(10), Duration.ofMillis(100),
+                    Duration.ofMillis(1000), Duration.ofNanos(Long.MAX_VALUE));
             return Stream.of(Arguments.of(buckets), Arguments.of(bucketsWithInf));
         }
+
     }
 
     @ParameterizedTest
@@ -224,19 +209,18 @@ class SignalFxMeterRegistryTest {
         MockClock mockClock = new MockClock();
         SignalFxMeterRegistry registry = new SignalFxMeterRegistry(cumulativeHistogramConfig, mockClock);
         DistributionSummary distributionSummary = DistributionSummary.builder("my.distribution")
-                .serviceLevelObjectives(buckets)
-                .register(registry);
+                .serviceLevelObjectives(buckets).register(registry);
 
         distributionSummary.record(5);
         distributionSummary.record(20);
         distributionSummary.record(175);
         distributionSummary.record(2000);
 
-        // Advance time, so we are in the "next" step where currently recorded values will be reported.
+        // Advance time, so we are in the "next" step where currently recorded values will
+        // be reported.
         mockClock.add(cumulativeHistogramConfig.step());
 
-        assertThat(getDataPoints(registry, mockClock.wallTime()))
-                .hasSize(9)
+        assertThat(getDataPoints(registry, mockClock.wallTime())).hasSize(9)
                 .has(gaugePoint("my.distribution.avg", 550), atIndex(0))
                 .has(counterPoint("my.distribution.count", 4), atIndex(1))
                 .has(allOf(cumulativeCounterPoint("my.distribution.histogram", 4), bucket("+Inf")), atIndex(2))
@@ -254,10 +238,11 @@ class SignalFxMeterRegistryTest {
 
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            Object buckets = new double[]{1.0, 10, 100, 1000};
-            Object bucketsWithInf = new double[]{1.0, 10, 100, 1000, Double.MAX_VALUE};
+            Object buckets = new double[] { 1.0, 10, 100, 1000 };
+            Object bucketsWithInf = new double[] { 1.0, 10, 100, 1000, Double.MAX_VALUE };
             return Stream.of(Arguments.of(buckets), Arguments.of(bucketsWithInf));
         }
+
     }
 
     @Test
@@ -265,12 +250,9 @@ class SignalFxMeterRegistryTest {
         MockClock mockClock = new MockClock();
         SignalFxMeterRegistry registry = new SignalFxMeterRegistry(config, mockClock);
         Timer timer = Timer.builder("my.timer")
-                .serviceLevelObjectives(Duration.ofMillis(1),
-                        Duration.ofMillis(10),
-                        Duration.ofMillis(100),
+                .serviceLevelObjectives(Duration.ofMillis(1), Duration.ofMillis(10), Duration.ofMillis(100),
                         Duration.ofMillis(1000))
-                .distributionStatisticExpiry(Duration.ofSeconds(10))
-                .distributionStatisticBufferLength(1)
+                .distributionStatisticExpiry(Duration.ofSeconds(10)).distributionStatisticBufferLength(1)
                 .register(registry);
 
         timer.record(50, TimeUnit.MILLISECONDS);
@@ -282,10 +264,8 @@ class SignalFxMeterRegistryTest {
         timer.record(500, TimeUnit.MILLISECONDS);
         mockClock.add(config.step().minus(Duration.ofMillis(1)));
 
-        assertThat(getDataPoints(registry, mockClock.wallTime()))
-                .hasSize(8)
-                .has(gaugePoint("my.timer.avg", 0.2525), atIndex(0))
-                .has(counterPoint("my.timer.count", 2), atIndex(1))
+        assertThat(getDataPoints(registry, mockClock.wallTime())).hasSize(8)
+                .has(gaugePoint("my.timer.avg", 0.2525), atIndex(0)).has(counterPoint("my.timer.count", 2), atIndex(1))
                 .has(allOf(gaugePoint("my.timer.histogram", 0), bucket(Duration.ofMillis(1))), atIndex(2))
                 .has(allOf(gaugePoint("my.timer.histogram", 1), bucket(Duration.ofMillis(10))), atIndex(3))
                 .has(allOf(gaugePoint("my.timer.histogram", 1), bucket(Duration.ofMillis(100))), atIndex(4))
@@ -301,10 +281,8 @@ class SignalFxMeterRegistryTest {
         MockClock mockClock = new MockClock();
         SignalFxMeterRegistry registry = new SignalFxMeterRegistry(config, mockClock);
         DistributionSummary summary = DistributionSummary.builder("my.distribution")
-                .serviceLevelObjectives(1, 10, 100, 1000)
-                .distributionStatisticExpiry(Duration.ofSeconds(10))
-                .distributionStatisticBufferLength(1)
-                .register(registry);
+                .serviceLevelObjectives(1, 10, 100, 1000).distributionStatisticExpiry(Duration.ofSeconds(10))
+                .distributionStatisticBufferLength(1).register(registry);
 
         summary.record(50);
         summary.record(5000);
@@ -315,8 +293,7 @@ class SignalFxMeterRegistryTest {
         summary.record(500);
         mockClock.add(config.step().minus(Duration.ofMillis(1)));
 
-        assertThat(getDataPoints(registry, mockClock.wallTime()))
-                .hasSize(8)
+        assertThat(getDataPoints(registry, mockClock.wallTime())).hasSize(8)
                 .has(gaugePoint("my.distribution.avg", 252.5), atIndex(0))
                 .has(counterPoint("my.distribution.count", 2), atIndex(1))
                 .has(allOf(gaugePoint("my.distribution.histogram", 0), bucket(1)), atIndex(2))
@@ -329,26 +306,15 @@ class SignalFxMeterRegistryTest {
         registry.close();
     }
 
-    private static List<SignalFxProtocolBuffers.DataPoint> getDataPoints(SignalFxMeterRegistry registry, long timestamp) {
-        return registry.getMeters().stream().map(meter -> meter.match(
-                        registry::addGauge,
-                        registry::addCounter,
-                        registry::addTimer,
-                        registry::addDistributionSummary,
-                        registry::addLongTaskTimer,
-                        registry::addTimeGauge,
-                        registry::addFunctionCounter,
-                        registry::addFunctionTimer,
-                        registry::addMeter))
+    private static List<SignalFxProtocolBuffers.DataPoint> getDataPoints(SignalFxMeterRegistry registry,
+            long timestamp) {
+        return registry.getMeters().stream()
+                .map(meter -> meter.match(registry::addGauge, registry::addCounter, registry::addTimer,
+                        registry::addDistributionSummary, registry::addLongTaskTimer, registry::addTimeGauge,
+                        registry::addFunctionCounter, registry::addFunctionTimer, registry::addMeter))
                 .flatMap(builders -> builders.map(builder -> builder.setTimestamp(timestamp).build()))
-                .sorted((point1, point2) -> {
-                    int cmp = point1.getMetric().compareTo(point2.getMetric());
-                    if (cmp == 0) {
-                        return point1.getDimensions(0).getValue()
-                                .compareTo(point2.getDimensions(0).getValue());
-                    }
-                    return cmp;
-                })
+                .sorted(Comparator.comparing(SignalFxProtocolBuffers.DataPoint::getMetric)
+                        .thenComparing((point) -> point.getDimensions(0).getValue()))
                 .collect(Collectors.toList());
     }
 
@@ -361,30 +327,26 @@ class SignalFxMeterRegistryTest {
     }
 
     private static Condition<SignalFxProtocolBuffers.DataPoint> bucket(String bucketStr) {
-        return allOf(
-                new Condition<>(point -> point.getDimensions(0).getKey().equals("le"), "Has 'le' dimension"),
-                new Condition<>(point -> point.getDimensions(0).getValue().equals(bucketStr), "Has 'le' dimension with value %s", bucketStr));
+        return allOf(new Condition<>(point -> point.getDimensions(0).getKey().equals("le"), "Has 'le' dimension"),
+                new Condition<>(point -> point.getDimensions(0).getValue().equals(bucketStr),
+                        "Has 'le' dimension with value %s", bucketStr));
     }
 
     private static Condition<SignalFxProtocolBuffers.DataPoint> counterPoint(String name, double value) {
-        return allOf(
-                new Condition<>(point -> point.getMetric().equals(name), "Has name %s", name),
-                new Condition<>(point -> point.getMetricType().equals(COUNTER), "Has COUNTER type"),
-                hasValue(value));
+        return allOf(new Condition<>(point -> point.getMetric().equals(name), "Has name %s", name),
+                new Condition<>(point -> point.getMetricType().equals(COUNTER), "Has COUNTER type"), hasValue(value));
     }
 
     private static Condition<SignalFxProtocolBuffers.DataPoint> cumulativeCounterPoint(String name, double value) {
-        return allOf(
-                new Condition<>(point -> point.getMetric().equals(name), "Has name %s", name),
-                new Condition<>(point -> point.getMetricType().equals(CUMULATIVE_COUNTER), "Has CUMULATIVE_COUNTER type"),
+        return allOf(new Condition<>(point -> point.getMetric().equals(name), "Has name %s", name),
+                new Condition<>(point -> point.getMetricType().equals(CUMULATIVE_COUNTER),
+                        "Has CUMULATIVE_COUNTER type"),
                 hasValue(value));
     }
 
     private static Condition<SignalFxProtocolBuffers.DataPoint> gaugePoint(String name, double value) {
-        return allOf(
-                new Condition<>(point -> point.getMetric().equals(name), "Has name %s", name),
-                new Condition<>(point -> point.getMetricType().equals(GAUGE), "Has GAUGE type"),
-                hasValue(value));
+        return allOf(new Condition<>(point -> point.getMetric().equals(name), "Has name %s", name),
+                new Condition<>(point -> point.getMetricType().equals(GAUGE), "Has GAUGE type"), hasValue(value));
     }
 
     private static Condition<SignalFxProtocolBuffers.DataPoint> hasValue(double value) {
@@ -393,4 +355,5 @@ class SignalFxMeterRegistryTest {
             return v.getDoubleValue() == value || v.getIntValue() == (int) value;
         }, "Has value %s", value);
     }
+
 }
