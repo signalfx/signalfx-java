@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2017 SignalFx, Inc. All rights reserved.
 
@@ -80,7 +80,7 @@ def perform_file_replacements(version):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        sys.stderr.write('usage: %s <version>%n', sys.argv[0])
+        sys.stderr.write(f"usage: {sys.argv[0]} <version>\n")
         sys.exit(1)
 
     version = sys.argv[1]
