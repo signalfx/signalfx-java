@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author dgriff
  */
-public class SignalFlowClient {
+public class SignalFlowClient implements AutoCloseable {
 
     private SignalFlowTransport transport;
 
@@ -198,6 +198,7 @@ public class SignalFlowClient {
     /**
      * Close this SignalFlow client.
      */
+    @Override
     public void close() {
         this.transport.close(1000, null);
     }
