@@ -72,7 +72,8 @@ final class SignalfxTimer extends AbstractTimer {
                 baseTimeUnit, false);
         countTotal = new StepTuple2<>(clock, stepMillis, 0L, 0L, count::sumThenReset, total::sumThenReset);
         max = new TimeWindowMax(clock, distributionStatisticConfig);
-        if (isDelta) {
+        if (!distributionStatisticConfig.isPublishingPercentiles()
+                && distributionStatisticConfig.isPublishingHistogram() && isDelta) {
             deltaHistogramSnapshot = new DeltaHistogramSnapshot();
         } else {
             deltaHistogramSnapshot = null;
