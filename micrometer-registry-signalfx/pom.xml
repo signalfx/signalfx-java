@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.signalfx.public</groupId>
     <artifactId>clients-parent</artifactId>
-    <version>1.0.21</version>
+    <version>1.0.22</version>
   </parent>
 
   <artifactId>micrometer-registry-signalfx</artifactId>
@@ -16,7 +16,7 @@
   <description>
     A temporary fork of the io.micrometer:micrometer-registry-signalfx project
   </description>
-  <version>1.9.2-splunk</version>
+  <version>1.9.2-splunk2</version>
 
   <url>https://www.signalfx.com</url>
 
