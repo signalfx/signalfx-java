@@ -62,17 +62,19 @@ final class SignalfxDistributionSummary extends AbstractDistributionSummary {
 
     private final TimeWindowMax max;
 
-    private final DeltaHistogramSnapshot deltaHistogramSnapshot;
+    private final DeltaHistogramCounts deltaHistogramCounts;
 
     SignalfxDistributionSummary(Id id, Clock clock, DistributionStatisticConfig distributionStatisticConfig,
             double scale, long stepMillis, boolean isDelta) {
         super(id, clock, CumulativeHistogramConfigUtil.updateConfig(distributionStatisticConfig), scale, false);
         this.countTotal = new StepTuple2<>(clock, stepMillis, 0L, 0.0, count::sumThenReset, total::sumThenReset);
         this.max = new TimeWindowMax(clock, distributionStatisticConfig);
-        if (isDelta) {
-            deltaHistogramSnapshot = new DeltaHistogramSnapshot();
-        } else {
-            deltaHistogramSnapshot = null;
+        if (!distributionStatisticConfig.isPublishingPercentiles()
+                && distributionStatisticConfig.isPublishingHistogram() && isDelta) {
+            deltaHistogramCounts = new DeltaHistogramCounts();
+        }
+        else {
+            deltaHistogramCounts = null;
         }
     }
 
@@ -100,9 +102,16 @@ final class SignalfxDistributionSummary extends AbstractDistributionSummary {
 
     @Override
     public HistogramSnapshot takeSnapshot() {
-        if (deltaHistogramSnapshot != null) {
-            return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+        HistogramSnapshot currentSnapshot = super.takeSnapshot();
+        if (deltaHistogramCounts == null) {
+            return currentSnapshot;
         }
-        return super.takeSnapshot();
+        return new HistogramSnapshot(currentSnapshot.count(), // Already delta in sfx
+                // implementation
+                currentSnapshot.total(), // Already delta in sfx implementation
+                currentSnapshot.max(), // Max cannot be calculated as delta, keep the
+                // current.
+                null, // No percentile values
+                deltaHistogramCounts.calculate(currentSnapshot.histogramCounts()), currentSnapshot::outputSummary);
     }
 }
