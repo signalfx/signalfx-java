@@ -64,7 +64,7 @@ final class SignalfxTimer extends AbstractTimer {
     private final TimeWindowMax max;
 
     // Not null only if producing delta.
-    private final DeltaHistogramSnapshot deltaHistogramSnapshot;
+    private final DeltaHistogramCounts deltaHistogramCounts;
 
     SignalfxTimer(Id id, Clock clock, DistributionStatisticConfig distributionStatisticConfig,
             PauseDetector pauseDetector, TimeUnit baseTimeUnit, long stepMillis, boolean isDelta) {
@@ -74,9 +74,10 @@ final class SignalfxTimer extends AbstractTimer {
         max = new TimeWindowMax(clock, distributionStatisticConfig);
         if (!distributionStatisticConfig.isPublishingPercentiles()
                 && distributionStatisticConfig.isPublishingHistogram() && isDelta) {
-            deltaHistogramSnapshot = new DeltaHistogramSnapshot();
-        } else {
-            deltaHistogramSnapshot = null;
+            deltaHistogramCounts = new DeltaHistogramCounts();
+        }
+        else {
+            deltaHistogramCounts = null;
         }
     }
 
@@ -105,9 +106,16 @@ final class SignalfxTimer extends AbstractTimer {
 
     @Override
     public HistogramSnapshot takeSnapshot() {
-        if (deltaHistogramSnapshot != null) {
-            return deltaHistogramSnapshot.calculateSnapshot(super.takeSnapshot());
+        HistogramSnapshot currentSnapshot = super.takeSnapshot();
+        if (deltaHistogramCounts == null) {
+            return currentSnapshot;
         }
-        return super.takeSnapshot();
+        return new HistogramSnapshot(currentSnapshot.count(), // Already delta in sfx
+                // implementation
+                currentSnapshot.total(), // Already delta in sfx implementation
+                currentSnapshot.max(), // Max cannot be calculated as delta, keep the
+                // current.
+                null, // No percentile values
+                deltaHistogramCounts.calculate(currentSnapshot.histogramCounts()), currentSnapshot::outputSummary);
     }
 }
