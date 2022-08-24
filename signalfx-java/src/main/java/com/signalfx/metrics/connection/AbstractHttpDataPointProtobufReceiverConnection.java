@@ -44,6 +44,15 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
         this.compress = !Boolean.getBoolean(DISABLE_COMPRESSION_PROPERTY);
     }
 
+    public AbstractHttpDataPointProtobufReceiverConnection(SignalFxReceiverEndpoint endpoint,
+                                                           int timeoutMs,
+                                                           int maxRetries,
+                                                           HttpClientConnectionManager httpClientConnectionManager,
+                                                           List<Class<? extends IOException>> nonRetryableExceptions) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager, nonRetryableExceptions);
+        this.compress = !Boolean.getBoolean(DISABLE_COMPRESSION_PROPERTY);
+    }
+
     @Override
     public void addDataPoints(String auth, List<SignalFxProtocolBuffers.DataPoint> dataPoints)
             throws SignalFxMetricsException {

@@ -1,6 +1,7 @@
 package com.signalfx.connection;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
@@ -23,6 +24,7 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
 import static com.signalfx.connection.RetryHandler.DEFAULT_MAX_RETRIES;
+import static com.signalfx.connection.RetryHandler.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
 
 public abstract class AbstractHttpReceiverConnection {
 
@@ -47,9 +49,14 @@ public abstract class AbstractHttpReceiverConnection {
 
     protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
                                              HttpClientConnectionManager httpClientConnectionManager) {
+        this(endpoint, timeoutMs, DEFAULT_MAX_RETRIES, httpClientConnectionManager, DEFAULT_NON_RETRYABLE_EXCEPTIONS);
+    }
+
+    protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+                                             HttpClientConnectionManager httpClientConnectionManager, List<Class<? extends IOException>> nonRetryableExceptions) {
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)
-                .setRetryHandler(new RetryHandler(maxRetries))
+                .setRetryHandler(new RetryHandler(maxRetries, nonRetryableExceptions))
                 .setServiceUnavailableRetryStrategy(new RetryStrategy(maxRetries))
                 .build();
         this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(), endpoint.getScheme());
