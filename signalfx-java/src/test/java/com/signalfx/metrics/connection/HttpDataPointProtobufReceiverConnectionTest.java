@@ -23,10 +23,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
@@ -93,6 +95,63 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
           SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
     }
+  }
+
+  @Test
+  public void shouldRetryOnSocketTimeout() throws Exception {
+    final CountingTimeoutHandler handler = new CountingTimeoutHandler();
+    final int timeout = 1000;
+    Server server = new Server();
+    ServerConnector connector = new ServerConnector(server);
+    connector.setIdleTimeout(timeout);
+    connector.setPort(0);
+    server.setConnectors(new Connector[]{connector});
+    server.setHandler(handler);
+    server.start();
+
+    try (AutoCloseable ignored = server::stop) {
+      URI uri = server.getURI();
+      DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
+              new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+              .setMaxRetries(1)
+              .setNonRetryableExceptions(Collections.emptyList())
+              .createDataPointReceiver();
+      try {
+        dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
+                SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+      } catch (Exception ignored2) {
+      }
+    }
+
+    Assert.assertEquals(2, handler.requests);
+  }
+
+  @Test
+  public void shouldNotRetryOnDefaultNonRetryableExceptions() throws Exception{
+    final CountingTimeoutHandler handler = new CountingTimeoutHandler();
+    final int timeout = 1000;
+    Server server = new Server();
+    ServerConnector connector = new ServerConnector(server);
+    connector.setIdleTimeout(timeout);
+    connector.setPort(0);
+    server.setConnectors(new Connector[]{connector});
+    server.setHandler(handler);
+    server.start();
+
+    try (AutoCloseable ignored = server::stop) {
+      URI uri = server.getURI();
+      DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
+              new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+              .setMaxRetries(1)
+              .createDataPointReceiver();
+      try {
+        dpr.addDataPoints(AUTH_TOKEN, Collections.singletonList(
+                SignalFxProtocolBuffers.DataPoint.newBuilder().setSource("source").build()));
+      } catch (Exception ignored2) {
+      }
+    }
+
+    Assert.assertEquals(1, handler.requests);
   }
 
   @Test
@@ -190,6 +249,20 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       }
 
       ok(response, baseRequest);
+    }
+  }
+
+  private static class CountingTimeoutHandler extends AbstractHandler {
+    private int requests = 0;
+
+    @Override
+    public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException{
+      requests++;
+
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException ignored) {
+      }
     }
   }
 
