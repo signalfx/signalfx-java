@@ -72,8 +72,7 @@ final class SignalfxTimer extends AbstractTimer {
                 baseTimeUnit, false);
         countTotal = new StepTuple2<>(clock, stepMillis, 0L, 0L, count::sumThenReset, total::sumThenReset);
         max = new TimeWindowMax(clock, distributionStatisticConfig);
-        if (!distributionStatisticConfig.isPublishingPercentiles()
-                && distributionStatisticConfig.isPublishingHistogram() && isDelta) {
+        if (distributionStatisticConfig.isPublishingHistogram() && isDelta) {
             deltaHistogramCounts = new DeltaHistogramCounts();
         }
         else {
@@ -110,12 +109,10 @@ final class SignalfxTimer extends AbstractTimer {
         if (deltaHistogramCounts == null) {
             return currentSnapshot;
         }
-        return new HistogramSnapshot(currentSnapshot.count(), // Already delta in sfx
-                // implementation
+        return new HistogramSnapshot(currentSnapshot.count(), // Already delta in sfx implementation
                 currentSnapshot.total(), // Already delta in sfx implementation
-                currentSnapshot.max(), // Max cannot be calculated as delta, keep the
-                // current.
-                null, // No percentile values
+                currentSnapshot.max(), // Max cannot be calculated as delta, keep the current.
+                currentSnapshot.percentileValues(), // No changes to the percentile values.
                 deltaHistogramCounts.calculate(currentSnapshot.histogramCounts()), currentSnapshot::outputSummary);
     }
 }
