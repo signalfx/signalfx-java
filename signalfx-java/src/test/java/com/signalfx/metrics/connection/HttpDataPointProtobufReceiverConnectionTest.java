@@ -14,8 +14,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
@@ -23,13 +24,14 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.Assert.assertEquals;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
 
@@ -99,11 +101,10 @@ public class HttpDataPointProtobufReceiverConnectionTest {
 
   @Test
   public void shouldRetryOnSocketTimeout() throws Exception {
-    final CountingTimeoutHandler handler = new CountingTimeoutHandler();
-    final int timeout = 1000;
+    final LatchTriggeredHandler handler = new LatchTriggeredHandler(new CountDownLatch(1), 2000);
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(timeout);
+    connector.setIdleTimeout(1000);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -123,16 +124,15 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       }
     }
 
-    Assert.assertEquals(2, handler.requests);
+    assertEquals(2, handler.requests);
   }
 
   @Test
   public void shouldNotRetryOnDefaultNonRetryableExceptions() throws Exception{
-    final CountingTimeoutHandler handler = new CountingTimeoutHandler();
-    final int timeout = 1000;
+    final LatchTriggeredHandler handler = new LatchTriggeredHandler(new CountDownLatch(1), 1000);
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(timeout);
+    connector.setIdleTimeout(500);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -151,7 +151,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       }
     }
 
-    Assert.assertEquals(1, handler.requests);
+    assertEquals(1, handler.requests);
   }
 
   @Test
@@ -252,15 +252,22 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     }
   }
 
-  private static class CountingTimeoutHandler extends AbstractHandler {
+  private static class LatchTriggeredHandler extends AbstractHandler {
+    private final CountDownLatch latch;
+
+    private long timeoutMs = Integer.MAX_VALUE;
     private int requests = 0;
+
+    LatchTriggeredHandler(CountDownLatch latch, long timeoutMs) {
+      this.latch = latch;
+      this.timeoutMs = timeoutMs;
+    }
 
     @Override
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException{
       requests++;
-
       try {
-        Thread.sleep(2000);
+        latch.await(timeoutMs, MILLISECONDS);
       } catch (InterruptedException ignored) {
       }
     }
