@@ -7,20 +7,14 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.ConnectException;
-import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.List;
+
+import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
+import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
 
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
     public static final int DEFAULT_VERSION = 2;
-    public static final int DEFAULT_MAX_RETRIES = 3;
-    public static final List<Class<? extends IOException>> DEFAULT_NON_RETRYABLE_EXCEPTIONS = Arrays.asList(
-            InterruptedIOException.class,
-            UnknownHostException.class,
-            ConnectException.class);
 
     private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager;

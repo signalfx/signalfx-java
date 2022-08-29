@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
-import static com.signalfx.connection.RetryHandler.DEFAULT_MAX_RETRIES;
-import static com.signalfx.connection.RetryHandler.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
+import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
+import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
 
 public abstract class AbstractHttpReceiverConnection {
 
