@@ -6,7 +6,7 @@
   <groupId>com.signalfx.public</groupId>
   <artifactId>clients-parent</artifactId>
   <name>SignalFx parent</name>
-  <version>1.0.22</version>
+  <version>1.0.23</version>
   <packaging>pom</packaging>
 
   <description>
@@ -24,7 +24,7 @@
     <os72.protobuf-shaded.plugin-version>${protobuf.version}</os72.protobuf-shaded.plugin-version>
     <os72.protobuf-shaded.version>3-11-1</os72.protobuf-shaded.version>
     <protobuf.version>3.11.1</protobuf.version>
-    <slf4j.version>2.0.0</slf4j.version>
+    <slf4j.version>1.7.36</slf4j.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
@@ -106,27 +106,27 @@
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-protoc</artifactId>
-        <version>1.0.22</version>
+        <version>1.0.23</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-codahale</artifactId>
-        <version>1.0.22</version>
+        <version>1.0.23</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-yammer</artifactId>
-        <version>1.0.22</version>
+        <version>1.0.23</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-commons-protoc-java</artifactId>
-        <version>1.0.22</version>
+        <version>1.0.23</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-java</artifactId>
-        <version>1.0.22</version>
+        <version>1.0.23</version>
       </dependency>
 
       <!-- shaded and included in the jar -->
