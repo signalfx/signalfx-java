@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -101,10 +102,14 @@ public class HttpDataPointProtobufReceiverConnectionTest {
 
   @Test
   public void shouldRetryOnSocketTimeout() throws Exception {
-    final LatchTriggeredHandler handler = new LatchTriggeredHandler(new CountDownLatch(1), 2000);
+    final CountDownLatch latch = new CountDownLatch(1);
+    final LatchTriggeredHandler handler = new LatchTriggeredHandler(latch);
+    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    executor.schedule(latch::countDown, 3000, MILLISECONDS);
+
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(1000);
+    connector.setIdleTimeout(500);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -128,8 +133,12 @@ public class HttpDataPointProtobufReceiverConnectionTest {
   }
 
   @Test
-  public void shouldNotRetryOnDefaultNonRetryableExceptions() throws Exception{
-    final LatchTriggeredHandler handler = new LatchTriggeredHandler(new CountDownLatch(1), 1000);
+  public void shouldNotRetryOnDefaultNonRetryableExceptions() throws Exception {
+    final CountDownLatch latch = new CountDownLatch(1);
+    final LatchTriggeredHandler handler = new LatchTriggeredHandler(latch);
+    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    executor.schedule(latch::countDown, 2000, MILLISECONDS);
+
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
     connector.setIdleTimeout(500);
@@ -254,20 +263,17 @@ public class HttpDataPointProtobufReceiverConnectionTest {
 
   private static class LatchTriggeredHandler extends AbstractHandler {
     private final CountDownLatch latch;
-
-    private long timeoutMs = Integer.MAX_VALUE;
     private int requests = 0;
 
-    LatchTriggeredHandler(CountDownLatch latch, long timeoutMs) {
+    LatchTriggeredHandler(CountDownLatch latch) {
       this.latch = latch;
-      this.timeoutMs = timeoutMs;
     }
 
     @Override
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException{
       requests++;
       try {
-        latch.await(timeoutMs, MILLISECONDS);
+        latch.await();
       } catch (InterruptedException ignored) {
       }
     }

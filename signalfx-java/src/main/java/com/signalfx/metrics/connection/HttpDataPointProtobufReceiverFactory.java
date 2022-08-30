@@ -7,6 +7,7 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
@@ -49,7 +50,7 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     }
 
     public HttpDataPointProtobufReceiverFactory setNonRetryableExceptions(List<Class<? extends IOException>> clazzes) {
-        this.nonRetryableExceptions = clazzes;
+        this.nonRetryableExceptions = Collections.unmodifiableList(clazzes);
         return this;
     }
 

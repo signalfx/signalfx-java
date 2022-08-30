@@ -11,7 +11,7 @@ public final class RetryDefaults {
     private RetryDefaults() {
     }
 
-    public static final Integer DEFAULT_MAX_RETRIES = 3;
+    public static final int DEFAULT_MAX_RETRIES = 3;
     public static final List<Class<? extends IOException>> DEFAULT_NON_RETRYABLE_EXCEPTIONS = Arrays.asList(
             InterruptedIOException.class,
             UnknownHostException.class,
