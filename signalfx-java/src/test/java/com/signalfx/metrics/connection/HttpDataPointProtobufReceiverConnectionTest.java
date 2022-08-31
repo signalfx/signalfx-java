@@ -105,11 +105,11 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     final CountDownLatch latch = new CountDownLatch(1);
     final LatchTriggeredHandler handler = new LatchTriggeredHandler(latch);
     ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    executor.schedule(latch::countDown, 3000, MILLISECONDS);
+    executor.schedule(latch::countDown, 500, MILLISECONDS);
 
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(500);
+    connector.setIdleTimeout(100);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -120,6 +120,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
               new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
               .setMaxRetries(1)
+              .setTimeoutMs(50)
               .setNonRetryableExceptions(Collections.emptyList())
               .createDataPointReceiver();
       try {
@@ -137,11 +138,11 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     final CountDownLatch latch = new CountDownLatch(1);
     final LatchTriggeredHandler handler = new LatchTriggeredHandler(latch);
     ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    executor.schedule(latch::countDown, 2000, MILLISECONDS);
+    executor.schedule(latch::countDown, 500, MILLISECONDS);
 
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(500);
+    connector.setIdleTimeout(100);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -151,6 +152,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       URI uri = server.getURI();
       DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
               new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
+              .setTimeoutMs(50)
               .setMaxRetries(1)
               .createDataPointReceiver();
       try {
