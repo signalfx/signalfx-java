@@ -14,9 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +28,6 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
@@ -102,10 +98,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
 
   @Test
   public void shouldRetryOnSocketTimeout() throws Exception {
-    final CountDownLatch latch = new CountDownLatch(1);
-    final LatchTriggeredHandler handler = new LatchTriggeredHandler(latch);
-    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    executor.schedule(latch::countDown, 500, MILLISECONDS);
+    final CountingHandler handler = new CountingHandler();
 
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
@@ -120,7 +113,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
               new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
               .setMaxRetries(1)
-              .setTimeoutMs(50)
+              .setTimeoutMs(25)
               .setNonRetryableExceptions(Collections.emptyList())
               .createDataPointReceiver();
       try {
@@ -135,10 +128,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
 
   @Test
   public void shouldNotRetryOnDefaultNonRetryableExceptions() throws Exception {
-    final CountDownLatch latch = new CountDownLatch(1);
-    final LatchTriggeredHandler handler = new LatchTriggeredHandler(latch);
-    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    executor.schedule(latch::countDown, 500, MILLISECONDS);
+    final CountingHandler handler = new CountingHandler();
 
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
@@ -263,21 +253,12 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     }
   }
 
-  private static class LatchTriggeredHandler extends AbstractHandler {
-    private final CountDownLatch latch;
+  private static class CountingHandler extends AbstractHandler {
     private int requests = 0;
-
-    LatchTriggeredHandler(CountDownLatch latch) {
-      this.latch = latch;
-    }
 
     @Override
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException{
       requests++;
-      try {
-        latch.await();
-      } catch (InterruptedException ignored) {
-      }
     }
   }
 
