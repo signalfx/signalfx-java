@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.zip.GZIPInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +29,9 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class HttpDataPointProtobufReceiverConnectionTest {
 
@@ -98,11 +101,13 @@ public class HttpDataPointProtobufReceiverConnectionTest {
 
   @Test
   public void shouldRetryOnSocketTimeout() throws Exception {
-    final CountingHandler handler = new CountingHandler();
+    final CountDownLatch latch = new CountDownLatch(2);
+    final int clientTimeoutMs = 100;
+    final LatchedTimeoutHandler handler = new LatchedTimeoutHandler(latch, clientTimeoutMs);
 
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(100);
+    connector.setIdleTimeout(1000);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -113,7 +118,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
               new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
               .setMaxRetries(1)
-              .setTimeoutMs(25)
+              .setTimeoutMs(clientTimeoutMs)
               .setNonRetryableExceptions(Collections.emptyList())
               .createDataPointReceiver();
       try {
@@ -123,16 +128,18 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       }
     }
 
-    assertEquals(2, handler.requests);
+    assertTrue(latch.await(1000, MILLISECONDS));
   }
 
   @Test
   public void shouldNotRetryOnDefaultNonRetryableExceptions() throws Exception {
-    final CountingHandler handler = new CountingHandler();
+    final CountDownLatch latch = new CountDownLatch(1);
+    final int timeoutMs = 100;
+    final LatchedTimeoutHandler handler = new LatchedTimeoutHandler(latch, timeoutMs);
 
     Server server = new Server();
     ServerConnector connector = new ServerConnector(server);
-    connector.setIdleTimeout(100);
+    connector.setIdleTimeout(1000);
     connector.setPort(0);
     server.setConnectors(new Connector[]{connector});
     server.setHandler(handler);
@@ -142,7 +149,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       URI uri = server.getURI();
       DataPointReceiver dpr = new HttpDataPointProtobufReceiverFactory(
               new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
-              .setTimeoutMs(50)
+              .setTimeoutMs(timeoutMs)
               .setMaxRetries(1)
               .createDataPointReceiver();
       try {
@@ -152,7 +159,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
       }
     }
 
-    assertEquals(1, handler.requests);
+    assertTrue(latch.await(1000, MILLISECONDS));
   }
 
   @Test
@@ -253,12 +260,22 @@ public class HttpDataPointProtobufReceiverConnectionTest {
     }
   }
 
-  private static class CountingHandler extends AbstractHandler {
-    private int requests = 0;
+  private static class LatchedTimeoutHandler extends AbstractHandler {
+    private final CountDownLatch latch;
+    private final int timeoutMs;
+
+    LatchedTimeoutHandler(CountDownLatch latch, int timeoutMs) {
+      this.latch = latch;
+      this.timeoutMs = timeoutMs;
+    }
 
     @Override
-    public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException{
-      requests++;
+    public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+      latch.countDown();
+      try {
+        Thread.sleep(timeoutMs);
+      } catch (Exception ignored) {
+      }
     }
   }
 
