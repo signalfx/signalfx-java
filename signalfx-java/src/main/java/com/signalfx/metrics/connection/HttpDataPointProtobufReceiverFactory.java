@@ -7,6 +7,7 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     }
 
     public HttpDataPointProtobufReceiverFactory setNonRetryableExceptions(List<Class<? extends IOException>> clazzes) {
-        this.nonRetryableExceptions = Collections.unmodifiableList(clazzes);
+        this.nonRetryableExceptions = Collections.unmodifiableList(new ArrayList<>(clazzes));
         return this;
     }
 
