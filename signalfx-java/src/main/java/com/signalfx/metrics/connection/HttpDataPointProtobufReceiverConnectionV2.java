@@ -1,5 +1,6 @@
 package com.signalfx.metrics.connection;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,12 @@ public class HttpDataPointProtobufReceiverConnectionV2
             SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
             HttpClientConnectionManager httpClientConnectionManager) {
         super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
+    }
+
+    public HttpDataPointProtobufReceiverConnectionV2(
+            SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+            HttpClientConnectionManager httpClientConnectionManager, List<Class<? extends IOException>> nonRetryableExceptions) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager, nonRetryableExceptions);
     }
 
     @Override

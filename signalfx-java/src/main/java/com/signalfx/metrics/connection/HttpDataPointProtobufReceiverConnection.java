@@ -37,6 +37,12 @@ public class HttpDataPointProtobufReceiverConnection
         super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager);
     }
 
+    public HttpDataPointProtobufReceiverConnection(
+            SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
+            HttpClientConnectionManager httpClientConnectionManager, List<Class<? extends IOException>> nonRetryableExceptions) {
+        super(endpoint, timeoutMs, maxRetries, httpClientConnectionManager, nonRetryableExceptions);
+    }
+
     @Override
     protected HttpEntity getEntityForVersion(List<SignalFxProtocolBuffers.DataPoint> dataPoints) {
         return new InputStreamEntity(

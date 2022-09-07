@@ -1,11 +1,12 @@
 package com.signalfx.connection;
 
-import java.io.InterruptedIOException;
-import java.net.ConnectException;
-import java.net.UnknownHostException;
-import java.util.Arrays;
+import java.io.IOException;
+import java.util.List;
 
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+
+import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
+import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
 
 /**
  * Compared to the {@link DefaultHttpRequestRetryHandler} we allow retry on {@link
@@ -14,19 +15,16 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
  * "stale" connections in such a way that http client is unable to detect this.
  */
 class RetryHandler extends DefaultHttpRequestRetryHandler {
-  public static final Integer DEFAULT_MAX_RETRIES = 3;
 
   public RetryHandler(final int maxRetries) {
-    super(maxRetries, true, Arrays.asList(
-        InterruptedIOException.class,
-        UnknownHostException.class,
-        ConnectException.class));
+    this(maxRetries, DEFAULT_NON_RETRYABLE_EXCEPTIONS);
   }
 
   public RetryHandler() {
-    super(DEFAULT_MAX_RETRIES, true, Arrays.asList(
-            InterruptedIOException.class,
-            UnknownHostException.class,
-            ConnectException.class));
+    this(DEFAULT_MAX_RETRIES, DEFAULT_NON_RETRYABLE_EXCEPTIONS);
+  }
+
+  public RetryHandler(final int maxRetries, List<Class<? extends IOException>> clazzes) {
+    super(maxRetries, true, clazzes);
   }
 }

@@ -6,10 +6,17 @@ import com.google.common.base.MoreObjects;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
+import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
+
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
     public static final int DEFAULT_VERSION = 2;
-    public static final int DEFAULT_MAX_RETRIES = 3;
 
     private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager;
@@ -17,6 +24,7 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
     private int version = DEFAULT_VERSION;
     private int maxRetries = DEFAULT_MAX_RETRIES;
+    private List<Class<? extends IOException>> nonRetryableExceptions = DEFAULT_NON_RETRYABLE_EXCEPTIONS;
 
     public HttpDataPointProtobufReceiverFactory(SignalFxReceiverEndpoint endpoint) {
         this.endpoint = endpoint;
@@ -42,6 +50,11 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
         return this;
     }
 
+    public HttpDataPointProtobufReceiverFactory setNonRetryableExceptions(List<Class<? extends IOException>> clazzes) {
+        this.nonRetryableExceptions = Collections.unmodifiableList(new ArrayList<>(clazzes));
+        return this;
+    }
+
     public void setHttpClientConnectionManager(
             HttpClientConnectionManager httpClientConnectionManager) {
         this.explicitHttpClientConnectionManager = httpClientConnectionManager;
@@ -55,13 +68,15 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
                 endpoint,
                 this.timeoutMs,
                 this.maxRetries,
-                resolveHttpClientConnectionManager());
+                resolveHttpClientConnectionManager(),
+                this.nonRetryableExceptions);
         } else {
             return new HttpDataPointProtobufReceiverConnectionV2(
                 endpoint,
                 this.timeoutMs,
                 this.maxRetries,
-                resolveHttpClientConnectionManager());
+                resolveHttpClientConnectionManager(),
+                this.nonRetryableExceptions);
         }
 
     }
