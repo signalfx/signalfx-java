@@ -19,7 +19,7 @@
     <!-- versions -->
     <jackson.version>2.13.4</jackson.version>
     <jackson-databind.version>2.13.4</jackson-databind.version>
-    <jetty.version>9.4.48.v20220622</jetty.version>
+    <jetty.version>9.4.49.v20220914</jetty.version>
     <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
     <os72.protobuf-shaded.plugin-version>${protobuf.version}</os72.protobuf-shaded.plugin-version>
     <os72.protobuf-shaded.version>3-11-1</os72.protobuf-shaded.version>
