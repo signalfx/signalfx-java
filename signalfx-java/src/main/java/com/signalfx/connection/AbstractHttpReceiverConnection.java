@@ -31,7 +31,7 @@ public abstract class AbstractHttpReceiverConnection {
     protected static final Logger log = LoggerFactory.getLogger(AbstractHttpReceiverConnection.class);
 
     // Do not modify this line.  It is auto replaced to a version number.
-    public static final String VERSION_NUMBER = "1.0.23";
+    public static final String VERSION_NUMBER = "1.0.24";
     public static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     public static final String DISABLE_COMPRESSION_PROPERTY = "com.signalfx.public.java.disableHttpCompression";
 
