@@ -24,7 +24,7 @@
     <os72.protobuf-shaded.plugin-version>${protobuf.version}</os72.protobuf-shaded.plugin-version>
     <os72.protobuf-shaded.version>3-11-1</os72.protobuf-shaded.version>
     <protobuf.version>3.11.1</protobuf.version>
-    <slf4j.version>2.0.2</slf4j.version>
+    <slf4j.version>2.0.3</slf4j.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
