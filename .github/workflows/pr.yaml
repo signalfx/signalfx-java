@@ -15,17 +15,15 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        java-version: [ 8.0.292+10, 11.0.11+9 ]
+        java-version: [ 8.0.352+8, 11.0.17+8 ]
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v3
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ matrix.java-version }}
 
       - name: Build
