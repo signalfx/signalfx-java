@@ -84,5 +84,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     version = sys.argv[1]
+    version = re.sub(r'^v', '', version)
     update_pom_files(version)
     perform_file_replacements(version)
