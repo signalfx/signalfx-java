@@ -15,7 +15,7 @@ public class RetryStrategy implements ServiceUnavailableRetryStrategy {
     @Override
     public boolean retryRequest(final HttpResponse httpResponse, final int executionCount, final HttpContext httpContext) {
         final int statusCode = httpResponse.getStatusLine().getStatusCode();
-        return executionCount <= maxRetries && (statusCode == HttpStatus.SC_REQUEST_TIMEOUT || statusCode == HttpStatus.SC_GATEWAY_TIMEOUT || statusCode == 598 || statusCode == -1);
+        return executionCount <= maxRetries && (statusCode == HttpStatus.SC_REQUEST_TIMEOUT || statusCode == HttpStatus.SC_GATEWAY_TIMEOUT || statusCode == 598 || statusCode == -1 || statusCode == HttpStatus.SC_TOO_MANY_REQUESTS);
     }
 
     @Override

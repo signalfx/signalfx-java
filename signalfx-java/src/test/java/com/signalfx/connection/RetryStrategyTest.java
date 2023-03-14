@@ -58,6 +58,17 @@ public class RetryStrategyTest {
     }
 
     @Test
+    public void shouldSetRetryOnTooManyRequests() {
+        final RetryStrategy retryStrategy = new RetryStrategy(3);
+
+        final StatusLine mockStatusLine = generateStatusLineByCode(HttpStatus.SC_TOO_MANY_REQUESTS);
+        final HttpContext mockHttpContext = new HttpClientContext();
+        final HttpResponse mockResp = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(mockStatusLine, mockHttpContext);
+
+        assertTrue(retryStrategy.retryRequest(mockResp, 1, mockHttpContext));
+    }
+
+    @Test
     public void shouldNotRetryOnOtherStatusCode() {
         final RetryStrategy retryStrategy = new RetryStrategy(3);
 
