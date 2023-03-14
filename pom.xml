@@ -307,9 +307,17 @@
                 <exclude>about.html</exclude>
                 <exclude>google/protobuf/**/*.proto</exclude>
                 <exclude>mozilla/*.txt</exclude>
+                <exclude>META-INF/LICENSE*</exclude>
+                <exclude>META-INF/NOTICE*</exclude>
               </excludes>
             </filter>
           </filters>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+              <resource>META-INF/LICENSE</resource>
+              <file>${project.basedir}/../LICENSE</file>
+            </transformer>
+          </transformers>
           <artifactSet>
             <excludes>
               <exclude>org.slf4j:*</exclude>
