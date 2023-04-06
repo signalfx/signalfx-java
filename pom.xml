@@ -383,6 +383,5 @@
     <module>signalfx-commons-protoc-java</module>
     <module>signalfx-codahale</module>
     <module>signalfx-yammer</module>
-<!--    <module>micrometer-registry-signalfx</module>-->
   </modules>
 </project>
