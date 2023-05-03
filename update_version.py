@@ -23,7 +23,7 @@ def no_snapshots(v):
     return 'SNAPSHOT' not in v
 
 FILE_REPLACES = {
-    'signalfx-java/src/main/java/com/signalfx/connection/AbstractHttpReceiverConnection.java': [
+    'signalfx-connection/src/main/java/com/signalfx/connection/AbstractHttpReceiverConnection.java': [
         (match_all, re.compile(r'public static final String VERSION_NUMBER = "(.*?)"'),
          'public static final String VERSION_NUMBER = "%s"')
     ],

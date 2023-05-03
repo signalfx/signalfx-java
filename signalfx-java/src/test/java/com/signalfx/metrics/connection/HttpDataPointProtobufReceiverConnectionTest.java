@@ -30,7 +30,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class HttpDataPointProtobufReceiverConnectionTest {

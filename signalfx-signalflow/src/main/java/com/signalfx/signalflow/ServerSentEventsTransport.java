@@ -225,7 +225,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
 
         private String token;
         private String protocol = "https";
-        private String host = SignalFlowTransport.DEFAULT_HOST;
+        private String host = DEFAULT_HOST;
         private int port = 443;
         private int timeout = 1;
         private int version = 2;

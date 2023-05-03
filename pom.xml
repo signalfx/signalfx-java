@@ -14,6 +14,7 @@
   </description>
 
   <properties>
+    <skipShaded>false</skipShaded>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- versions -->
@@ -176,11 +177,11 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.12.0</version>
       </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty.websocket</groupId>
-        <artifactId>websocket-client</artifactId>
-        <version>${jetty.version}</version>
-      </dependency>
+<!--      <dependency>-->
+<!--        <groupId>org.eclipse.jetty.websocket</groupId>-->
+<!--        <artifactId>websocket-client</artifactId>-->
+<!--        <version>${jetty.version}</version>-->
+<!--      </dependency>-->
 
       <!-- just included in the jar -->
       <dependency>
@@ -298,6 +299,7 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.4.1</version>
         <configuration>
+          <skip>${skipShaded}</skip>
           <createSourcesJar>true</createSourcesJar>
           <shadeSourcesContent>true</shadeSourcesContent>
           <filters>
@@ -379,9 +381,12 @@
 
   <modules>
     <module>signalfx-protoc</module>
+    <module>signalfx-endpoint</module>
+    <module>signalfx-connection</module>
     <module>signalfx-java</module>
     <module>signalfx-commons-protoc-java</module>
     <module>signalfx-codahale</module>
     <module>signalfx-yammer</module>
+    <module>signalfx-signalflow</module>
   </modules>
 </project>

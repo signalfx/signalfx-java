@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -9,19 +10,21 @@
     <version>1.0.30</version>
   </parent>
 
-  <artifactId>signalfx-java</artifactId>
-  <name>SignalFx java libraries</name>
-  <packaging>jar</packaging>
-  <description>
-    Bare minimum core library needed to sending metrics to SignalFx from Java clients
-  </description>
+  <properties>
+    <!-- This prevents shading from happening in this module -->
+    <skipShaded>true</skipShaded>
+  </properties>
 
-  <url>http://www.signalfx.com</url>
+  <artifactId>signalfx-connection</artifactId>
+  <name>SignalFx connection</name>
+<!--  <packaging>jar</packaging>-->
+  <description>Shared SignalFx connection related classes</description>
+  <url>https://www.splunk.com</url>
 
   <licenses>
     <license>
       <name>Apache License 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -43,48 +46,18 @@
   </developers>
 
   <dependencies>
-    <!-- compile -->
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-protoc</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-endpoint</artifactId>
       <version>${version}</version>
     </dependency>
     <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-connection</artifactId>
-      <version>${version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-commons-protoc-java</artifactId>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -95,26 +68,18 @@
       <artifactId>httpcore</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--      <artifactId>jackson-core</artifactId>-->
+<!--    </dependency>-->
 
     <!-- test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.orbit</groupId>
-      <artifactId>javax.servlet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
     </dependency>
   </dependencies>
 </project>
