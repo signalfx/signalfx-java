@@ -1,6 +1,5 @@
 package com.signalfx.connection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -33,7 +32,6 @@ public abstract class AbstractHttpReceiverConnection {
     public static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     public static final String DISABLE_COMPRESSION_PROPERTY = "com.signalfx.public.java.disableHttpCompression";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
     protected static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
 
     protected final CloseableHttpClient client;

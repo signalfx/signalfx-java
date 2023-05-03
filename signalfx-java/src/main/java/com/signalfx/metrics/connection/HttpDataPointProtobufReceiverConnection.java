@@ -25,6 +25,9 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 public class HttpDataPointProtobufReceiverConnection
         extends AbstractHttpDataPointProtobufReceiverConnection {
+
+    protected static final ObjectMapper MAPPER = new ObjectMapper();
+
     public HttpDataPointProtobufReceiverConnection(
             SignalFxReceiverEndpoint endpoint, int timeoutMs,
             HttpClientConnectionManager httpClientConnectionManager) {
