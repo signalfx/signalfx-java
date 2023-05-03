@@ -25,7 +25,7 @@ To send data to Splunk, you will need a Splunk Observability account and organiz
 API token to use them. For more information on SignalFx and to create an
 account, go to [Splunk Observability](https://www.splunk.com/en_us/products/observability.html).
 
-## Supported languages
+## Language compatibility
 
 * Java 8+
 
