@@ -37,6 +37,10 @@ to Splunk instead.
 
 Legacy documentation is still here for posterity: [legacy-usage.md](legacy-usage.md). 
 
+# Executing SignalFlow computations
+
+[Learn more about using SignalFlow here](signalflow.md).
+
 ## License
 
 Apache Software License v2. Copyright © 2014-2023 SignalFx | Splunk
