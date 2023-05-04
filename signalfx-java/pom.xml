@@ -43,6 +43,22 @@
   </developers>
 
   <dependencies>
+    <!-- pure deps for shading -->
+    <dependency>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-connection</artifactId>
+      <version>${version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-endpoint</artifactId>
+      <version>${version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.signalfx.public</groupId>
+      <artifactId>signalfx-signalflow</artifactId>
+      <version>${version}</version>
+    </dependency>
     <!-- compile -->
     <dependency>
       <groupId>com.signalfx.public</groupId>
