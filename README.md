@@ -32,7 +32,7 @@ account, go to [Splunk Observability](https://www.splunk.com/en_us/products/obse
 ## Using this library in your project
 
 You are discouraged from integrating this library into new services. 
-use [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) to send data 
+Use [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) to send data 
 to Splunk instead.
 
 Legacy documentation is still here for posterity: [legacy-usage.md](legacy-usage.md). 
