@@ -18,7 +18,7 @@ reporting metrics to Splunk Observability Cloud (formerly SignalFx).
 Splunk has adopted OpenTelemetry. Use the 
 [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java) or
 the [Splunk Distribution of OpenTelemetry Java Instrumentation](https://github.com/signalfx/splunk-otel-java)
-agent to send telemetry data to Splunk. Users should *NOT* be integrating `signalfx-java` 
+agent to send telemetry data to Splunk. Do not integrate `signalfx-java` 
 into new services.
 
 To send data to Splunk, you need a Splunk Observability account and organization
