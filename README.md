@@ -15,7 +15,7 @@
 This repository contains legacy libraries for instrumenting Java applications and
 reporting metrics to Splunk Observability Cloud (formerly SignalFx).
 
-Splunk has adopted OpenTelemetry and users are strongly encouraged to use the 
+Splunk has adopted OpenTelemetry. Use the 
 [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java) or
 the [Splunk Distribution of OpenTelemetry Java Instrumentation](https://github.com/signalfx/splunk-otel-java)
 agent to send telemetry data to Splunk. Users should *NOT* be integrating `signalfx-java` 
