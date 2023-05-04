@@ -27,7 +27,7 @@ account, go to [Splunk Observability](https://www.splunk.com/en_us/products/obse
 
 ## Language compatibility
 
-* Java 8+
+* Java 8 and higher
 
 ## Using this library in your project
 
