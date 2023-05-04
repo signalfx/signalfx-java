@@ -17,7 +17,6 @@
 
   <artifactId>signalfx-signalflow</artifactId>
   <name>SignalFx signalflow</name>
-  <packaging>jar</packaging>
   <description>
     SignalFx functionality to support signalflow
   </description>

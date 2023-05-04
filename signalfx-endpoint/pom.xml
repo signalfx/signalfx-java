@@ -17,7 +17,6 @@
 
   <artifactId>signalfx-endpoint</artifactId>
   <name>SignalFx endpoint</name>
-  <packaging>jar</packaging>
   <description>
     Shared SignalFxEndpoint related classes
   </description>

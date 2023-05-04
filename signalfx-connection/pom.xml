@@ -17,7 +17,6 @@
 
   <artifactId>signalfx-connection</artifactId>
   <name>SignalFx connection</name>
-<!--  <packaging>jar</packaging>-->
   <description>Shared SignalFx connection related classes</description>
   <url>https://www.splunk.com</url>
 
