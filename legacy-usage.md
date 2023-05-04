@@ -1,5 +1,9 @@
 
-### With Maven
+# Using this library in your project
+
+Notes on using this legacy library are kept here for posterity.
+
+## With Maven
 
 If you're using Maven, add the following to your project's `pom.xml` file.
 
@@ -23,7 +27,7 @@ If you're using Maven, add the following to your project's `pom.xml` file.
 </dependency>
 ```
 
-### With SBT
+## With SBT
 
 If you're using SBT, add the following to your project's `build.sbt` file.
 
@@ -39,7 +43,7 @@ libraryDependencies += "com.signalfx.public" % "signalfx-codahale" % "1.0.30"
 libraryDependencies += "com.signalfx.public" % "signalfx-yammer" % "1.0.30"
 ```
 
-### From source
+## From source
 
 You can also install this library from source by cloning the repo and using
 `./mvnw install` as follows. However, we strongly recommend using the automated
@@ -72,9 +76,9 @@ $ ./mvnw install
 [INFO] ------------------------------------------------------------------------
 ```
 
-## Sending metrics
+# Sending metrics
 
-### Configuring your endpoint
+## Configuring your endpoint
 
 Before we can send metrics to SignalFx, we need to make sure you are sending
 them to the correct SignalFx realm. To determine what realm you are in, check
@@ -103,9 +107,9 @@ SignalFxReporter reporter =
         .build();
 ```
 
-### Codahale Metrics 3.0.x
+## Codahale Metrics 3.0.x
 
-#### 1. Set up the Codahale reporter
+### 1. Set up the Codahale reporter
 
 ```java
 final MetricRegistry metricRegistry = new MetricRegistry();
@@ -118,7 +122,7 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 final SfxMetrics metrics = new SfxMetrics(metricRegistry, metricMetadata);
 ```
 
-#### 2. Send a metric
+### 2. Send a metric
 
 ```java
 // This will send the current time in ms to SignalFx as a gauge
@@ -129,7 +133,7 @@ metrics.registerGauge("gauge", new Gauge<Long>() {
 });
 ```
 
-#### 3. Add dimensions and metadata to metrics
+### 3. Add dimensions and metadata to metrics
 
 ```java
 /*
@@ -166,17 +170,17 @@ try (Timer.Context ignored = metrics.timer("request_time").time()) {
 }
 ```
 
-#### After setting up Codahale
+### After setting up Codahale
 
 After setting up a SignalFxReporter, you can use Codahale metrics as you
 normally would, reported at the frequency configured by the `SignalFxReporter`.
 
-### Yammer Metrics
+## Yammer Metrics
 
 You can also use this library with Yammer metrics 2.0.x as shown in the
 following examples.
 
-#### 1. Set up Yammer metrics
+### 1. Set up Yammer metrics
 
 ```java
 final MetricsRegistry metricsRegistry = new MetricsRegistry();
@@ -190,7 +194,7 @@ final MetricMetadata metricMetadata = signalfxReporter.getMetricMetadata();
 
 Note: the `SfxMetrics` helper is not supported for Yammer metrics.
 
-#### 2. Send a metric with Yammer metrics
+### 2. Send a metric with Yammer metrics
 
 ```java
 // This will send the current time in ms to SignalFx as a gauge
@@ -203,7 +207,7 @@ Metric gauge = metricRegistry.newGauge(gaugeName, new Gauge<Long>() {
 });
 ```
 
-#### 3. Add Dimensions and SignalFx metadata to Yammer metrics
+### 3. Add Dimensions and SignalFx metadata to Yammer metrics
 
 Use the MetricMetadata of the reporter as shown.
 
@@ -222,7 +226,7 @@ metricMetadata.forMetric(gauge)
     .withDimension("queue_name", "customer_backlog");
 ```
 
-### Changing the default source
+## Changing the default source
 
 The default source name for metrics is discovered by [SourceNameHelper]
 (signalfx-java/src/main/java/com/signalfx/metrics/SourceNameHelper.java).
@@ -239,7 +243,7 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 ).build();
 ```
 
-### Default dimensions
+## Default dimensions
 
 Sometimes there is a desire to set one or more dimension key/value pairs
 on every datapoint that is reported by this library. In order to do this
@@ -255,7 +259,7 @@ non-distributed. For such dimensions use
 `addUniqueDimension()/addUniqueDimensions()` on the
 `SignalFxReporter.Builder` object.
 
-### AWS Integration
+## AWS Integration
 
 To enable AWS integration in SignalFx (i.e aws tag/property syncing) to a metric
 you can use `com.signalfx.metrics.aws.AWSInstanceInfo`. And either add it as
@@ -274,7 +278,7 @@ final SignalFxReporter signalfxReporter = new SignalFxReporter.Builder(
 ).addUniqueDimension(AWSInstanceInfo.DIMENSION_NAME, instanceInfo).build();
 ```
 
-### Sending metrics without using Codahale
+## Sending metrics without using Codahale
 
 We recommend sending metrics using Codahale as shown above. You can also
 interact with our Java library directly if you do not want to use Codahale. To
@@ -330,7 +334,7 @@ try (AggregateMetricSender.Session i = mf.createSession()) {
 }
 ```
 
-### Sending metrics through a HTTP proxy
+## Sending metrics through a HTTP proxy
 
 To send metrics through a HTTP proxy one can set the standard java system
 properties used to control HTTP protocol handling. There are 3 properties you
@@ -355,7 +359,7 @@ Example with directive to bypass proxy for `localhost` and `host.mydomain.com`:
 $ java -Dhttp.proxyHost=webcache.mydomain.com -Dhttp.proxyPort=8080 -Dhttp.noProxyHosts=”localhost|host.mydomain.com”
 ```
 
-### Disabling compression when sending datapoints
+## Disabling compression when sending datapoints
 
 By default, the Java library compresses datapoint payloads when sending them to
 SignalFx. This can provide significant egress volume savings when sending data
@@ -366,7 +370,7 @@ to SignalFx's ingest API. This behavior can be disabled by setting the
 $ java -Dcom.signalfx.public.java.disableHttpCompression=true ...
 ```
 
-## Example Project
+# Example Project
 
 You can find a full-stack example project called "signalfx-java-examples" in
 the repo.
@@ -395,7 +399,7 @@ Run it as follows:
     ```
 New metrics and events from the example project should appear in SignalFx.
 
-## Executing SignalFlow computations
+# Executing SignalFlow computations
 
 SignalFlow is SignalFx's real-time analytics computation language. The
 SignalFlow API allows SignalFx users to execute real-time streaming analytics
