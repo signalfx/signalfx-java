@@ -13,6 +13,7 @@
   <properties>
     <!-- This prevents shading from happening in this module -->
     <skipShaded>true</skipShaded>
+    <maven.deploy.skip>false</maven.deploy.skip>
   </properties>
 
   <artifactId>signalfx-signalflow</artifactId>
