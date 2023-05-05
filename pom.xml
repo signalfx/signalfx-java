@@ -177,11 +177,6 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.12.0</version>
       </dependency>
-<!--      <dependency>-->
-<!--        <groupId>org.eclipse.jetty.websocket</groupId>-->
-<!--        <artifactId>websocket-client</artifactId>-->
-<!--        <version>${jetty.version}</version>-->
-<!--      </dependency>-->
 
       <!-- just included in the jar -->
       <dependency>
