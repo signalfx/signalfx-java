@@ -22,7 +22,7 @@ agent to send telemetry data to Splunk. Do not integrate `signalfx-java`
 into new services.
 
 To send data to Splunk, you need a Splunk Observability Cloud account and organization
-API token to use them. For more information on SignalFx and to create an
+API token. For more information on Observability Cloud and to create an
 account, go to [Splunk Observability](https://www.splunk.com/en_us/products/observability.html).
 
 ## Language compatibility
