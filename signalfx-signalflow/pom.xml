@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -9,14 +10,19 @@
     <version>1.0.30</version>
   </parent>
 
-  <artifactId>signalfx-java</artifactId>
-  <name>SignalFx java libraries</name>
-  <packaging>jar</packaging>
+  <properties>
+    <!-- This prevents shading from happening in this module -->
+    <skipShaded>true</skipShaded>
+    <maven.deploy.skip>false</maven.deploy.skip>
+  </properties>
+
+  <artifactId>signalfx-signalflow</artifactId>
+  <name>SignalFx signalflow</name>
   <description>
-    Bare minimum core library needed to sending metrics to SignalFx from Java clients
+    SignalFx functionality to support signalflow
   </description>
 
-  <url>http://www.signalfx.com</url>
+  <url>http://www.splunk.com</url>
 
   <licenses>
     <license>
@@ -43,12 +49,6 @@
   </developers>
 
   <dependencies>
-    <!-- pure deps for shading -->
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-connection</artifactId>
-      <version>${version}</version>
-    </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-endpoint</artifactId>
@@ -56,17 +56,8 @@
     </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-signalflow</artifactId>
+      <artifactId>signalfx-connection</artifactId>
       <version>${version}</version>
-    </dependency>
-    <!-- compile -->
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-protoc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-commons-protoc-java</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -77,20 +68,16 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -104,6 +91,11 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.websocket</groupId>
+      <artifactId>websocket-client</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
 
     <!-- test -->
     <dependency>
@@ -113,14 +105,6 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.orbit</groupId>
-      <artifactId>javax.servlet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
     </dependency>
   </dependencies>
 </project>

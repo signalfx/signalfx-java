@@ -1,9 +1,6 @@
 package com.signalfx.connection;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.regex.Pattern;
-
+import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -19,9 +16,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import com.signalfx.metrics.SignalFxMetricsException;
+import java.io.IOException;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
 import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
@@ -35,7 +32,6 @@ public abstract class AbstractHttpReceiverConnection {
     public static final String USER_AGENT = "SignalFx-java-client/" + VERSION_NUMBER;
     public static final String DISABLE_COMPRESSION_PROPERTY = "com.signalfx.public.java.disableHttpCompression";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
     protected static final ContentType JSON_TYPE = ContentType.APPLICATION_JSON;
 
     protected final CloseableHttpClient client;
@@ -94,20 +90,19 @@ public abstract class AbstractHttpReceiverConnection {
         }
     }
 
-    protected void checkHttpResponse(CloseableHttpResponse resp) throws
-            SignalFxMetricsException {
+    protected void checkHttpResponse(CloseableHttpResponse resp) {
         final String body;
         try {
             body = IOUtils.toString(resp.getEntity().getContent());
         } catch (IOException e) {
-            throw new SignalFxMetricsException("Unable to get response content", e);
+            throw new RuntimeException("Unable to get response content", e);
         }
         if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new SignalFxMetricsException("Invalid status code "
+            throw new RuntimeException("Invalid status code "
                     + resp.getStatusLine().getStatusCode() + ": " + body);
         }
         if (!"\"OK\"".equals(body)) {
-            throw new SignalFxMetricsException("Invalid response body: " + body);
+            throw new RuntimeException("Invalid response body: " + body);
         }
     }
 

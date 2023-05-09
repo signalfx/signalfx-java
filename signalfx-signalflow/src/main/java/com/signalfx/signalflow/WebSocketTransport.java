@@ -199,7 +199,7 @@ public class WebSocketTransport implements SignalFlowTransport {
 
         private String token;
         private String protocol = "wss";
-        private String host = SignalFlowTransport.DEFAULT_HOST;
+        private String host = DEFAULT_HOST;
         private int port = 443;
         private int timeout = DEFAULT_TIMEOUT;
         private int version = 2;
