@@ -27,7 +27,7 @@ FILE_REPLACES = {
         (match_all, re.compile(r'public static final String VERSION_NUMBER = "(.*?)"'),
          'public static final String VERSION_NUMBER = "%s"')
     ],
-    'README.md': [
+    'legacy-usage.md': [
         (no_snapshots, re.compile(r'<version>([^<]+)</version>'),
          '<version>%s</version>'),
         (no_snapshots, re.compile(r'libraryDependencies \+= "com.signalfx.public" % "signalfx-codahale" % "(.*?)"'),
