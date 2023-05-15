@@ -63,22 +63,12 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     @Override
     public DataPointReceiver createDataPointReceiver() throws
             SignalFxMetricsException {
-        if (version == 1) {
-            return new HttpDataPointProtobufReceiverConnection(
+        return new HttpDataPointProtobufReceiverConnectionV2(
                 endpoint,
                 this.timeoutMs,
                 this.maxRetries,
                 resolveHttpClientConnectionManager(),
                 this.nonRetryableExceptions);
-        } else {
-            return new HttpDataPointProtobufReceiverConnectionV2(
-                endpoint,
-                this.timeoutMs,
-                this.maxRetries,
-                resolveHttpClientConnectionManager(),
-                this.nonRetryableExceptions);
-        }
-
     }
 
     private HttpClientConnectionManager resolveHttpClientConnectionManager() {
