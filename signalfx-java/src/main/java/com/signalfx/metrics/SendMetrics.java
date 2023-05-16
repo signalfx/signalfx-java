@@ -54,7 +54,7 @@ public final class SendMetrics {
 
         AggregateMetricSender mf = new AggregateMetricSender(
                 "test.SendMetrics",
-                new HttpDataPointProtobufReceiverFactory(endpoint).setVersion(2),
+                new HttpDataPointProtobufReceiverFactory(endpoint),
                 new StaticAuthToken(token),
                 Collections.singletonList(errorHandler));
 
