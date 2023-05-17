@@ -19,7 +19,6 @@ import com.signalfx.metrics.auth.AuthToken;
 import com.signalfx.metrics.auth.StaticAuthToken;
 import com.signalfx.metrics.connection.DataPointReceiverFactory;
 import com.signalfx.metrics.connection.HttpDataPointProtobufReceiverFactory;
-import com.signalfx.metrics.endpoint.DataPointReceiverEndpoint;
 import com.signalfx.metrics.errorhandler.OnSendErrorHandler;
 import com.signalfx.metrics.flush.AggregateMetricSender;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
@@ -200,11 +199,6 @@ public class SignalFxReporter extends CustomScheduledReporter {
                     new HttpDataPointProtobufReceiverFactory(endpoint)
                             .setTimeoutMs(this.timeoutMs);
             return this;
-        }
-
-        @Deprecated
-        public Builder setDataPointEndpoint(DataPointReceiverEndpoint dataPointEndpoint) {
-            return setEndpoint(dataPointEndpoint);
         }
 
         public Builder setName(String name) {
