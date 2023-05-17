@@ -164,7 +164,6 @@ public class SignalFxReporter extends ScheduledReporter {
         private Set<MetricDetails> detailsToAdd = MetricDetails.DEFAULTS;
         private Collection<OnSendErrorHandler> onSendErrorHandlerCollection = Collections.emptyList();
         private MetricMetadata metricMetadata = new MetricMetadataImpl();
-        private int version = HttpDataPointProtobufReceiverFactory.DEFAULT_VERSION;
         private boolean useLocalTime = false;
         private final ImmutableMap.Builder<String, DimensionInclusion> defaultDimensions = new ImmutableMap.Builder<String, DimensionInclusion>();
 
@@ -196,8 +195,7 @@ public class SignalFxReporter extends ScheduledReporter {
             this.endpoint = endpoint;
             this.dataPointReceiverFactory =
                     new HttpDataPointProtobufReceiverFactory(endpoint)
-                            .setTimeoutMs(this.timeoutMs)
-                            .setVersion(this.version);
+                            .setTimeoutMs(this.timeoutMs);
             return this;
         }
 
@@ -215,17 +213,12 @@ public class SignalFxReporter extends ScheduledReporter {
             this.timeoutMs = timeoutMs;
             this.dataPointReceiverFactory =
                     new HttpDataPointProtobufReceiverFactory(endpoint)
-                            .setVersion(this.version)
                             .setTimeoutMs(this.timeoutMs);
             return this;
         }
 
+        @Deprecated
         public Builder setVersion(int version) {
-            this.version = version;
-            this.dataPointReceiverFactory =
-                    new HttpDataPointProtobufReceiverFactory(endpoint)
-                            .setVersion(this.version)
-                            .setTimeoutMs(this.timeoutMs);
             return this;
         }
 

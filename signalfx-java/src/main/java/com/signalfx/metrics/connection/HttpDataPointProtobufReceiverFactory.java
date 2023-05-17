@@ -16,13 +16,11 @@ import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPT
 
 public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFactory {
     public static final int DEFAULT_TIMEOUT_MS = 2000;
-    public static final int DEFAULT_VERSION = 2;
 
     private final SignalFxReceiverEndpoint endpoint;
     private HttpClientConnectionManager httpClientConnectionManager;
     private HttpClientConnectionManager explicitHttpClientConnectionManager;
     private int timeoutMs = DEFAULT_TIMEOUT_MS;
-    private int version = DEFAULT_VERSION;
     private int maxRetries = DEFAULT_MAX_RETRIES;
     private List<Class<? extends IOException>> nonRetryableExceptions = DEFAULT_NON_RETRYABLE_EXCEPTIONS;
 
@@ -40,8 +38,8 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
         return this;
     }
 
+    @Deprecated
     public HttpDataPointProtobufReceiverFactory setVersion(int version) {
-        this.version = version;
         return this;
     }
 
@@ -63,22 +61,12 @@ public class HttpDataPointProtobufReceiverFactory implements DataPointReceiverFa
     @Override
     public DataPointReceiver createDataPointReceiver() throws
             SignalFxMetricsException {
-        if (version == 1) {
-            return new HttpDataPointProtobufReceiverConnection(
+        return new HttpDataPointProtobufReceiverConnectionV2(
                 endpoint,
                 this.timeoutMs,
                 this.maxRetries,
                 resolveHttpClientConnectionManager(),
                 this.nonRetryableExceptions);
-        } else {
-            return new HttpDataPointProtobufReceiverConnectionV2(
-                endpoint,
-                this.timeoutMs,
-                this.maxRetries,
-                resolveHttpClientConnectionManager(),
-                this.nonRetryableExceptions);
-        }
-
     }
 
     private HttpClientConnectionManager resolveHttpClientConnectionManager() {
