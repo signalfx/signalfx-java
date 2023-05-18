@@ -101,14 +101,13 @@ public class AggregateMetricSender {
     }
 
     private final class SessionImpl implements Session {
-        private final Map<String, com.signalfx.metrics.protobuf.SignalFxProtocolBuffers
+        private final Map<String, SignalFxProtocolBuffers
                 .MetricType> toBeRegisteredMetricPairs;
         private final List<SignalFxProtocolBuffers.DataPoint> pointsToFlush;
         private final List<SignalFxProtocolBuffers.Event> eventsToFlush;
 
         private SessionImpl() {
-            toBeRegisteredMetricPairs = new HashMap<String, com.signalfx.metrics.protobuf
-                    .SignalFxProtocolBuffers.MetricType>();
+            toBeRegisteredMetricPairs = new HashMap<String, SignalFxProtocolBuffers.MetricType>();
 
             pointsToFlush = new ArrayList<SignalFxProtocolBuffers.DataPoint>();
             eventsToFlush = new ArrayList<SignalFxProtocolBuffers.Event>();
@@ -200,7 +199,7 @@ public class AggregateMetricSender {
         }
 
         private void check(String metricPair,
-                           com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType
+                           SignalFxProtocolBuffers.MetricType
                                    metricType) {
             if (!registeredMetricPairs.contains(metricPair)) {
                 toBeRegisteredMetricPairs.put(metricPair, metricType);

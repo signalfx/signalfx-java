@@ -147,6 +147,11 @@
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
+        <groupId>com.fasterxml.jackson.jr</groupId>
+        <artifactId>jackson-jr-objects</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>31.1-jre</version>
@@ -383,5 +388,6 @@
     <module>signalfx-codahale</module>
     <module>signalfx-yammer</module>
     <module>signalfx-signalflow</module>
+    <module>signalfx-metrics</module>
   </modules>
 </project>
