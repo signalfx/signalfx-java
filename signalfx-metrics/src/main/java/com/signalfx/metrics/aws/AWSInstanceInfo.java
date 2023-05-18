@@ -43,7 +43,9 @@ public class AWSInstanceInfo {
 
         try {
             HttpResponse response = client.execute(request);
-            return parse(response.getEntity().getContent());
+            try (InputStream inputStream = response.getEntity().getContent()) {
+                return parse(inputStream);
+            }
         } catch (Exception e) {
             log.trace("Exception trying to execute {}, Exception: {} ", request, e);
         }
