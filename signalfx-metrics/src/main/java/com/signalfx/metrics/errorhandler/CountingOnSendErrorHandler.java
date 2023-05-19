@@ -1,9 +1,9 @@
 package com.signalfx.metrics.errorhandler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Counts errors.
@@ -30,7 +30,7 @@ public class CountingOnSendErrorHandler implements OnSendErrorHandler {
     }
 
     public synchronized Map<MetricErrorType, AtomicInteger> getValues() {
-        return ImmutableMap.copyOf(vals);
+        return new HashMap<>(vals);
     }
 
     public int getTotalErrorCount() {
