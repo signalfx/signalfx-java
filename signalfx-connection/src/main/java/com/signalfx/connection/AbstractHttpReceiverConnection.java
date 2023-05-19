@@ -1,7 +1,7 @@
 package com.signalfx.connection;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
-import org.apache.commons.io.IOUtils;
+import java.nio.charset.StandardCharsets;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -13,6 +13,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +94,7 @@ public abstract class AbstractHttpReceiverConnection {
     protected void checkHttpResponse(CloseableHttpResponse resp) {
         final String body;
         try {
-            body = IOUtils.toString(resp.getEntity().getContent());
+            body = EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Unable to get response content", e);
         }
