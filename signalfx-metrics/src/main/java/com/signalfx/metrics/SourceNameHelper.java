@@ -1,13 +1,16 @@
 package com.signalfx.metrics;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 
-import org.apache.commons.io.IOUtils;
+import java.nio.charset.StandardCharsets;
 
 import com.signalfx.metrics.aws.AWSInstanceInfo;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.util.EntityUtils;
 
 public final class SourceNameHelper {
     private SourceNameHelper() {
@@ -49,6 +52,9 @@ public final class SourceNameHelper {
 
     @Deprecated
     public static String getAwsInstanceId() throws IOException {
-        return IOUtils.toString(new URL("http://169.254.169.254/latest/meta-data/instance-id"));
+        URL url = new URL("http://169.254.169.254/latest/meta-data/instance-id");
+        try (InputStream inputStream = url.openStream()) {
+            return EntityUtils.toString(new InputStreamEntity(inputStream), StandardCharsets.UTF_8);
+        }
     }
 }
