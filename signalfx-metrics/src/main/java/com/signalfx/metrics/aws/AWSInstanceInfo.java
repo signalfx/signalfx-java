@@ -3,6 +3,12 @@
 */
 package com.signalfx.metrics.aws;
 
+import com.fasterxml.jackson.jr.ob.JSON;
+import com.google.common.annotations.VisibleForTesting;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -11,13 +17,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class AWSInstanceInfo {
 
     public static final String DIMENSION_NAME = "AWSUniqueId";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final String URL = "http://169.254.169.254/latest/dynamic/instance-identity/document";
     private static final Logger log = LoggerFactory.getLogger(AWSInstanceInfo.class);
@@ -41,16 +43,20 @@ public class AWSInstanceInfo {
 
         try {
             HttpResponse response = client.execute(request);
-            JsonNode object = MAPPER.readTree(response.getEntity().getContent());
-
-            return object.get(INSTANCE_ID).asText() + "_" + object.get(REGION).asText() + "_"
-                    + object.get(ACCOUNT_ID).asText();
-
+            try (InputStream inputStream = response.getEntity().getContent()) {
+                return parse(inputStream);
+            }
         } catch (Exception e) {
             log.trace("Exception trying to execute {}, Exception: {} ", request, e);
         }
 
         return null;
+    }
+
+    @VisibleForTesting
+    static String parse(InputStream inputStream) throws Exception {
+        Map<String, Object> result = JSON.std.mapFrom(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        return result.get(INSTANCE_ID) + "_" + result.get(REGION) + "_" + result.get(ACCOUNT_ID);
     }
 
     /**

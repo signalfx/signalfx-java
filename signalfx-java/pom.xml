@@ -13,7 +13,7 @@
   <name>SignalFx java libraries</name>
   <packaging>jar</packaging>
   <description>
-    Bare minimum core library needed to sending metrics to SignalFx from Java clients
+    SignalFx from Java client libraries
   </description>
 
   <url>http://www.signalfx.com</url>
@@ -43,84 +43,15 @@
   </developers>
 
   <dependencies>
-    <!-- pure deps for shading -->
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-connection</artifactId>
-      <version>${version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-endpoint</artifactId>
-      <version>${version}</version>
-    </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-signalflow</artifactId>
-      <version>${version}</version>
-    </dependency>
-    <!-- compile -->
-    <dependency>
-      <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-protoc</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
-      <artifactId>signalfx-commons-protoc-java</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-
-    <!-- test -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.orbit</groupId>
-      <artifactId>javax.servlet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <artifactId>signalfx-metrics</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>
