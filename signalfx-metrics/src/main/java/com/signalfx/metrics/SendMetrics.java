@@ -1,12 +1,12 @@
 package com.signalfx.metrics;
 
-import com.google.common.base.Preconditions;
 import com.signalfx.metrics.errorhandler.MetricError;
 
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Properties;
 
 import com.signalfx.endpoint.SignalFxEndpoint;
@@ -31,8 +31,8 @@ public final class SendMetrics {
         Properties prop = new Properties();
         prop.load(new FileInputStream("auth.properties"));
 
-        String token = Preconditions.checkNotNull(prop.getProperty("auth"), "No auth token set");
-        String host = Preconditions.checkNotNull(prop.getProperty("host"), "No endpoint set");
+        String token = Objects.requireNonNull(prop.getProperty("auth"), "No auth token set");
+        String host = Objects.requireNonNull(prop.getProperty("host"), "No endpoint set");
         URL hostUrl = new URL(host);
 
         System.out.printf("Sending metrics to %s (X-SF-Token: %s) ...%n", hostUrl, token);

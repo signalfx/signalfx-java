@@ -4,7 +4,6 @@
 package com.signalfx.metrics.aws;
 
 import com.fasterxml.jackson.jr.ob.JSON;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -53,7 +52,7 @@ public class AWSInstanceInfo {
         return null;
     }
 
-    @VisibleForTesting
+    // visible for testing
     static String parse(InputStream inputStream) throws Exception {
         Map<String, Object> result = JSON.std.mapFrom(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         return result.get(INSTANCE_ID) + "_" + result.get(REGION) + "_" + result.get(ACCOUNT_ID);

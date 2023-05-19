@@ -1,11 +1,11 @@
 package com.signalfx.metrics.connection;
 
-import com.google.common.collect.Lists;
 import com.signalfx.common.proto.ProtocolBufferStreamingInputStream;
 import com.signalfx.connection.AbstractHttpReceiverConnection;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import java.util.ArrayList;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -99,7 +99,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
             return;
         }
 
-        List<NameValuePair> params = Lists.newArrayList();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("orgid", orgId));
         params.add(new BasicNameValuePair("metric_type", metricType));
         params.add(new BasicNameValuePair("metric", metric));

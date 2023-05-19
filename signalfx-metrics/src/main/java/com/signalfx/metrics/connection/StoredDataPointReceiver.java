@@ -8,8 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.Dimension;
@@ -26,11 +24,10 @@ public class StoredDataPointReceiver implements DataPointReceiver {
     public boolean throwOnAdd = false;
 
     public StoredDataPointReceiver() {
-        addDataPoints = Collections
-                .synchronizedList(new ArrayList<SignalFxProtocolBuffers.DataPointOrBuilder>());
-        registeredMetrics = Collections.synchronizedMap(new HashMap<String, SignalFxProtocolBuffers.MetricType>());
+        addDataPoints = Collections.synchronizedList(new ArrayList<>());
+        registeredMetrics = Collections.synchronizedMap(new HashMap<>());
 
-        pointsFor = Maps.newHashMap();
+        pointsFor = new HashMap<>();
     }
 
     @Override
@@ -49,7 +46,7 @@ public class StoredDataPointReceiver implements DataPointReceiver {
             if (pointsFor.containsKey(key)) {
                 pointsFor.get(key).add(dp.getValue());
             } else {
-                pointsFor.put(key, Lists.newArrayList(dp.getValue()));
+                pointsFor.put(key, new ArrayList<>(Collections.singletonList(dp.getValue())));
             }
         }
     }

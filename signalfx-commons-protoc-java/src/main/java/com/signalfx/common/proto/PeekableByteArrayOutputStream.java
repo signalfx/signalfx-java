@@ -1,7 +1,6 @@
 package com.signalfx.common.proto;
 
 import java.io.ByteArrayOutputStream;
-import com.google.common.base.Preconditions;
 
 /**
  * <p>A stream that users can output bytes to as well as peek at and read bytes from.  It's trying to
@@ -66,6 +65,5 @@ public final class PeekableByteArrayOutputStream extends ByteArrayOutputStream {
     @Override public void reset() {
         super.reset();
         position = 0;
-        Preconditions.checkArgument(count == 0, "I expect count to reset");
     }
 }

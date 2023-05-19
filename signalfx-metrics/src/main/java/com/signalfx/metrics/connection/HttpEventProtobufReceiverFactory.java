@@ -2,7 +2,6 @@ package com.signalfx.metrics.connection;
 
 import org.apache.http.conn.HttpClientConnectionManager;
 
-import com.google.common.base.MoreObjects;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
@@ -62,6 +61,12 @@ public class HttpEventProtobufReceiverFactory implements EventReceiverFactory {
     }
 
     private HttpClientConnectionManager resolveHttpClientConnectionManager() {
-        return MoreObjects.firstNonNull(explicitHttpClientConnectionManager, httpClientConnectionManager);
+        if (explicitHttpClientConnectionManager != null) {
+            return explicitHttpClientConnectionManager;
+        }
+        if (httpClientConnectionManager != null) {
+            return httpClientConnectionManager;
+        }
+        throw new IllegalStateException("Both explicitHttpClientConnectionManager and httpClientConnectionManager are null");
     }
 }
