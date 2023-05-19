@@ -49,7 +49,7 @@
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-endpoint</artifactId>
-      <version>${version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

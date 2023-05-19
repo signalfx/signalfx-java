@@ -52,12 +52,12 @@
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-endpoint</artifactId>
-      <version>${version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.signalfx.public</groupId>
       <artifactId>signalfx-connection</artifactId>
-      <version>${version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
