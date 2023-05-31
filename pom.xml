@@ -18,7 +18,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- versions -->
-    <jackson.version>2.15.1</jackson.version>
+    <jackson.version>2.15.2</jackson.version>
     <jackson-databind.version>2.15.1</jackson-databind.version>
     <jetty.version>9.4.51.v20230217</jetty.version>
     <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
