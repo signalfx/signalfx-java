@@ -20,7 +20,6 @@ import com.codahale.metrics.Timer;
  * }
  * </pre>
  *
- * @author uday
  */
 public class ResettingTimer extends Timer {
 

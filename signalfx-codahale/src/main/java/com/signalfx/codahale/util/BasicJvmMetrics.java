@@ -25,8 +25,6 @@ import com.codahale.metrics.MetricRegistry;
 /**
  * Report a basic set of JVM metrics to SignalFx.
  *
- * @author psi
- *
  */
 public class BasicJvmMetrics {
     /**

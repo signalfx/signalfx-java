@@ -33,9 +33,9 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * A utility class for declaring Codahale metrics with additional dimensions.
- *
- * @author max
+ * @deprecated Migrate to OpenTelemetry to send metric telemetry to Splunk.
  */
+@Deprecated
 public class SfxMetrics {
 
     private final MetricRegistry metricRegistry;

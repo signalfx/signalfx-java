@@ -34,7 +34,9 @@ import com.yammer.metrics.core.Timer;
 /**
  * Reporter object for codahale metrics that reports values to com.signalfx.signalfx at some
  * interval.
+ * @deprecated Migrate to OpenTelemetry to send metric telemetry to Splunk.
  */
+@Deprecated
 public class SignalFxReporter extends CustomScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
