@@ -20,7 +20,6 @@ import com.codahale.metrics.ResettingExponentiallyDecayingReservoir;
  * histo.update(42);
  * </pre>
  *
- * @author max
  * @see com.codahale.metrics.Histogram
  */
 public class ResettingHistogram extends Histogram {

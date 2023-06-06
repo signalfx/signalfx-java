@@ -8,8 +8,6 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 /**
  * Collection of flags to indicate if a default dimension should be added to a type of metric
  *
- * @author tedo
- *
  */
 public class DimensionInclusion {
 

@@ -37,6 +37,11 @@ to Splunk instead.
 
 Legacy documentation is still here for posterity: [legacy-usage.md](legacy-usage.md). 
 
+## Deprecations
+
+* :warning: `signalfx-codahale` will be deleted in July 2024.
+* :warning: `signalfx-yammer` will be deleted in July 2024. 
+
 # Executing SignalFlow computations
 
 [Learn more about using SignalFlow here](signalflow.md).

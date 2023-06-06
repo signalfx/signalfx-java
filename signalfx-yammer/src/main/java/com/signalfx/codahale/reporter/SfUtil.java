@@ -8,7 +8,9 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 
 /**
  * Utility functions that make common SignalFx operations easier to do.
+ * @deprecated Migrate to OpenTelemetry to send metric telemetry to Splunk.
  */
+@Deprecated
 public class SfUtil {
 
     /**
