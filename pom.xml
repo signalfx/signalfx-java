@@ -21,10 +21,8 @@
     <jackson.version>2.15.2</jackson.version>
     <jackson-databind.version>2.15.2</jackson-databind.version>
     <jetty.version>9.4.51.v20230217</jetty.version>
-    <os72.protobuf-shaded.jar-version>0.9</os72.protobuf-shaded.jar-version>
-    <os72.protobuf-shaded.plugin-version>${protobuf.version}</os72.protobuf-shaded.plugin-version>
-    <os72.protobuf-shaded.version>3-11-1</os72.protobuf-shaded.version>
-    <protobuf.version>3.11.1</protobuf.version>
+    <os72.protobuf.plugin-version>3.11.1</os72.protobuf.plugin-version>
+    <protobuf.version>3.23.2</protobuf.version>
     <slf4j.version>2.0.7</slf4j.version>
   </properties>
 
@@ -182,12 +180,10 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.12.0</version>
       </dependency>
-
-      <!-- just included in the jar -->
       <dependency>
-        <groupId>com.github.os72</groupId>
-        <artifactId>protobuf-java-shaded-${os72.protobuf-shaded.version}</artifactId>
-        <version>${os72.protobuf-shaded.jar-version}</version>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
       </dependency>
 
       <!-- compile -->
@@ -363,6 +359,10 @@
             <relocation>
               <pattern>org.checkerframework</pattern>
               <shadedPattern>com.signalfx.shaded.checkerframework</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.google.protobuf</pattern>
+              <shadedPattern>com.signalfx.shaded.google.protobuf</shadedPattern>
             </relocation>
           </relocations>
         </configuration>

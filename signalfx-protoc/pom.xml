@@ -9,6 +9,12 @@
     <version>1.0.33-SNAPSHOT</version>
   </parent>
 
+  <properties>
+    <!-- This prevents shading from happening in this module -->
+    <skipShaded>true</skipShaded>
+    <maven.deploy.skip>false</maven.deploy.skip>
+  </properties>
+
   <artifactId>signalfx-protoc</artifactId>
   <name>SignalFx Protocol Buffer definitions</name>
   <packaging>jar</packaging>
@@ -46,8 +52,9 @@
   <dependencies>
     <!-- compile -->
     <dependency>
-      <groupId>com.github.os72</groupId>
-      <artifactId>protobuf-java-shaded-${os72.protobuf-shaded.version}</artifactId>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
     </dependency>
   </dependencies>
 
@@ -56,7 +63,7 @@
       <plugin>
         <groupId>com.github.os72</groupId>
         <artifactId>protoc-jar-maven-plugin</artifactId>
-        <version>${os72.protobuf-shaded.plugin-version}</version>
+        <version>${os72.protobuf.plugin-version}</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -65,7 +72,7 @@
             </goals>
             <configuration>
               <protocVersion>${protobuf.version}</protocVersion>
-              <type>java-shaded</type>
+              <type>java</type>
             </configuration>
           </execution>
         </executions>
