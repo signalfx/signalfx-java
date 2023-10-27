@@ -14,7 +14,7 @@ import com.google.common.base.Preconditions;
 import com.signalfx.codahale.metrics.MetricBuilder;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers.MetricType;
 
-public class MetricMetadataImpl implements MetricMetadata {
+public final class MetricMetadataImpl implements MetricMetadata {
     private final ConcurrentMap<Metric, Metadata> metaDataCollection;
 
     public MetricMetadataImpl() {

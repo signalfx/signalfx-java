@@ -37,7 +37,7 @@ import com.yammer.metrics.core.Timer;
  * @deprecated Migrate to OpenTelemetry to send metric telemetry to Splunk.
  */
 @Deprecated
-public class SignalFxReporter extends CustomScheduledReporter {
+public final class SignalFxReporter extends CustomScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;

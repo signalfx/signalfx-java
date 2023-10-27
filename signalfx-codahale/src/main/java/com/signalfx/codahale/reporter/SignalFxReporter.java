@@ -40,7 +40,7 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
  * @deprecated Migrate to OpenTelemetry to send metric telemetry to Splunk.
  */
 @Deprecated
-public class SignalFxReporter extends ScheduledReporter {
+public final class SignalFxReporter extends ScheduledReporter {
     private final AggregateMetricSender aggregateMetricSender;
     private final Set<MetricDetails> detailsToAdd;
     private final MetricMetadata metricMetadata;

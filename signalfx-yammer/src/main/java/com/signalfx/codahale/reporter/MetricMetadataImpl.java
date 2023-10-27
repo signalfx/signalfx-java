@@ -16,7 +16,7 @@ import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
  *
  */
 
-public class MetricMetadataImpl implements MetricMetadata {
+public final class MetricMetadataImpl implements MetricMetadata {
     private final ConcurrentMap<Metric, Metadata> metaDataCollection;
 
     public MetricMetadataImpl() {
