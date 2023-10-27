@@ -370,35 +370,6 @@ to SignalFx's ingest API. This behavior can be disabled by setting the
 $ java -Dcom.signalfx.public.java.disableHttpCompression=true ...
 ```
 
-# Example Project
-
-You can find a full-stack example project called "signalfx-java-examples" in
-the repo.
-
-Run it as follows:
-
-1. Download the code and create an "auth" file in the "signalfx-java-examples"
-   directory. The auth file should contain the following:
-
-    ```
-    auth=<signalfx API Token>
-    host=https://ingest.signalfx.com
-    ```
-
-2. Run the following commands in your terminal to install and run the example
-   project, replacing `path/to/signalfx-java-examples` with the location of the
-   example project code in your environment. You must have Maven installed.
-
-    ```
-    cd path/to/signalfx-java-examples
-    mvn install
-    # an example for Yammer 2.x metrics
-    mvn exec:java -Dexec.mainClass="com.signalfx.example.YammerExample"
-    # an example for sending datapoints and events using protocol buffers
-    mvn exec:java -Dexec.mainClass="com.signalfx.example.ProtobufExample"
-    ```
-New metrics and events from the example project should appear in SignalFx.
-
 # Executing SignalFlow computations
 
 [Learn more about using SignalFlow here](signalflow.md).
