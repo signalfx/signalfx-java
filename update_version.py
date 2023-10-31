@@ -57,8 +57,6 @@ def update_pom_files(version):
     cmd = ['mvn', 'versions:set', 'versions:update-child-modules',
            '-DnewVersion=%s' % version]
     (stdout, _, code) = execute(cmd, expected_code=0)
-    os.chdir('signalfx-java-examples')
-    (stdout, _, code) = execute(cmd, expected_code=0)
     os.chdir(base_dir)
 
 
