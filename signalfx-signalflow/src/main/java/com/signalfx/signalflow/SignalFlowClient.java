@@ -134,7 +134,8 @@ public class SignalFlowClient implements AutoCloseable {
      *            Optional adjusts the stop timestamp so that the computation doesn't wait for
      *            future data to be available
      * @param timeZone
-     *            Optional the timezone to be used for computation
+     *            Optional the time zone to be used for computation. The value is forwarded to the endpoint.
+     *            Supported time zone values are mentioned in the <a href="https://dev.splunk.com/observability/docs/time_zone">docs.</a>
      * @return computation instance
      */
     public Computation execute(String program, Long start, Long stop, Long resolution,
