@@ -14,14 +14,15 @@
 
 # :warning: This repository and its published libraries are deprecated
 
-This repository contains legacy libraries for instrumenting Java applications and
-reporting metrics to Splunk Observability Cloud (formerly SignalFx).
-The only commits that will be made to this repo are organizational or security
-related patches. No additional features will be added, and the repository
-will be archived and the final versions published on or prior to February 1, 2025.
+This repository contains legacy libraries for reporting metrics to Splunk 
+Observability Cloud (formerly SignalFx). The only commits that will be made 
+to this repo are organizational or security related patches. No additional 
+features will be added, and the repository will be archived and the final 
+versions published on or prior to February 1, 2025.
 
 * :warning: `signalfx-codahale` will be deleted in July 2024.
 * :warning: `signalfx-yammer` will be deleted in July 2024.
+* :warning: Everything else will be archived February 1st 2025.
 
 Splunk has adopted OpenTelemetry. Use the 
 [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java) or
