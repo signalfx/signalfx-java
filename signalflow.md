@@ -6,8 +6,8 @@ SignalFlow API allows SignalFx users to execute real-time streaming analytics
 computations on the SignalFx platform. For more information, head over to our
 Developers documentation:
 
-* [SignalFlow Overview](https://developers.signalfx.com/signalflow_analytics/signalflow_overview.html)
-* [SignalFlow API Reference](https://developers.signalfx.com/signalflow_reference.html)
+* [SignalFlow Overview](https://dev.splunk.com/observability/docs/signalflow/)
+* [SignalFlow API Reference](https://dev.splunk.com/observability/reference/api/signalflow/latest)
 
 Executing a SignalFlow program is very simple with this client library:
 
