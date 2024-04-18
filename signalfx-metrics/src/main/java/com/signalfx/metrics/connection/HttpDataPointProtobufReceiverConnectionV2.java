@@ -10,6 +10,8 @@ import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 
 public class HttpDataPointProtobufReceiverConnectionV2
         extends AbstractHttpDataPointProtobufReceiverConnection {
