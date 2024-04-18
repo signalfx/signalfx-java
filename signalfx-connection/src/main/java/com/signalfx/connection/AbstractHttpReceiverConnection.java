@@ -2,27 +2,30 @@ package com.signalfx.connection;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import java.nio.charset.StandardCharsets;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.GzipCompressingEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.GzipCompressingEntity;
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.util.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
 import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public abstract class AbstractHttpReceiverConnection {
 
@@ -51,18 +54,18 @@ public abstract class AbstractHttpReceiverConnection {
 
     protected AbstractHttpReceiverConnection(SignalFxReceiverEndpoint endpoint, int timeoutMs, int maxRetries,
                                              HttpClientConnectionManager httpClientConnectionManager, List<Class<? extends IOException>> nonRetryableExceptions) {
+        HttpRequestRetryStrategy retryStrategy = new RetryHandler(maxRetries, nonRetryableExceptions);
         this.client = HttpClientBuilder.create()
                 .setConnectionManager(httpClientConnectionManager)
-                .setRetryHandler(new RetryHandler(maxRetries, nonRetryableExceptions))
-                .setServiceUnavailableRetryStrategy(new RetryStrategy(maxRetries))
+                .setRetryStrategy(retryStrategy)
                 .build();
-        this.host = new HttpHost(endpoint.getHostname(), endpoint.getPort(), endpoint.getScheme());
+        this.host = new HttpHost(endpoint.getScheme(), endpoint.getHostname(), endpoint.getPort());
 
         HttpHost proxy = createHttpProxyFromSystemProperties(endpoint.getHostname());
         this.requestConfig = RequestConfig.custom()
-                .setSocketTimeout(timeoutMs)
-                .setConnectionRequestTimeout(timeoutMs)
-                .setConnectTimeout(timeoutMs)
+                .setResponseTimeout(timeoutMs, MILLISECONDS)
+                .setConnectionRequestTimeout(timeoutMs, MILLISECONDS)
+                .setConnectTimeout(timeoutMs, MILLISECONDS)
                 .setProxy(proxy)
                 .build();
     }
@@ -95,12 +98,12 @@ public abstract class AbstractHttpReceiverConnection {
         final String body;
         try {
             body = EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw new RuntimeException("Unable to get response content", e);
         }
-        if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+        if (resp.getCode() != HttpStatus.SC_OK) {
             throw new RuntimeException("Invalid status code "
-                    + resp.getStatusLine().getStatusCode() + ": " + body);
+                    + resp.getCode() + ": " + body);
         }
         if (!"\"OK\"".equals(body)) {
             throw new RuntimeException("Invalid response body: " + body);
@@ -154,7 +157,7 @@ public abstract class AbstractHttpReceiverConnection {
             }
 
             // return http proxy host
-            return new HttpHost(proxyHost.trim(), Integer.parseInt(proxyPort.trim()), "http");
+            return new HttpHost("http", proxyHost.trim(), Integer.parseInt(proxyPort.trim()));
         }
 
         // http proxy is not configured

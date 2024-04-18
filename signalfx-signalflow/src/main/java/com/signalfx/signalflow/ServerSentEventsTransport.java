@@ -3,35 +3,25 @@
  */
 package com.signalfx.signalflow;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.regex.Pattern;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
+import com.signalfx.connection.AbstractHttpReceiverConnection;
+import com.signalfx.endpoint.SignalFxEndpoint;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.signalfx.connection.AbstractHttpReceiverConnection;
-import com.signalfx.endpoint.SignalFxEndpoint;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Server-Sent Events transport.
@@ -284,8 +274,9 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
         public TransportConnection(SignalFxEndpoint endpoint, int timeoutMs, int maxRetries) {
             super(endpoint, timeoutMs, maxRetries, new BasicHttpClientConnectionManager());
 
-            this.transportRequestConfig = RequestConfig.custom().setSocketTimeout(0)
+            this.transportRequestConfig = RequestConfig.custom()
                     .setConnectionRequestTimeout(this.requestConfig.getConnectionRequestTimeout())
+                    .setResponseTimeout(Timeout.DISABLED)
                     .setConnectTimeout(this.requestConfig.getConnectTimeout())
                     .setProxy(this.requestConfig.getProxy()).build();
 
@@ -297,7 +288,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
                 throws SignalFlowException {
             HttpPost httpPost = null;
             try {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                List<NameValuePair> params = new ArrayList<>();
                 if (parameters != null) {
                     for (Map.Entry<String, String> entry : parameters.entrySet()) {
                         params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
@@ -323,8 +314,7 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
 
                 CloseableHttpResponse response = client.execute(httpPost);
 
-                StatusLine statusLine = response.getStatusLine();
-                int statuscode = statusLine.getStatusCode();
+                int statuscode = response.getCode();
                 if ((statuscode < 200) || (statuscode >= 300)) {
 
                     try {
@@ -333,9 +323,9 @@ public class ServerSentEventsTransport implements SignalFlowTransport {
                         log.error("failed to close response", ex);
                     }
 
-                    String errorMessage = statusLine.getStatusCode() + ": failed post [ " + httpPost
-                            + " ] reason: " + statusLine.getReasonPhrase();
-                    throw new SignalFlowException(statusLine.getStatusCode(), errorMessage);
+                    String errorMessage = response.getCode() + ": failed post [ " + httpPost
+                            + " ] reason: " + response.getReasonPhrase();
+                    throw new SignalFlowException(response.getCode(), errorMessage);
                 }
 
                 return response;
