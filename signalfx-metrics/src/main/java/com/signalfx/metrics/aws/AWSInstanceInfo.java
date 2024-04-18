@@ -8,11 +8,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +37,13 @@ public class AWSInstanceInfo {
      * @return null if the value was not obtained for any reason
      */
     public static String get(int timeoutInMs) {
-        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeoutInMs).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeoutInMs, TimeUnit.MILLISECONDS).build();
         HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig)
                 .build();
         HttpGet request = new HttpGet(URL);
 
         try {
-            HttpResponse response = client.execute(request);
+            ClassicHttpResponse response = client.executeOpen(null, request, null);
             try (InputStream inputStream = response.getEntity().getContent()) {
                 return parse(inputStream);
             }
