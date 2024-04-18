@@ -1,17 +1,19 @@
 package com.signalfx.metrics.connection;
 
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.ssl.SSLContexts;
+
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocket;
-
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContexts;
 
 public class HttpClientConnectionManagerFactory {
 
@@ -27,7 +29,7 @@ public class HttpClientConnectionManagerFactory {
             .build());
 
     httpClientConnectionManager.setDefaultSocketConfig(
-        SocketConfig.custom().setSoTimeout(timeoutMs).build());
+        SocketConfig.custom().setSoTimeout(timeoutMs, TimeUnit.MILLISECONDS).build());
 
     return httpClientConnectionManager;
   }
@@ -39,7 +41,7 @@ public class HttpClientConnectionManagerFactory {
     private final int timeoutMs;
 
     public SSLConnectionSocketFactoryWithTimeout(int timeoutMs) {
-      super(SSLContexts.createDefault(), SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER);
+      super(SSLContexts.createDefault(), new DefaultHostnameVerifier());
       this.timeoutMs = timeoutMs;
     }
 

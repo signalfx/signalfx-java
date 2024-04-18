@@ -2,12 +2,12 @@ package com.signalfx.metrics.connection;
 
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 
 public class HttpEventProtobufReceiverConnectionV2
         extends AbstractHttpEventProtobufReceiverConnection {

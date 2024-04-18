@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.entity.ByteArrayEntity;
 
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 
 public class HttpDataPointProtobufReceiverConnectionV2
         extends AbstractHttpDataPointProtobufReceiverConnection {

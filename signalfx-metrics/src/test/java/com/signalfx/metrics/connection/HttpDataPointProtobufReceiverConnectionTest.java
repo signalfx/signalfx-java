@@ -18,10 +18,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.zip.GZIPInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
+
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -173,7 +174,7 @@ public class HttpDataPointProtobufReceiverConnectionTest {
           new SignalFxEndpoint(uri.getScheme(), uri.getHost(), uri.getPort()))
           .createDataPointReceiver();
 
-      ArrayList<SignalFxProtocolBuffers.PointValue> values = new ArrayList<SignalFxProtocolBuffers.PointValue>(Arrays.asList(
+      List<SignalFxProtocolBuffers.PointValue> values = new ArrayList<SignalFxProtocolBuffers.PointValue>(Arrays.asList(
           SignalFxProtocolBuffers.PointValue.newBuilder().setTimestamp(System.currentTimeMillis())
               .setValue(SignalFxProtocolBuffers.Datum.newBuilder().setDoubleValue(123.0)).build()
       ));

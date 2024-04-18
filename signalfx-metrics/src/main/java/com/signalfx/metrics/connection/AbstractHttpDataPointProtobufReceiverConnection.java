@@ -5,16 +5,17 @@ import com.signalfx.connection.AbstractHttpReceiverConnection;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
+
 import java.util.ArrayList;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -66,7 +67,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                         getEndpointForAddDatapoints(),
                         compress);
 
-                int code = resp.getStatusLine().getStatusCode();
+                int code = resp.getCode();
                 // SignalFx may respond with various 2xx return codes for success.
                 if (code < 200 || code > 299) {
                     throw new SignalFxMetricsException("Invalid status code " + code);
@@ -119,7 +120,7 @@ public abstract class AbstractHttpDataPointProtobufReceiverConnection extends Ab
                         "/v1/backfill?" + URLEncodedUtils.format(params, StandardCharsets.UTF_8),
                         false);
 
-                int code = resp.getStatusLine().getStatusCode();
+                int code = resp.getCode();
                 // SignalFx may respond with various 2xx return codes for success.
                 if (code < 200 || code > 299) {
                     throw new SignalFxMetricsException("Invalid status code " + code);

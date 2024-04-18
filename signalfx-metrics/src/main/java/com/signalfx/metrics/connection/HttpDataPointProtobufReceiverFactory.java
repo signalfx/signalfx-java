@@ -1,7 +1,5 @@
 package com.signalfx.metrics.connection;
 
-import org.apache.http.conn.HttpClientConnectionManager;
-
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 
@@ -9,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 
 import static com.signalfx.connection.RetryDefaults.DEFAULT_MAX_RETRIES;
 import static com.signalfx.connection.RetryDefaults.DEFAULT_NON_RETRYABLE_EXCEPTIONS;

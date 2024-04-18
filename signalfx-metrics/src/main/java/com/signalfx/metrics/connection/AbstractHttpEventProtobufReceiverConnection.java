@@ -3,15 +3,14 @@ package com.signalfx.metrics.connection;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.entity.ContentType;
-
 import com.signalfx.connection.AbstractHttpReceiverConnection;
 import com.signalfx.endpoint.SignalFxReceiverEndpoint;
 import com.signalfx.metrics.SignalFxMetricsException;
 import com.signalfx.metrics.protobuf.SignalFxProtocolBuffers;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
 
 public abstract class AbstractHttpEventProtobufReceiverConnection extends AbstractHttpReceiverConnection implements EventReceiver {
 
