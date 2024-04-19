@@ -72,6 +72,7 @@
             </goals>
             <configuration>
               <protocVersion>${protobuf.version}</protocVersion>
+              <protocArtifact>com.google.protobuf:protoc:${protobuf.version}</protocArtifact>
               <type>java</type>
             </configuration>
           </execution>
