@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.util.TimeValue;
 
@@ -33,5 +34,12 @@ class RetryHandler extends DefaultHttpRequestRetryStrategy {
 
   public RetryHandler(final int maxRetries, List<Class<? extends IOException>> clazzes) {
     super(maxRetries, TimeValue.ofSeconds(1), clazzes, RETRYABLE_CODES);
+  }
+
+  @Override
+  protected boolean handleAsIdempotent(HttpRequest request) {
+    // Previous implementation did not consider idempotency, so we have to assume we want to
+    // retry, regardless of the request method.
+    return true; // OOF yes
   }
 }
