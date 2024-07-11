@@ -385,8 +385,6 @@
     <module>signalfx-connection</module>
     <module>signalfx-java</module>
     <module>signalfx-commons-protoc-java</module>
-    <module>signalfx-codahale</module>
-    <module>signalfx-yammer</module>
     <module>signalfx-signalflow</module>
     <module>signalfx-metrics</module>
   </modules>
