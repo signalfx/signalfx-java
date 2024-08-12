@@ -23,7 +23,7 @@
     <jetty.version>9.4.55.v20240627</jetty.version>
     <os72.protobuf.plugin-version>3.11.1</os72.protobuf.plugin-version>
     <protobuf.version>3.25.3</protobuf.version>
-    <slf4j.version>2.0.15</slf4j.version>
+    <slf4j.version>2.0.16</slf4j.version>
   </properties>
 
   <url>http://www.signalfx.com</url>
