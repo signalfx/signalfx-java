@@ -6,7 +6,7 @@
   <groupId>com.signalfx.public</groupId>
   <artifactId>clients-parent</artifactId>
   <name>SignalFx parent</name>
-  <version>1.0.46</version>
+  <version>1.0.47</version>
   <packaging>pom</packaging>
 
   <description>
@@ -105,7 +105,7 @@
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-protoc</artifactId>
-        <version>1.0.46</version>
+        <version>1.0.47</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
@@ -120,12 +120,12 @@
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-commons-protoc-java</artifactId>
-        <version>1.0.46</version>
+        <version>1.0.47</version>
       </dependency>
       <dependency>
         <groupId>com.signalfx.public</groupId>
         <artifactId>signalfx-java</artifactId>
-        <version>1.0.46</version>
+        <version>1.0.47</version>
       </dependency>
 
       <!-- shaded and included in the jar -->
