@@ -1,26 +1,10 @@
 >ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html) for more information.
 
----
-
-<p align="center">
-  <a href="https://github.com/signalfx/signalfx-java/actions?query=workflow%3A%22CI+build%22">
-    <img alt="Build Status" src="https://github.com/signalfx/signalfx-java/actions/workflows/ci.yaml/badge.svg">
-  </a>
-</p>
-
----
-
 # SignalFx client libraries
 
-# :warning: This repository and its published libraries are deprecated
+* :warning: This library has reached end of support.
 
-This repository contains legacy libraries for reporting metrics to Splunk 
-Observability Cloud (formerly SignalFx). The only commits that will be made 
-to this repo are organizational or security related patches. No additional 
-features will be added, and the repository will be archived and the final 
-versions published on or prior to February 1, 2025.
-
-* :warning:This repo will be archived February 1st 2025.
+This library is now in permanent public archive and will no longer receive updates..
 
 Splunk has adopted OpenTelemetry. Use the 
 [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java) or
@@ -38,10 +22,6 @@ API token. For more information on Observability Cloud and to create an
 account, go to [Splunk Observability](https://www.splunk.com/en_us/products/observability.html).
 
 Legacy documentation is still here for posterity: [legacy-usage.md](legacy-usage.md). 
-
-# Executing SignalFlow computations
-
-[Learn more about using SignalFlow here](signalflow.md).
 
 ## License
 
